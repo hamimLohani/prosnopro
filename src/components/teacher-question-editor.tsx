@@ -87,6 +87,7 @@ export function TeacherQuestionEditor({
 
   // Draft Review Queue (shared by With AI & PDF Import)
   const [drafts, setDrafts] = useState<DraftMcqQuestion[]>([]);
+  const [editingDraftIdx, setEditingDraftIdx] = useState<number | null>(null);
   const [saveDraftsToBank, setSaveDraftsToBank] = useState(false);
   const [savingDrafts, setSavingDrafts] = useState(false);
 
@@ -1368,7 +1369,10 @@ export function TeacherQuestionEditor({
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => setDrafts([])}
+                onClick={() => {
+                  setDrafts([]);
+                  setEditingDraftIdx(null);
+                }}
                 className="min-h-[36px] text-xs font-semibold text-rose-700 hover:underline cursor-pointer"
               >
                 Discard all drafts
@@ -1377,74 +1381,136 @@ export function TeacherQuestionEditor({
           </div>
 
           <div className="space-y-4">
-            {drafts.map((draft, dIdx) => (
-              <div
-                key={dIdx}
-                className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 space-y-3"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-bold text-amber-700">Draft #{dIdx + 1}</span>
-                  <button
-                    type="button"
-                    onClick={() => setDrafts((prev) => prev.filter((_, idx) => idx !== dIdx))}
-                    className="min-h-[32px] px-2 text-xs text-rose-600 hover:underline cursor-pointer"
-                  >
-                    Remove
-                  </button>
-                </div>
-
-                <textarea
-                  rows={2}
-                  value={draft.text}
-                  onChange={(e) => {
-                    const next = [...drafts];
-                    next[dIdx] = { ...draft, text: e.target.value };
-                    setDrafts(next);
-                  }}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
-                />
-
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {draft.options.map((opt, optIdx) => (
-                    <div
-                      key={optIdx}
-                      className={`flex min-h-[44px] items-center gap-2 rounded-lg border px-2.5 py-2 ${
-                        draft.correct_index === optIdx
-                          ? "border-emerald-400 bg-emerald-50/60"
-                          : "border-slate-200"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name={`draft-correct-${dIdx}`}
-                        checked={draft.correct_index === optIdx}
-                        onChange={() => {
-                          const next = [...drafts];
-                          next[dIdx] = { ...draft, correct_index: optIdx };
-                          setDrafts(next);
+            {drafts.map((draft, dIdx) => {
+              const isEditingDraft = editingDraftIdx === dIdx;
+              return (
+                <div
+                  key={dIdx}
+                  className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 space-y-3"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-amber-700">Draft #{dIdx + 1}</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setEditingDraftIdx(isEditingDraft ? null : dIdx)}
+                        className="inline-flex min-h-[32px] items-center gap-1 rounded-lg px-2.5 text-xs font-semibold text-navy hover:bg-slate-100 cursor-pointer"
+                      >
+                        <Pencil className="h-3 w-3" />
+                        <span>{isEditingDraft ? "Done" : "Edit"}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDrafts((prev) => prev.filter((_, idx) => idx !== dIdx));
+                          setEditingDraftIdx((prev) =>
+                            prev === dIdx ? null : prev !== null && prev > dIdx ? prev - 1 : prev,
+                          );
                         }}
-                        className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 text-emerald-600 cursor-pointer"
-                      />
-                      <span className="text-xs font-semibold text-slate-600 shrink-0">
-                        {optionLabel(optIdx, exam.medium)}
-                      </span>
-                      <input
-                        type="text"
-                        value={opt}
+                        className="min-h-[32px] px-2 text-xs text-rose-600 hover:underline cursor-pointer"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  {isEditingDraft ? (
+                    <>
+                      <textarea
+                        rows={3}
+                        value={draft.text}
                         onChange={(e) => {
                           const next = [...drafts];
-                          const nextOpts = [...draft.options];
-                          nextOpts[optIdx] = e.target.value;
-                          next[dIdx] = { ...draft, options: nextOpts };
+                          next[dIdx] = { ...draft, text: e.target.value };
                           setDrafts(next);
                         }}
-                        className="w-full bg-transparent text-base sm:text-xs text-slate-900 focus:outline-none"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
                       />
-                    </div>
-                  ))}
+
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {draft.options.map((opt, optIdx) => (
+                          <div
+                            key={optIdx}
+                            className={`flex min-h-[44px] items-center gap-2 rounded-lg border px-2.5 py-2 ${
+                              draft.correct_index === optIdx
+                                ? "border-emerald-400 bg-emerald-50/60"
+                                : "border-slate-200"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name={`draft-correct-${dIdx}`}
+                              checked={draft.correct_index === optIdx}
+                              onChange={() => {
+                                const next = [...drafts];
+                                next[dIdx] = { ...draft, correct_index: optIdx };
+                                setDrafts(next);
+                              }}
+                              className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 text-emerald-600 cursor-pointer"
+                            />
+                            <span className="text-xs font-semibold text-slate-600 shrink-0">
+                              {optionLabel(optIdx, exam.medium)}
+                            </span>
+                            <input
+                              type="text"
+                              value={opt}
+                              onChange={(e) => {
+                                const next = [...drafts];
+                                const nextOpts = [...draft.options];
+                                nextOpts[optIdx] = e.target.value;
+                                next[dIdx] = { ...draft, options: nextOpts };
+                                setDrafts(next);
+                              }}
+                              className="w-full bg-transparent text-base sm:text-xs text-slate-900 focus:outline-none"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-[15px] sm:text-sm font-semibold leading-relaxed text-slate-900 break-words">
+                        <MathText text={draft.text} />
+                      </p>
+
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {draft.options.map((opt, optIdx) => {
+                          const isCorrect = draft.correct_index === optIdx;
+                          return (
+                            <label
+                              key={optIdx}
+                              className={`flex min-h-[44px] items-center gap-2.5 rounded-lg border px-3 py-2 text-[14px] sm:text-xs cursor-pointer ${
+                                isCorrect
+                                  ? "border-emerald-400 bg-emerald-50/60 font-semibold text-emerald-950"
+                                  : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name={`draft-correct-${dIdx}`}
+                                checked={isCorrect}
+                                onChange={() => {
+                                  const next = [...drafts];
+                                  next[dIdx] = { ...draft, correct_index: optIdx };
+                                  setDrafts(next);
+                                }}
+                                className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 text-emerald-600 cursor-pointer"
+                              />
+                              <span className="font-semibold text-slate-600 shrink-0">
+                                {optionLabel(optIdx, exam.medium)}
+                              </span>
+                              <span className="min-w-0 flex-1 break-words leading-relaxed">
+                                <MathText text={opt} />
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">

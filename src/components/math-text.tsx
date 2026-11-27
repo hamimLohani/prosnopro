@@ -10,16 +10,16 @@ interface MathTextProps {
 }
 
 /**
- * Renders plain text with inline `$...$` KaTeX expressions safely (no raw HTML injection).
+ * Renders plain text with inline/display KaTeX expressions (`$...$`, `$$...$$`, `\(...\)`, `\[...\]`).
  */
 export function MathText({ text, className = "" }: MathTextProps) {
   const parts = useMemo(() => {
-    if (!text.includes("$")) {
+    if (!text.includes("$") && !text.includes("\\(") && !text.includes("\\[")) {
       return [{ type: "text" as const, content: text }];
     }
 
     const segments: Array<{ type: "text" | "math"; content: string; displayMode?: boolean }> = [];
-    const regex = /(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g;
+    const regex = /(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|\$[^$\n]+?\$|\\\([\s\S]+?\\\))/g;
     let lastIndex = 0;
     let match: RegExpExecArray | null;
 
@@ -28,8 +28,11 @@ export function MathText({ text, className = "" }: MathTextProps) {
         segments.push({ type: "text", content: text.slice(lastIndex, match.index) });
       }
       const token = match[0];
-      const isDisplay = token.startsWith("$$");
-      const expr = isDisplay ? token.slice(2, -2) : token.slice(1, -1);
+      const isDisplay = token.startsWith("$$") || token.startsWith("\\[");
+      const expr =
+        token.startsWith("$$") || token.startsWith("\\[") || token.startsWith("\\(")
+          ? token.slice(2, -2)
+          : token.slice(1, -1);
       segments.push({ type: "math", content: expr, displayMode: isDisplay });
       lastIndex = regex.lastIndex;
     }
@@ -56,7 +59,7 @@ export function MathText({ text, className = "" }: MathTextProps) {
           return (
             <span
               key={idx}
-              className="inline-block align-middle"
+              className="inline-block max-w-full overflow-x-auto align-middle"
               dangerouslySetInnerHTML={{ __html: html }}
             />
           );
