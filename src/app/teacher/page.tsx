@@ -87,12 +87,32 @@ export default async function TeacherDashboardPage() {
           </div>
 
           {examList.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center space-y-2">
-              <p className="text-base font-semibold text-slate-800">এখনো কোনো Exam নেই</p>
-              <p className="text-sm text-slate-500">
-                আপনার প্রথম MCQ পরীক্ষা তৈরি করতে উপরের &ldquo;নতুন Exam তৈরি করুন&rdquo; বাটনে ট্যাপ
-                করুন।
-              </p>
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-3">
+                <h3 className="text-sm sm:text-base font-bold text-navy">
+                  নতুন Teacher? ৩ ধাপে প্রথম Exam শুরু করুন
+                </h3>
+                <ol className="list-decimal pl-5 space-y-1.5 text-xs sm:text-sm text-slate-600">
+                  <li>
+                    উপরের <strong className="text-slate-800">নতুন Exam তৈরি করুন</strong> বাটনে
+                    ট্যাপ করে নাম, Class ও সময় দিন।
+                  </li>
+                  <li>
+                    <strong className="text-slate-800">Manual</strong>,{" "}
+                    <strong className="text-slate-800">Bulk Paste</strong>, অথবা{" "}
+                    <Link href="/teacher/settings#ai-key" className="font-semibold text-navy underline">
+                      Settings-এ ফ্রি Gemini/Groq Key
+                    </Link>{" "}
+                    যোগ করে AI/PDF দিয়ে প্রশ্ন তৈরি করুন।
+                  </li>
+                  <li>
+                    Exam <strong className="text-slate-800">Publish</strong> করে আপনার{" "}
+                    <span className="font-mono font-semibold text-navy">{teacherCode}</span> ও Exam
+                    Code Student-দের সাথে শেয়ার করুন।
+                  </li>
+                </ol>
+              </div>
+              <TeacherExamList exams={examList} />
             </div>
           ) : (
             <TeacherExamList exams={examList} />

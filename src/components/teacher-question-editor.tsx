@@ -6,6 +6,7 @@ import {
   ArrowUp,
   BookOpen,
   CheckCircle2,
+  ClipboardPaste,
   FileUp,
   KeyRound,
   Loader2,
@@ -22,6 +23,7 @@ import { useMemo, useState } from "react";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { MathText } from "@/components/math-text";
 import type { DraftMcqQuestion } from "@/lib/ai/schema";
+import { parseBulkMcqText } from "@/lib/bulk-mcq";
 import { createClient } from "@/lib/supabase/client";
 import type { Exam, Question, QuestionBankItem } from "@/lib/types";
 import { analyzeBanglaPdfText } from "@/lib/validation";
@@ -35,7 +37,7 @@ interface TeacherQuestionEditorProps {
   aiProvider: string | null;
 }
 
-type SourceTab = "manual" | "bank" | "ai" | "pdf";
+type SourceTab = "manual" | "paste" | "bank" | "ai" | "pdf";
 
 function optionLabel(index: number, medium: "bn" | "en"): string {
   if (medium === "bn") {
@@ -58,6 +60,9 @@ export function TeacherQuestionEditor({
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [activeTab, setActiveTab] = useState<SourceTab>("manual");
   const [composerOpen, setComposerOpen] = useState(initialQuestions.length === 0);
+
+  // Bulk Paste state (no AI key needed)
+  const [bulkText, setBulkText] = useState("");
 
   // Question Bank import state
   const [bankKeyword, setBankKeyword] = useState("");
@@ -714,7 +719,7 @@ export function TeacherQuestionEditor({
               আরও প্রশ্ন যোগ করুন
             </span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
             <button
               type="button"
               onClick={() => {
@@ -725,6 +730,17 @@ export function TeacherQuestionEditor({
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Manual</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("paste");
+                setComposerOpen(true);
+              }}
+              className="inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+            >
+              <ClipboardPaste className="h-3.5 w-3.5 text-navy" />
+              <span>Bulk Paste</span>
             </button>
             <button
               type="button"
@@ -754,7 +770,7 @@ export function TeacherQuestionEditor({
                 setActiveTab("pdf");
                 setComposerOpen(true);
               }}
-              className="inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+              className="col-span-2 sm:col-span-1 inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
             >
               <FileUp className="h-3.5 w-3.5 text-navy" />
               <span>PDF Import</span>
@@ -794,6 +810,18 @@ export function TeacherQuestionEditor({
                 </button>
                 <button
                   type="button"
+                  onClick={() => setActiveTab("paste")}
+                  className={`inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
+                    activeTab === "paste"
+                      ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  <ClipboardPaste className="h-3.5 w-3.5 text-navy shrink-0" />
+                  <span>Bulk Paste</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => setActiveTab("bank")}
                   className={`inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
                     activeTab === "bank"
@@ -819,7 +847,7 @@ export function TeacherQuestionEditor({
                 <button
                   type="button"
                   onClick={() => setActiveTab("pdf")}
-                  className={`inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
+                  className={`col-span-2 sm:col-span-1 inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
                     activeTab === "pdf"
                       ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
                       : "text-slate-600 hover:text-slate-900"
@@ -842,6 +870,68 @@ export function TeacherQuestionEditor({
           )}
 
           <div className="p-4 sm:p-6">
+            {/* TAB: Bulk Paste (No AI Key Needed) */}
+            {activeTab === "paste" && !editingId && (
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-base font-bold text-navy">
+                    Bulk Paste (কোনো AI Key ছাড়াই একসাথে প্রশ্ন যোগ করুন)
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    Word, Notepad বা WhatsApp থেকে {optionCount}-option MCQ কপি-পেস্ট করুন। প্রতিটি
+                    প্রশ্নের মাঝে একটি ফাঁকা লাইন দিন।
+                  </p>
+                </div>
+
+                <textarea
+                  rows={8}
+                  value={bulkText}
+                  onChange={(e) => setBulkText(e.target.value)}
+                  placeholder={`1. বাংলাদেশের রাজধানী কোথায়?\nক) চট্টগ্রাম\nখ) ঢাকা\nগ) খুলনা\nঘ) রাজশাহী\nAns: খ`}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2.5 font-mono text-xs sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+                />
+
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setBulkText(
+                        `1. বাংলাদেশের রাজধানী কোথায়?\nক) চট্টগ্রাম\nখ) ঢাকা\nগ) খুলনা\nঘ) রাজশাহী\nAns: খ\n\n2. নিউটনের গতির দ্বিতীয় সূত্র কোনটি?\nক) F = ma\nখ) E = mc²\nগ) V = IR\nঘ) PV = nRT\nAns: ক`,
+                      )
+                    }
+                    className="text-xs font-semibold text-navy hover:underline cursor-pointer"
+                  >
+                    উদাহরণ বসান (Sample)
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setError(null);
+                      const parsed = parseBulkMcqText(
+                        bulkText,
+                        optionCount,
+                        Number(exam.default_marks),
+                      );
+                      if (parsed.length === 0) {
+                        setError(
+                          `কোনো বৈধ ${optionCount}-option প্রশ্ন পাওয়া যায়নি। প্রতিটি প্রশ্নের নিচে ${optionCount}টি Option ও মাঝে একটি ফাঁকা লাইন আছে কি না দেখুন।`,
+                        );
+                        return;
+                      }
+                      setDrafts((prev) => [...prev, ...parsed]);
+                      setBulkText("");
+                      setMessage(`${parsed.length}টি Draft তৈরি হয়েছে — নিচে যাচাই করে Save করুন।`);
+                    }}
+                    className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong cursor-pointer"
+                  >
+                    <ClipboardPaste className="h-4 w-4" />
+                    <span>Draft তৈরি করুন</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* TAB 2: Question Bank Snapshot Import */}
             {activeTab === "bank" && !editingId && (
               <div className="space-y-4">
@@ -1106,7 +1196,7 @@ export function TeacherQuestionEditor({
                       </div>
                     </div>
                     <Link
-                      href="/teacher/settings#ai-key"
+                      href={`/teacher/settings?returnTo=${encodeURIComponent(`/teacher/exams/${exam.id}/questions`)}#ai-key`}
                       className="inline-flex min-h-[40px] w-full sm:w-auto shrink-0 items-center justify-center gap-1.5 rounded-lg bg-navy px-3.5 py-2 text-xs font-semibold text-white hover:bg-navy-strong"
                     >
                       <KeyRound className="h-3.5 w-3.5" />
@@ -1126,7 +1216,7 @@ export function TeacherQuestionEditor({
                         </p>
                       </div>
                       <Link
-                        href="/teacher/settings#ai-key"
+                        href={`/teacher/settings?returnTo=${encodeURIComponent(`/teacher/exams/${exam.id}/questions`)}#ai-key`}
                         className="text-xs font-semibold text-navy hover:underline"
                       >
                         API Key পরিবর্তন করুন
@@ -1242,7 +1332,7 @@ export function TeacherQuestionEditor({
                       </div>
                     </div>
                     <Link
-                      href="/teacher/settings#ai-key"
+                      href={`/teacher/settings?returnTo=${encodeURIComponent(`/teacher/exams/${exam.id}/questions`)}#ai-key`}
                       className="inline-flex min-h-[40px] w-full sm:w-auto shrink-0 items-center justify-center gap-1.5 rounded-lg bg-navy px-3.5 py-2 text-xs font-semibold text-white hover:bg-navy-strong"
                     >
                       <KeyRound className="h-3.5 w-3.5" />

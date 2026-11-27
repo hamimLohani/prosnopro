@@ -1,9 +1,11 @@
 "use client";
 
 import {
+  Check,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
+  Copy,
   Download,
   FileSpreadsheet,
   FileText,
@@ -46,7 +48,25 @@ export function ExamResultsClient({
   const [exportBusy, setExportBusy] = useState<string | null>(null);
   const [releasing, setReleasing] = useState(false);
   const [regrading, setRegrading] = useState(false);
+  const [meritCopied, setMeritCopied] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  async function handleCopyMeritList() {
+    const ranked = attempts.filter((a) => a.score !== null && a.total_marks !== null);
+    if (ranked.length === 0) return;
+    const lines = ranked.map(
+      (a, idx) =>
+        `${idx + 1}. ${a.student_name}${a.student_roll ? ` (${a.student_roll})` : ""} — ${a.score}/${a.total_marks}`,
+    );
+    const text = `🏆 ${exam.name} — Merit List\n${lines.join("\n")}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      setMeritCopied(true);
+      setTimeout(() => setMeritCopied(false), 1800);
+    } catch {
+      // Clipboard unavailable
+    }
+  }
 
   async function handleReleaseManual() {
     const supabase = createClient();
@@ -265,19 +285,33 @@ export function ExamResultsClient({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-base font-bold text-navy">Student-দের Result ({attempts.length})</h2>
           {analytics.submittedCount > 0 && (
-            <button
-              type="button"
-              disabled={regrading}
-              onClick={handleRegrade}
-              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
-            >
-              {regrading ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <RefreshCw className="h-3.5 w-3.5" />
-              )}
-              <span>Re-grade করুন</span>
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={handleCopyMeritList}
+                className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50 cursor-pointer"
+              >
+                {meritCopied ? (
+                  <Check className="h-3.5 w-3.5 text-emerald-600" />
+                ) : (
+                  <Copy className="h-3.5 w-3.5" />
+                )}
+                <span>{meritCopied ? "Copy হয়েছে" : "Merit List Copy করুন"}</span>
+              </button>
+              <button
+                type="button"
+                disabled={regrading}
+                onClick={handleRegrade}
+                className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
+              >
+                {regrading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-3.5 w-3.5" />
+                )}
+                <span>Re-grade করুন</span>
+              </button>
+            </div>
           )}
         </div>
 
@@ -287,19 +321,35 @@ export function ExamResultsClient({
           <>
             {/* Mobile Results Cards */}
             <div className="divide-y divide-slate-100 sm:hidden">
-              {attempts.map((a) => {
+              {attempts.map((a, idx) => {
                 const pct =
                   a.score !== null && a.total_marks && Number(a.total_marks) > 0
                     ? `${((Number(a.score) / Number(a.total_marks)) * 100).toFixed(1)}%`
                     : "—";
                 const isOpen = expandedAttemptId === a.id;
                 const answerMap = a.answers ?? a.draft_answers ?? {};
+                const rankLabel = a.score !== null ? `#${idx + 1}` : null;
 
                 return (
                   <div key={a.id} className="py-3.5 space-y-2.5 text-sm">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="truncate font-semibold text-slate-900">{a.student_name}</p>
+                        <div className="flex items-center gap-1.5">
+                          {rankLabel && (
+                            <span
+                              className={`rounded-md px-1.5 py-0.5 text-[11px] font-bold ${
+                                idx === 0
+                                  ? "bg-amber-100 text-amber-900"
+                                  : idx <= 2
+                                    ? "bg-navy/10 text-navy"
+                                    : "bg-slate-100 text-slate-600"
+                              }`}
+                            >
+                              {rankLabel}
+                            </span>
+                          )}
+                          <p className="truncate font-semibold text-slate-900">{a.student_name}</p>
+                        </div>
                         <p className="text-xs text-slate-500">
                           {a.student_roll ? `Roll: ${a.student_roll}` : "Roll নেই"} •{" "}
                           {formatTimeTaken(a.started_at, a.submitted_at)} •{" "}
@@ -390,6 +440,7 @@ export function ExamResultsClient({
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-xs uppercase text-slate-500">
+                    <th className="py-2 pr-3">Rank</th>
                     <th className="py-2 pr-4">Student</th>
                     <th className="py-2 pr-4">Roll</th>
                     <th className="py-2 pr-4">Score</th>
@@ -401,7 +452,7 @@ export function ExamResultsClient({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {attempts.map((a) => {
+                  {attempts.map((a, idx) => {
                     const pct =
                       a.score !== null && a.total_marks && Number(a.total_marks) > 0
                         ? `${((Number(a.score) / Number(a.total_marks)) * 100).toFixed(1)}%`
@@ -412,6 +463,9 @@ export function ExamResultsClient({
                     return (
                       <Fragment key={a.id}>
                         <tr>
+                          <td className="py-3 pr-3 font-bold text-navy">
+                            {a.score !== null ? `#${idx + 1}` : "—"}
+                          </td>
                           <td className="py-3 pr-4 font-medium text-slate-900">{a.student_name}</td>
                           <td className="py-3 pr-4 text-slate-600">{a.student_roll ?? "—"}</td>
                           <td className="py-3 pr-4 font-semibold text-slate-900">
@@ -449,7 +503,7 @@ export function ExamResultsClient({
 
                         {isOpen && (
                           <tr>
-                            <td colSpan={8} className="bg-slate-50 p-4">
+                            <td colSpan={9} className="bg-slate-50 p-4">
                               <div className="space-y-2 text-xs">
                                 <p className="font-semibold text-slate-700">
                                   Submit:{" "}

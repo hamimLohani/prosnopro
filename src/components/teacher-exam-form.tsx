@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Lock, RefreshCw } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2, Lock, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -49,6 +49,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
   );
   const [showAnswers, setShowAnswers] = useState(exam?.show_answers ?? true);
   const [practiceSharing, setPracticeSharing] = useState(exam?.practice_sharing ?? false);
+  const [showAdvanced, setShowAdvanced] = useState(isEdit);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -333,8 +334,19 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
         </div>
       </section>
 
-      {/* Marking & Shuffle */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-4">
+      <button
+        type="button"
+        onClick={() => setShowAdvanced((v) => !v)}
+        className="flex min-h-[44px] w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-navy hover:bg-slate-50 cursor-pointer"
+      >
+        <span>Advanced Settings (Marking, Shuffle, Schedule ও Result)</span>
+        {showAdvanced ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+      </button>
+
+      {showAdvanced && (
+        <>
+          {/* Marking & Shuffle */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-4">
         <h2 className="text-base font-bold text-navy">Marking ও Randomization</h2>
 
         <div className="grid gap-4 sm:grid-cols-3">
@@ -532,6 +544,8 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
           </div>
         </div>
       </section>
+        </>
+      )}
 
       <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3">
         <button

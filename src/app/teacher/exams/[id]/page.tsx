@@ -125,8 +125,13 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
                 {exam.code}
               </span>
             </div>
-            <div className="col-span-2 sm:col-span-1 flex items-center justify-stretch sm:justify-end [&>button]:w-full sm:[&>button]:w-auto">
-              <TeacherCodeCopy code={`Teacher: ${teacherCode} | Exam: ${exam.code}`} />
+            <div className="col-span-2 sm:col-span-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 [&>button]:w-full sm:[&>button]:w-auto">
+              <TeacherCodeCopy
+                code={`📝 ProsnoPro Online Exam\nExam: ${exam.name}\nসময়: ${exam.duration_minutes} মিনিট\nলিংক: __STUDENT_URL__\nTeacher Code: ${teacherCode}\nExam Code: ${exam.code}`}
+                label="Invite Message Copy করুন"
+                copiedLabel="Invite Copy হয়েছে"
+                includeStudentUrl
+              />
             </div>
           </div>
         </section>

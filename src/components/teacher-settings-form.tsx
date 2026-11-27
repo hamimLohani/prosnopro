@@ -11,6 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { TeacherCodeInput } from "@/components/teacher-code-input";
@@ -27,6 +28,7 @@ interface TeacherSettingsFormProps {
   initialHasKey: boolean;
   initialKeyHint: string | null;
   serverEncryptionReady: boolean;
+  returnTo?: string | null;
 }
 
 const PROVIDER_ORDER: AiProviderId[] = ["gemini", "groq", "openai", "anthropic"];
@@ -40,6 +42,7 @@ export function TeacherSettingsForm({
   initialHasKey,
   initialKeyHint,
   serverEncryptionReady,
+  returnTo = null,
 }: TeacherSettingsFormProps) {
   const router = useRouter();
   const [name, setName] = useState(initialName);
@@ -527,6 +530,20 @@ export function TeacherSettingsForm({
             </>
           )}
         </div>
+
+        {returnTo && hasKey && (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <span className="text-xs font-medium text-emerald-900">
+              AI Key প্রস্তুত! এখন আপনার Exam-এ ফিরে গিয়ে প্রশ্ন তৈরি করতে পারেন।
+            </span>
+            <Link
+              href={returnTo}
+              className="inline-flex min-h-[40px] shrink-0 items-center justify-center rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
+            >
+              Exam-এ ফিরে যান →
+            </Link>
+          </div>
+        )}
       </form>
 
       <ConfirmModal

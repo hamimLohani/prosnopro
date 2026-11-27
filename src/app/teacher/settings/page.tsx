@@ -8,7 +8,11 @@ import { isEncryptionConfigured } from "@/lib/crypto";
 import { isAdminClientConfigured } from "@/lib/supabase/admin";
 import { getCurrentUserContext } from "@/lib/supabase/server";
 
-export default async function TeacherSettingsPage() {
+interface TeacherSettingsPageProps {
+  searchParams: Promise<{ returnTo?: string }>;
+}
+
+export default async function TeacherSettingsPage({ searchParams }: TeacherSettingsPageProps) {
   const ctx = await getCurrentUserContext();
 
   if (!ctx.configured) {
@@ -26,6 +30,9 @@ export default async function TeacherSettingsPage() {
   if (!ctx.profile) redirect("/onboarding");
   if (ctx.profile.role !== "teacher") redirect("/student");
 
+  const sp = await searchParams;
+  const rawReturn = sp.returnTo ?? "";
+  const safeReturnTo = rawReturn.startsWith("/teacher/") ? rawReturn : null;
   const tp = ctx.teacherProfile;
 
   return (
@@ -39,8 +46,11 @@ export default async function TeacherSettingsPage() {
               আপনার Teacher Code এবং নিজস্ব BYOK AI API Key পরিচালনা করুন।
             </p>
           </div>
-          <Link href="/teacher" className="py-1 text-sm font-semibold text-navy hover:underline shrink-0">
-            ← Dashboard-এ ফিরে যান
+          <Link
+            href={safeReturnTo ?? "/teacher"}
+            className="py-1 text-sm font-semibold text-navy hover:underline shrink-0"
+          >
+            {safeReturnTo ? "← Exam-এ ফিরে যান" : "← Dashboard-এ ফিরে যান"}
           </Link>
         </div>
 
@@ -53,6 +63,7 @@ export default async function TeacherSettingsPage() {
           initialHasKey={Boolean(tp?.ai_key_hint)}
           initialKeyHint={tp?.ai_key_hint ?? null}
           serverEncryptionReady={isAdminClientConfigured() && isEncryptionConfigured()}
+          returnTo={safeReturnTo}
         />
       </main>
     </div>
