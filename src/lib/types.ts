@@ -18,6 +18,8 @@ export interface TeacherProfile {
   user_id: string;
   teacher_code: string;
   ai_provider: "gemini" | "groq" | "openai" | "anthropic" | null;
+  ai_model?: string | null;
+  ai_key_hint?: string | null;
   created_at: string;
   updated_at: string;
 }

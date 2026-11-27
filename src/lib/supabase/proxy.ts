@@ -40,9 +40,9 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Verify JWT claims locally via cached JWKS (avoids a slow Auth HTTP round-trip on every click)
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const userId = claimsData?.claims?.sub ?? null;
 
   const { pathname } = request.nextUrl;
   const isTeacherRoute = isProtectedPrefix(pathname, "/teacher");
@@ -50,7 +50,7 @@ export async function updateSession(request: NextRequest) {
   const isOnboardingRoute = isProtectedPrefix(pathname, "/onboarding");
   const isAuthPage = AUTH_PAGES.has(pathname);
 
-  if (!user) {
+  if (!userId) {
     if (isTeacherRoute || isStudentRoute || isOnboardingRoute) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = "/login";
@@ -60,39 +60,22 @@ export async function updateSession(request: NextRequest) {
     return response;
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle<{ role: "teacher" | "student" }>();
+  // Protected /teacher* and /student* pages enforce role & profile checks inside Server Components
+  // via React-cached getCurrentUserContext(), avoiding a duplicate DB query here on every nav click.
+  if (isAuthPage) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .maybeSingle<{ role: "teacher" | "student" }>();
 
-  if (!profile) {
-    if (isTeacherRoute || isStudentRoute || isAuthPage) {
-      const onboardingUrl = request.nextUrl.clone();
-      onboardingUrl.pathname = "/onboarding";
-      return NextResponse.redirect(onboardingUrl);
-    }
-    return response;
-  }
-
-  const homePath = profile.role === "teacher" ? "/teacher" : "/student";
-
-  if (isOnboardingRoute || isAuthPage) {
     const destUrl = request.nextUrl.clone();
-    destUrl.pathname = homePath;
+    destUrl.pathname = profile
+      ? profile.role === "teacher"
+        ? "/teacher"
+        : "/student"
+      : "/onboarding";
     destUrl.search = "";
-    return NextResponse.redirect(destUrl);
-  }
-
-  if (isTeacherRoute && profile.role !== "teacher") {
-    const destUrl = request.nextUrl.clone();
-    destUrl.pathname = "/student";
-    return NextResponse.redirect(destUrl);
-  }
-
-  if (isStudentRoute && profile.role !== "student") {
-    const destUrl = request.nextUrl.clone();
-    destUrl.pathname = "/teacher";
     return NextResponse.redirect(destUrl);
   }
 

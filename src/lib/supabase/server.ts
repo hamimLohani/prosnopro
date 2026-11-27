@@ -1,7 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { cache } from "react";
 import { getSupabaseEnv } from "@/lib/env";
 import type { CurrentUserContext, Profile, TeacherProfile } from "@/lib/types";
+
+type ProfileWithTeacher = Profile & {
+  teacher_profiles?: TeacherProfile | TeacherProfile[] | null;
+};
 
 export async function createClient() {
   const { url, anonKey, configured } = getSupabaseEnv();
@@ -29,7 +34,7 @@ export async function createClient() {
   });
 }
 
-export async function getCurrentUserContext(): Promise<CurrentUserContext> {
+export const getCurrentUserContext = cache(async (): Promise<CurrentUserContext> => {
   // Always read request cookies so auth-aware pages stay dynamic even before env vars are set.
   await cookies();
   const { configured } = getSupabaseEnv();
@@ -56,11 +61,12 @@ export async function getCurrentUserContext(): Promise<CurrentUserContext> {
     };
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Fast local JWKS verification (avoids an extra Auth API round-trip per navigation)
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const claims = claimsData?.claims;
+  const userId = claims?.sub ?? null;
 
-  if (!user) {
+  if (!userId) {
     return {
       configured: true,
       userId: null,
@@ -71,28 +77,40 @@ export async function getCurrentUserContext(): Promise<CurrentUserContext> {
     };
   }
 
-  const { data: profile } = await supabase
+  // Single joined query for profile + teacher_profiles (never selects ai_key_encrypted)
+  const { data: profileRow } = await supabase
     .from("profiles")
-    .select("id, role, name, roll, institution, created_at, updated_at")
-    .eq("id", user.id)
-    .maybeSingle<Profile>();
+    .select(
+      "id, role, name, roll, institution, created_at, updated_at, teacher_profiles(user_id, teacher_code, ai_provider, ai_model, ai_key_hint, created_at, updated_at)",
+    )
+    .eq("id", userId)
+    .maybeSingle<ProfileWithTeacher>();
 
+  let profile: Profile | null = null;
   let teacherProfile: TeacherProfile | null = null;
-  if (profile?.role === "teacher") {
-    const { data: tp } = await supabase
-      .from("teacher_profiles")
-      .select("user_id, teacher_code, ai_provider, created_at, updated_at")
-      .eq("user_id", user.id)
-      .maybeSingle<TeacherProfile>();
-    teacherProfile = tp ?? null;
+
+  if (profileRow) {
+    const { teacher_profiles: tpRaw, ...rest } = profileRow;
+    profile = rest;
+    if (profile.role === "teacher") {
+      teacherProfile = Array.isArray(tpRaw) ? (tpRaw[0] ?? null) : (tpRaw ?? null);
+    }
   }
+
+  const email = typeof claims?.email === "string" ? claims.email : null;
+  const emailVerified = Boolean(
+    claims &&
+      typeof claims === "object" &&
+      "email_verified" in claims &&
+      (claims as Record<string, unknown>).email_verified,
+  );
 
   return {
     configured: true,
-    userId: user.id,
-    email: user.email ?? null,
-    emailVerified: Boolean(user.email_confirmed_at),
-    profile: profile ?? null,
+    userId,
+    email,
+    emailVerified,
+    profile,
     teacherProfile,
   };
-}
+});

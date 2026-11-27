@@ -6,7 +6,7 @@ import { TeacherSettingsForm } from "@/components/teacher-settings-form";
 import { isValidProvider } from "@/lib/ai/providers";
 import { isEncryptionConfigured } from "@/lib/crypto";
 import { isAdminClientConfigured } from "@/lib/supabase/admin";
-import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
+import { getCurrentUserContext } from "@/lib/supabase/server";
 
 export default async function TeacherSettingsPage() {
   const ctx = await getCurrentUserContext();
@@ -26,17 +26,7 @@ export default async function TeacherSettingsPage() {
   if (!ctx.profile) redirect("/onboarding");
   if (ctx.profile.role !== "teacher") redirect("/student");
 
-  const supabase = await createClient();
-  const { data: aiStatusRaw } = supabase
-    ? await supabase.rpc("get_teacher_ai_status")
-    : { data: null };
-
-  const aiStatus = (aiStatusRaw ?? {}) as {
-    ai_provider?: string | null;
-    ai_model?: string | null;
-    ai_key_hint?: string | null;
-    has_key?: boolean;
-  };
+  const tp = ctx.teacherProfile;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -56,14 +46,12 @@ export default async function TeacherSettingsPage() {
 
         <TeacherSettingsForm
           initialName={ctx.profile.name}
-          initialTeacherCode={ctx.teacherProfile?.teacher_code ?? ""}
+          initialTeacherCode={tp?.teacher_code ?? ""}
           email={ctx.email}
-          initialAiProvider={
-            isValidProvider(aiStatus.ai_provider) ? aiStatus.ai_provider : null
-          }
-          initialAiModel={aiStatus.ai_model ?? null}
-          initialHasKey={Boolean(aiStatus.has_key)}
-          initialKeyHint={aiStatus.ai_key_hint ?? null}
+          initialAiProvider={isValidProvider(tp?.ai_provider) ? tp.ai_provider : null}
+          initialAiModel={tp?.ai_model ?? null}
+          initialHasKey={Boolean(tp?.ai_key_hint)}
+          initialKeyHint={tp?.ai_key_hint ?? null}
           serverEncryptionReady={isAdminClientConfigured() && isEncryptionConfigured()}
         />
       </main>
