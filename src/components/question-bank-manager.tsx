@@ -12,8 +12,9 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { CLASS_OPTIONS, SUBJECT_OPTIONS } from "@/lib/academic-options";
+import { CLASS_OPTIONS } from "@/lib/academic-options";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { SearchableSubjectSelect } from "@/components/searchable-subject-select";
 import { MathText } from "@/components/math-text";
 import { createClient } from "@/lib/supabase/client";
 import type { ExamMedium, QuestionBankItem } from "@/lib/types";
@@ -300,21 +301,11 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
           </div>
 
           <div className="grid gap-3 sm:grid-cols-4">
-            <select
+            <SearchableSubjectSelect
               value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              className="h-11 sm:h-[42px] rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm"
-            >
-              <option value="">Subject (বিষয়)</option>
-              {subject && !SUBJECT_OPTIONS.some((o) => o.value === subject) && (
-                <option value={subject}>{subject}</option>
-              )}
-              {SUBJECT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              onChange={setSubject}
+              placeholder="Subject (বিষয়)"
+            />
             <select
               value={classLevel}
               onChange={(e) => setClassLevel(e.target.value)}
@@ -397,20 +388,24 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
             className="h-11 w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-base sm:text-sm"
           />
         </div>
-        <input
-          type="text"
+        <SearchableSubjectSelect
           value={subjectFilter}
-          onChange={(e) => setSubjectFilter(e.target.value)}
-          placeholder="Filter by subject"
-          className="h-11 rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
+          onChange={setSubjectFilter}
+          placeholder="All Subjects"
+          searchPlaceholder="Search subject..."
         />
-        <input
-          type="text"
+        <select
           value={classFilter}
           onChange={(e) => setClassFilter(e.target.value)}
-          placeholder="Filter by class"
-          className="h-11 rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
-        />
+          className="h-11 sm:h-[42px] rounded-lg border border-slate-300 bg-white px-3 py-2 text-base sm:text-sm"
+        >
+          <option value="">All Classes</option>
+          {CLASS_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
         <div className="grid grid-cols-2 gap-2">
           <select
             value={mediumFilter}

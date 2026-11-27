@@ -22,7 +22,8 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { MathText } from "@/components/math-text";
-import { CLASS_OPTIONS, SUBJECT_OPTIONS } from "@/lib/academic-options";
+import { SearchableSubjectSelect } from "@/components/searchable-subject-select";
+import { CLASS_OPTIONS } from "@/lib/academic-options";
 import type { DraftMcqQuestion } from "@/lib/ai/schema";
 import { parseBulkMcqText } from "@/lib/bulk-mcq";
 import { createClient } from "@/lib/supabase/client";
@@ -1321,22 +1322,12 @@ export function TeacherQuestionEditor({
                         <label htmlFor="ai-subj" className="block text-sm font-medium text-slate-700">
                           Subject (বিষয়)
                         </label>
-                        <select
+                        <SearchableSubjectSelect
                           id="ai-subj"
                           value={aiSubject}
-                          onChange={(e) => setAiSubject(e.target.value)}
-                          className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-                        >
-                          <option value="">বিষয় নির্বাচন করুন</option>
-                          {aiSubject && !SUBJECT_OPTIONS.some((o) => o.value === aiSubject) && (
-                            <option value={aiSubject}>{aiSubject}</option>
-                          )}
-                          {SUBJECT_OPTIONS.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
+                          onChange={setAiSubject}
+                          placeholder="বিষয় নির্বাচন করুন"
+                        />
                       </div>
 
                       <div className="space-y-1.5">

@@ -4,6 +4,8 @@ import { ArrowRight, CheckCircle2, Eye, EyeOff, Loader2, Search, ShieldAlert, XC
 import Link from "next/link";
 import { useState } from "react";
 import { MathText } from "@/components/math-text";
+import { SearchableSubjectSelect } from "@/components/searchable-subject-select";
+import { CLASS_OPTIONS } from "@/lib/academic-options";
 import type { ExamMedium } from "@/lib/types";
 
 export interface PracticeQuestionItem {
@@ -133,22 +135,24 @@ export function StudentPracticeClient({
             className="h-11 w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-base sm:text-sm"
           />
         </div>
-        <input
-          type="text"
-          enterKeyHint="search"
+        <SearchableSubjectSelect
           value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          placeholder="Subject"
-          className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
+          onChange={setSubject}
+          placeholder="All Subjects"
+          searchPlaceholder="Search subject..."
         />
-        <input
-          type="text"
-          enterKeyHint="search"
+        <select
           value={classLevel}
           onChange={(e) => setClassLevel(e.target.value)}
-          placeholder="Class (e.g. HSC)"
-          className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
-        />
+          className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base sm:text-sm"
+        >
+          <option value="">All Classes</option>
+          {CLASS_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
         <div className="flex gap-2">
           <select
             value={medium}

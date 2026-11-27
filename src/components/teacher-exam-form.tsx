@@ -4,7 +4,8 @@ import { BookOpen, ChevronDown, ChevronUp, Loader2, Lock, RefreshCw, Search } fr
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { CLASS_OPTIONS, SUBJECT_OPTIONS } from "@/lib/academic-options";
+import { SearchableSubjectSelect } from "@/components/searchable-subject-select";
+import { CLASS_OPTIONS } from "@/lib/academic-options";
 import { createClient } from "@/lib/supabase/client";
 import type { Exam, ExamMedium, QuestionBankItem, ResultReleaseMode } from "@/lib/types";
 import { generateExamCode, isValidExamCode, normalizeExamCode } from "@/lib/validation";
@@ -288,22 +289,12 @@ export function TeacherExamForm({
             <label htmlFor="exam-subject" className="block text-sm font-medium text-slate-700">
               Subject (বিষয়)
             </label>
-            <select
+            <SearchableSubjectSelect
               id="exam-subject"
               value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-            >
-              <option value="">বিষয় নির্বাচন করুন</option>
-              {subject && !SUBJECT_OPTIONS.some((o) => o.value === subject) && (
-                <option value={subject}>{subject}</option>
-              )}
-              {SUBJECT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              onChange={setSubject}
+              placeholder="বিষয় নির্বাচন করুন"
+            />
           </div>
 
           <div className="space-y-1.5">
