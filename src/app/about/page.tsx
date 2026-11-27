@@ -72,6 +72,27 @@ export default async function AboutPage() {
           </div>
         </section>
 
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 space-y-1.5">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Developer
+          </p>
+          <p className="text-sm sm:text-base font-bold text-navy">
+            Developed by Md. Inzamamul Lohani
+          </p>
+          <p className="text-xs sm:text-sm text-slate-600">
+            IIT, University of Dhaka
+          </p>
+          <p className="text-xs sm:text-sm text-slate-600">
+            Email:{" "}
+            <a
+              href="mailto:hamimlohani@gmail.com"
+              className="font-medium text-navy hover:underline"
+            >
+              hamimlohani@gmail.com
+            </a>
+          </p>
+        </section>
+
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-xs text-slate-600">
           <div className="flex items-center gap-2">
             <BookOpen className="h-4 w-4 text-navy shrink-0" />
