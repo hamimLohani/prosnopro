@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { MobileSidebar } from "@/components/mobile-sidebar";
 import { NavLink } from "@/components/nav-link";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -15,8 +16,9 @@ export function Navbar({ ctx }: NavbarProps) {
     role === "teacher" ? "/teacher" : role === "student" ? "/student" : "/onboarding";
 
   return (
-    <header className="no-print sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex min-h-14 sm:min-h-16 max-w-5xl items-center justify-between gap-2 sm:gap-4 px-3 py-1.5 sm:px-4 sm:py-0">
+    <>
+      <header className="no-print sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex min-h-14 sm:min-h-16 max-w-4xl items-center justify-between gap-2 sm:gap-4 px-3 py-1.5 sm:px-4 sm:py-0">
         <BrandMark href={ctx?.userId ? dashboardHref : "/"} />
 
         <nav className="flex shrink-0 items-center gap-1.5 sm:gap-2">
@@ -78,7 +80,11 @@ export function Navbar({ ctx }: NavbarProps) {
             teacherCode={ctx?.teacherProfile?.teacher_code ?? null}
           />
         </nav>
-      </div>
-    </header>
+        </div>
+      </header>
+      {ctx?.userId && (role === "teacher" || role === "student") && (
+        <MobileBottomNav role={role} />
+      )}
+    </>
   );
 }

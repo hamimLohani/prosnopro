@@ -1,13 +1,14 @@
 "use client";
 
 import { AlertTriangle, Loader2 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 interface ConfirmModalProps {
   open: boolean;
   title: string;
   message: string;
+  children?: ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
   tone?: "danger" | "primary";
@@ -23,6 +24,7 @@ export function ConfirmModal({
   open,
   title,
   message,
+  children,
   confirmLabel = "নিশ্চিত করুন",
   cancelLabel = "বাতিল",
   tone = "danger",
@@ -30,15 +32,24 @@ export function ConfirmModal({
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
+  const cancelBtnRef = useRef<HTMLButtonElement | null>(null);
+  const prevFocusRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     if (!open) return;
+    prevFocusRef.current = document.activeElement as HTMLElement | null;
+    cancelBtnRef.current?.focus();
+
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape" && !busy) {
         onCancel();
       }
     }
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      prevFocusRef.current?.focus?.();
+    };
   }, [busy, onCancel, open]);
 
   if (!open || typeof document === "undefined") {
@@ -76,8 +87,11 @@ export function ConfirmModal({
           </div>
         </div>
 
+        {children}
+
         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-1">
           <button
+            ref={cancelBtnRef}
             type="button"
             disabled={busy}
             onClick={onCancel}

@@ -6,6 +6,7 @@ import {
   Clock,
   CloudOff,
   CloudUpload,
+  Flag,
   Grid,
   Loader2,
   Send,
@@ -14,6 +15,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ConfirmModal } from "@/components/confirm-modal";
 import { MathText } from "@/components/math-text";
 import type { ExamMedium, StudentExamQuestion, ViolationCounts } from "@/lib/types";
 
@@ -77,6 +79,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
   const [questions, setQuestions] = useState<StudentExamQuestion[]>([]);
 
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [flaggedIds, setFlaggedIds] = useState<Record<string, boolean>>({});
   const [remainingSeconds, setRemainingSeconds] = useState<number>(0);
   const [syncState, setSyncState] = useState<"synced" | "unsaved" | "syncing" | "offline">("synced");
   const [showNavDrawer, setShowNavDrawer] = useState(false);
@@ -116,6 +119,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
     if (!attId) return;
     try {
       localStorage.removeItem(`prosnopro_draft_${attId}`);
+      localStorage.removeItem(`prosnopro_flags_${attId}`);
     } catch {
       // Ignore
     }
@@ -298,6 +302,17 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
         setExamInfo(data.exam);
         setQuestions(data.questions);
         setAnswers(initialAnswers);
+        try {
+          const rawFlags = localStorage.getItem(`prosnopro_flags_${att.id}`);
+          if (rawFlags) {
+            const parsedFlags = JSON.parse(rawFlags) as Record<string, boolean>;
+            if (parsedFlags && typeof parsedFlags === "object") {
+              setFlaggedIds(parsedFlags);
+            }
+          }
+        } catch {
+          // Ignore malformed flags
+        }
         setSyncState(dirtyRef.current ? "unsaved" : "synced");
 
         const initialRemaining = Math.max(
@@ -439,6 +454,24 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
     persistLocalDraft(attemptId, next, nextSeq);
   }
 
+  function toggleFlag(questionId: string) {
+    if (takenOver || submitting || !attemptId) return;
+    setFlaggedIds((prev) => {
+      const next = { ...prev };
+      if (next[questionId]) {
+        delete next[questionId];
+      } else {
+        next[questionId] = true;
+      }
+      try {
+        localStorage.setItem(`prosnopro_flags_${attemptId}`, JSON.stringify(next));
+      } catch {
+        // Ignore storage errors
+      }
+      return next;
+    });
+  }
+
   function clearOption(questionId: string) {
     if (takenOver || submitting || !attemptId) return;
     if (!(questionId in answers)) return;
@@ -555,48 +588,40 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
         )}
 
         {/* Submit Confirmation Modal */}
-        {showConfirmModal && (
-          <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-slate-900/60 p-0 sm:p-4">
-            <div className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:p-6 shadow-xl space-y-4">
-              <h2 className="text-lg font-bold text-navy">Exam Submit করবেন?</h2>
-              <div className="rounded-xl bg-slate-50 p-4 text-sm space-y-1">
-                <p>
-                  উত্তর দিয়েছেন:{" "}
-                  <span className="font-bold text-emerald-700">
-                    {answeredCount} / {questions.length}
-                  </span>
-                </p>
-                <p>
-                  উত্তর বাকি:{" "}
-                  <span className="font-bold text-slate-800">
-                    {questions.length - answeredCount}
-                  </span>
-                </p>
-              </div>
-              <p className="text-xs text-slate-500">
-                একবার Submit করলে আর উত্তর পরিবর্তন করা যাবে না।
+        <ConfirmModal
+          open={showConfirmModal}
+          tone="primary"
+          title="Exam Submit করবেন?"
+          message="একবার Submit করলে আর উত্তর পরিবর্তন করা যাবে না।"
+          confirmLabel="Submit নিশ্চিত করুন"
+          cancelLabel="উত্তরগুলো দেখুন"
+          busy={submitting}
+          onConfirm={() => void submitExam()}
+          onCancel={() => setShowConfirmModal(false)}
+        >
+          <div className="rounded-xl bg-slate-50 p-4 text-sm space-y-1">
+            <p>
+              উত্তর দিয়েছেন:{" "}
+              <span className="font-bold text-emerald-700">
+                {answeredCount} / {questions.length}
+              </span>
+            </p>
+            <p>
+              উত্তর বাকি:{" "}
+              <span className="font-bold text-slate-800">
+                {questions.length - answeredCount}
+              </span>
+            </p>
+            {Object.keys(flaggedIds).length > 0 && (
+              <p>
+                পুনরায় দেখার জন্য চিহ্নিত:{" "}
+                <span className="font-bold text-amber-800">
+                  {Object.keys(flaggedIds).length}টি
+                </span>
               </p>
-              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmModal(false)}
-                  className="min-h-[44px] w-full sm:w-auto rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-                >
-                  উত্তরগুলো দেখুন
-                </button>
-                <button
-                  type="button"
-                  disabled={submitting}
-                  onClick={() => void submitExam()}
-                  className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong cursor-pointer"
-                >
-                  {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                  <span>Submit নিশ্চিত করুন</span>
-                </button>
-              </div>
-            </div>
+            )}
           </div>
-        )}
+        </ConfirmModal>
 
         {/* Sticky Top Exam Bar */}
         <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
@@ -643,7 +668,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
               <div
                 className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 sm:px-3 font-mono text-sm font-bold tabular-nums ${
                   isLowTime
-                    ? "bg-rose-100 text-rose-800 animate-pulse"
+                    ? "border border-rose-300 bg-rose-100 text-rose-800"
                     : "bg-navy/10 text-navy"
                 }`}
               >
@@ -692,15 +717,20 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
               <div className="grid grid-cols-6 gap-2 sm:grid-cols-10">
                 {questions.map((q, idx) => {
                   const answered = typeof answers[q.id] === "number";
+                  const flagged = Boolean(flaggedIds[q.id]);
                   return (
                     <button
                       key={q.id}
                       type="button"
                       onClick={() => jumpToQuestion(q.id)}
                       className={`h-10 rounded-lg text-xs font-semibold transition active:scale-95 cursor-pointer ${
-                        answered
-                          ? "bg-navy text-white"
-                          : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+                        answered && flagged
+                          ? "border-2 border-amber-400 bg-navy text-white"
+                          : flagged
+                            ? "border border-amber-400 bg-amber-100 text-amber-900"
+                            : answered
+                              ? "bg-navy text-white"
+                              : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
                       }`}
                     >
                       {idx + 1}
@@ -710,6 +740,24 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
               </div>
             </div>
           )}
+
+          {/* Slim Live Progress Bar */}
+          <div className="h-1 w-full bg-slate-100" aria-hidden="true">
+            <div
+              className={`h-full transition-all duration-300 ${
+                questions.length > 0 && answeredCount === questions.length
+                  ? "bg-emerald-600"
+                  : "bg-navy"
+              }`}
+              style={{
+                width: `${
+                  questions.length > 0
+                    ? Math.round((answeredCount / questions.length) * 100)
+                    : 0
+                }%`,
+              }}
+            />
+          </div>
         </header>
 
         {fatalError && (
@@ -745,14 +793,32 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                     isQuestionAnswered ? "border-navy/30" : "border-slate-200"
                   }`}
                 >
-                  <div className="flex items-baseline justify-between gap-3">
+                  <div className="flex items-start justify-between gap-3">
                     <p className="min-w-0 flex-1 text-[15px] font-semibold leading-relaxed text-slate-900 break-words sm:text-base">
                       <span className="mr-1.5 text-navy">{idx + 1}.</span>
                       <MathText text={q.text} />
                     </p>
-                    <span className="shrink-0 text-xs font-medium text-slate-500">
-                      {q.marks} নম্বর
-                    </span>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleFlag(q.id)}
+                        aria-pressed={Boolean(flaggedIds[q.id])}
+                        title="পুনরায় দেখার জন্য চিহ্নিত করুন"
+                        className={`inline-flex min-h-[32px] items-center gap-1 rounded-lg border px-2 py-1 text-xs font-medium transition cursor-pointer ${
+                          flaggedIds[q.id]
+                            ? "border-amber-300 bg-amber-50 text-amber-900"
+                            : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                        }`}
+                      >
+                        <Flag className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">
+                          {flaggedIds[q.id] ? "চিহ্নিত" : "চিহ্নিত করুন"}
+                        </span>
+                      </button>
+                      <span className="text-xs font-medium text-slate-500">
+                        {q.marks} নম্বর
+                      </span>
+                    </div>
                   </div>
 
                   <div className="grid gap-2">
@@ -813,15 +879,20 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
               <div className="grid grid-cols-5 gap-1.5">
                 {questions.map((q, idx) => {
                   const answered = typeof answers[q.id] === "number";
+                  const flagged = Boolean(flaggedIds[q.id]);
                   return (
                     <button
                       key={q.id}
                       type="button"
                       onClick={() => jumpToQuestion(q.id)}
                       className={`h-8 rounded-lg text-xs font-semibold cursor-pointer ${
-                        answered
-                          ? "bg-navy text-white"
-                          : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                        answered && flagged
+                          ? "border-2 border-amber-400 bg-navy text-white"
+                          : flagged
+                            ? "border border-amber-400 bg-amber-100 text-amber-900"
+                            : answered
+                              ? "bg-navy text-white"
+                              : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
                       }`}
                     >
                       {idx + 1}
@@ -829,6 +900,11 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                   );
                 })}
               </div>
+              {Object.keys(flaggedIds).length > 0 && (
+                <p className="text-[11px] font-medium text-amber-800">
+                  হলুদ চিহ্নিত: {Object.keys(flaggedIds).length}টি প্রশ্ন পুনরায় দেখার জন্য রাখা হয়েছে
+                </p>
+              )}
               <button
                 type="button"
                 disabled={submitting}
