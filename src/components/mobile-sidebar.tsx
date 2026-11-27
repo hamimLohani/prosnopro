@@ -165,15 +165,20 @@ export function MobileSidebar({
         aria-label="Open navigation menu"
         aria-expanded={open}
         onClick={() => setOpenForPath(pathname)}
-        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 active:scale-95 sm:hidden cursor-pointer"
+        className={
+          userId
+            ? "inline-flex min-h-[38px] shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 active:scale-95 sm:hidden cursor-pointer"
+            : "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 active:scale-95 sm:hidden cursor-pointer"
+        }
       >
-        <Menu className="h-5 w-5" />
+        <Menu className={userId ? "h-4 w-4" : "h-5 w-5"} />
+        {userId && <span>Menu</span>}
       </button>
 
       {open &&
         typeof document !== "undefined" &&
         createPortal(
-          <div className="fixed inset-0 z-50 flex h-dvh sm:hidden">
+          <div className="fixed inset-0 z-50 flex justify-end h-dvh sm:hidden">
             <div
               onClick={() => setOpenForPath(null)}
               aria-hidden="true"
@@ -184,7 +189,7 @@ export function MobileSidebar({
               role="dialog"
               aria-modal="true"
               aria-label="Mobile navigation menu"
-              className="relative z-10 flex h-dvh w-[285px] max-w-[85vw] flex-col bg-white shadow-2xl"
+              className="relative z-10 flex h-dvh w-[285px] max-w-[85vw] flex-col border-l border-slate-200 bg-white shadow-2xl"
             >
               <div className="shrink-0 flex items-center justify-between border-b border-slate-200 bg-white px-4 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
                 <BrandMark href={homeHref} size="sm" />
