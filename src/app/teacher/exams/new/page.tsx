@@ -2,13 +2,24 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { TeacherExamForm } from "@/components/teacher-exam-form";
-import { getCurrentUserContext } from "@/lib/supabase/server";
+import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
+import type { QuestionBankItem } from "@/lib/types";
 
 export default async function NewExamPage() {
   const ctx = await getCurrentUserContext();
   if (!ctx.configured || !ctx.userId) redirect("/login");
   if (!ctx.profile) redirect("/onboarding");
   if (ctx.profile.role !== "teacher") redirect("/student");
+
+  const supabase = await createClient();
+  const { data: bankItems } = supabase
+    ? await supabase
+        .from("question_bank")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(150)
+        .returns<QuestionBankItem[]>()
+    : { data: [] };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -26,7 +37,7 @@ export default async function NewExamPage() {
           </Link>
         </div>
 
-        <TeacherExamForm mode="create" />
+        <TeacherExamForm mode="create" bankItems={bankItems ?? []} />
       </main>
     </div>
   );
