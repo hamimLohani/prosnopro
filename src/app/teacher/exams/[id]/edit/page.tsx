@@ -50,7 +50,11 @@ export default async function EditExamPage({ params }: EditExamPageProps) {
           </Link>
         </div>
 
-        <TeacherExamForm mode="edit" exam={exam} hasAttempts={(attemptCount ?? 0) > 0} />
+        <TeacherExamForm
+          mode="edit"
+          exam={exam}
+          hasAttempts={exam.status !== "closed" && (attemptCount ?? 0) > 0}
+        />
       </main>
     </div>
   );
