@@ -8,6 +8,7 @@ interface TeacherCodeCopyProps {
   label?: string;
   copiedLabel?: string;
   includeStudentUrl?: boolean;
+  studentPath?: string;
 }
 
 export function TeacherCodeCopy({
@@ -15,13 +16,14 @@ export function TeacherCodeCopy({
   label = "Code Copy করুন",
   copiedLabel = "Copy হয়েছে",
   includeStudentUrl = false,
+  studentPath = "/student",
 }: TeacherCodeCopyProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
     try {
       const text = includeStudentUrl
-        ? code.replace("__STUDENT_URL__", `${window.location.origin}/student`)
+        ? code.replace("__STUDENT_URL__", `${window.location.origin}${studentPath}`)
         : code;
       await navigator.clipboard.writeText(text);
       setCopied(true);

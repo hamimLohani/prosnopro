@@ -131,6 +131,7 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
                 label="Invite Message Copy করুন"
                 copiedLabel="Invite Copy হয়েছে"
                 includeStudentUrl
+                studentPath={`/student?t=${encodeURIComponent(teacherCode)}&e=${encodeURIComponent(exam.code)}`}
               />
             </div>
           </div>

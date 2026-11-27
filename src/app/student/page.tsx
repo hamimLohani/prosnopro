@@ -13,9 +13,14 @@ interface StudentAttemptRow {
   status: AttemptStatus;
   started_at: string;
   submitted_at: string | null;
+  exams: { name: string; subject: string } | null;
 }
 
-export default async function StudentDashboardPage() {
+interface StudentDashboardPageProps {
+  searchParams: Promise<{ t?: string; e?: string }>;
+}
+
+export default async function StudentDashboardPage({ searchParams }: StudentDashboardPageProps) {
   const ctx = await getCurrentUserContext();
 
   if (!ctx.configured) {
@@ -33,6 +38,7 @@ export default async function StudentDashboardPage() {
   if (!ctx.profile) redirect("/onboarding");
   if (ctx.profile.role !== "student") redirect("/teacher");
 
+  const sp = await searchParams;
   const supabase = await createClient();
   if (supabase) {
     await supabase.rpc("finalize_expired_attempts");
@@ -41,7 +47,7 @@ export default async function StudentDashboardPage() {
   const { data: attempts } = supabase
     ? await supabase
         .from("attempts")
-        .select("id, exam_id, status, started_at, submitted_at")
+        .select("id, exam_id, status, started_at, submitted_at, exams(name, subject)")
         .eq("student_id", ctx.userId)
         .order("started_at", { ascending: false })
         .limit(10)
@@ -65,9 +71,17 @@ export default async function StudentDashboardPage() {
           </div>
         </section>
 
-        <StudentJoinForm />
+        <StudentJoinForm initialTeacherCode={sp.t ?? ""} initialExamCode={sp.e ?? ""} />
 
-        {attemptList.length > 0 && (
+        {attemptList.length === 0 ? (
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 text-xs sm:text-sm text-slate-600 space-y-1.5">
+            <p className="font-bold text-navy">নতুন Student? জেনে রাখো:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Code দিলেই সাথে সাথে টাইমার শুরু হবে না — আগে পরীক্ষার তথ্য ও নিয়ম দেখতে পাবেন।</li>
+              <li>পরীক্ষা চলাকালে নেটওয়ার্ক চলে গেলেও আপনার উত্তর ফোনে Save থাকবে।</li>
+            </ul>
+          </section>
+        ) : (
           <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-3">
             <h2 className="text-base font-bold text-navy">সাম্প্রতিক Exam</h2>
             <div className="divide-y divide-slate-100">
@@ -77,10 +91,12 @@ export default async function StudentDashboardPage() {
                   className="flex items-center justify-between gap-3 py-3 text-sm"
                 >
                   <div className="min-w-0">
-                    <span className="font-semibold text-slate-900 capitalize">
-                      {a.status.replace("_", " ")}
-                    </span>
+                    <p className="truncate font-semibold text-slate-900">
+                      {a.exams?.name ?? "Online Exam"}
+                    </p>
                     <p className="text-xs text-slate-500">
+                      {a.exams?.subject ? `${a.exams.subject} • ` : ""}
+                      <span className="capitalize">{a.status.replace("_", " ")}</span> •{" "}
                       {new Date(a.started_at).toLocaleString()}
                     </p>
                   </div>

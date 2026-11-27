@@ -5,12 +5,41 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { normalizeExamCode, normalizeTeacherCode } from "@/lib/validation";
 
-export function StudentJoinForm() {
+interface StudentJoinFormProps {
+  initialTeacherCode?: string;
+  initialExamCode?: string;
+}
+
+export function StudentJoinForm({
+  initialTeacherCode = "",
+  initialExamCode = "",
+}: StudentJoinFormProps) {
   const router = useRouter();
-  const [teacherCode, setTeacherCode] = useState("");
-  const [examCode, setExamCode] = useState("");
+  const [teacherCode, setTeacherCode] = useState(() => normalizeTeacherCode(initialTeacherCode));
+  const [examCode, setExamCode] = useState(() => normalizeExamCode(initialExamCode));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [autoFilledNote, setAutoFilledNote] = useState<string | null>(() =>
+    initialTeacherCode && initialExamCode
+      ? "লিংক থেকে Teacher Code ও Exam Code Auto-fill হয়েছে।"
+      : null,
+  );
+
+  function handleSmartPaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    const pasted = e.clipboardData.getData("text");
+    if (!pasted) return;
+
+    const teacherMatch = pasted.match(/Teacher\s*Code\s*[:\-]\s*([A-Za-z0-9]{3,16})/i);
+    const examMatch = pasted.match(/Exam\s*Code\s*[:\-]\s*([A-Za-z0-9]{3,16})/i);
+
+    if (teacherMatch || examMatch) {
+      e.preventDefault();
+      if (teacherMatch) setTeacherCode(normalizeTeacherCode(teacherMatch[1]));
+      if (examMatch) setExamCode(normalizeExamCode(examMatch[1]));
+      setAutoFilledNote("Invite মেসেজ থেকে Code Auto-fill হয়েছে!");
+      setError(null);
+    }
+  }
 
   async function handleJoin(e: React.FormEvent) {
     e.preventDefault();
@@ -74,10 +103,17 @@ export function StudentJoinForm() {
           <div>
             <h2 className="text-lg font-bold text-slate-900">Exam-এ জয়েন করুন</h2>
             <p className="text-sm text-slate-600">
-              আপনার Teacher-এর দেওয়া Teacher Code এবং Exam Code লিখুন।
+              আপনার Teacher-এর দেওয়া Teacher Code ও Exam Code লিখুন (অথবা পুরো Invite মেসেজ
+              পেস্ট করুন)।
             </p>
           </div>
         </div>
+
+        {autoFilledNote && !error && (
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800">
+            {autoFilledNote}
+          </div>
+        )}
 
         {error && (
           <div className="rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-sm text-rose-800">
@@ -101,6 +137,7 @@ export function StudentJoinForm() {
               spellCheck={false}
               enterKeyHint="next"
               value={teacherCode}
+              onPaste={handleSmartPaste}
               onChange={(e) => setTeacherCode(normalizeTeacherCode(e.target.value))}
               placeholder="যেমন: RAHIM26"
               className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-base sm:text-sm uppercase tracking-wider text-slate-900 placeholder:normal-case placeholder:tracking-normal focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
@@ -121,6 +158,7 @@ export function StudentJoinForm() {
               spellCheck={false}
               enterKeyHint="go"
               value={examCode}
+              onPaste={handleSmartPaste}
               onChange={(e) => setExamCode(normalizeExamCode(e.target.value))}
               placeholder="যেমন: PHY01"
               className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-base sm:text-sm uppercase tracking-wider text-slate-900 placeholder:normal-case placeholder:tracking-normal focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
