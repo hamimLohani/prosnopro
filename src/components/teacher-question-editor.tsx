@@ -70,6 +70,7 @@ export function TeacherQuestionEditor({
   const [bankSubject, setBankSubject] = useState("");
   const [selectedBankIds, setSelectedBankIds] = useState<string[]>([]);
   const [importingBank, setImportingBank] = useState(false);
+  const [savingToBankKey, setSavingToBankKey] = useState<string | null>(null);
 
   // Manual form state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -615,6 +616,75 @@ export function TeacherQuestionEditor({
       return;
     }
     setMessage(`Re-graded ${Number(data ?? 0)} submitted attempt(s).`);
+    router.refresh();
+  }
+
+  async function handleSaveQuestionsToBank(targets: Question[], key: string) {
+    const unsaved = targets.filter((q) => !q.bank_id);
+    if (unsaved.length === 0) return;
+
+    const supabase = createClient();
+    if (!supabase) return;
+
+    setSavingToBankKey(key);
+    setError(null);
+    setMessage(null);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      setSavingToBankKey(null);
+      setError("Session শেষ হয়ে গেছে। আবার Sign in করুন।");
+      return;
+    }
+
+    const { data: insertedBank, error: bankErr } = await supabase
+      .from("question_bank")
+      .insert(
+        unsaved.map((q) => ({
+          teacher_id: user.id,
+          text: q.text,
+          options: q.options,
+          correct_index: q.correct_index,
+          explanation: q.explanation,
+          subject: exam.subject,
+          class: exam.class ?? "",
+          medium: exam.medium,
+          source: "manual",
+          visibility: "private",
+        })),
+      )
+      .select("id")
+      .returns<Array<{ id: string }>>();
+
+    if (bankErr || !insertedBank || insertedBank.length !== unsaved.length) {
+      setSavingToBankKey(null);
+      setError(bankErr?.message ?? "Question Bank-এ সংরক্ষণ করা যায়নি।");
+      return;
+    }
+
+    const idMap = new Map<string, string>();
+    unsaved.forEach((q, idx) => {
+      idMap.set(q.id, insertedBank[idx].id);
+    });
+
+    if (!hasAttempts) {
+      await Promise.all(
+        unsaved.map((q, idx) =>
+          supabase
+            .from("questions")
+            .update({ bank_id: insertedBank[idx].id })
+            .eq("id", q.id),
+        ),
+      );
+    }
+
+    setQuestions((prev) =>
+      prev.map((q) => (idMap.has(q.id) ? { ...q, bank_id: idMap.get(q.id) ?? q.bank_id } : q)),
+    );
+    setSavingToBankKey(null);
+    setMessage(`${unsaved.length}টি প্রশ্ন Question Bank-এ সংরক্ষণ করা হয়েছে।`);
     router.refresh();
   }
 
@@ -1584,8 +1654,25 @@ export function TeacherQuestionEditor({
 
       {/* Existing Question List */}
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-base font-bold text-slate-900">প্রশ্নসমূহ ({questions.length}টি)</h2>
+          {questions.some((q) => !q.bank_id) && (
+            <button
+              type="button"
+              disabled={savingToBankKey !== null || busy}
+              onClick={() => void handleSaveQuestionsToBank(questions, "all")}
+              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
+            >
+              {savingToBankKey === "all" ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <BookOpen className="h-3.5 w-3.5" />
+              )}
+              <span>
+                সবগুলো Bank-এ Save করুন ({questions.filter((q) => !q.bank_id).length})
+              </span>
+            </button>
+          )}
         </div>
 
         {questions.length === 0 ? (
@@ -1606,6 +1693,27 @@ export function TeacherQuestionEditor({
                     </span>
 
                     <div className="flex items-center gap-1 shrink-0">
+                      {q.bank_id ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 mr-1">
+                          <BookOpen className="h-3 w-3" />
+                          <span>Bank-এ আছে</span>
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={savingToBankKey !== null || busy}
+                          onClick={() => void handleSaveQuestionsToBank([q], q.id)}
+                          title="Question Bank-এ Save করুন"
+                          className="inline-flex h-8 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 text-[11px] font-semibold text-navy hover:bg-slate-50 disabled:opacity-40 cursor-pointer mr-1"
+                        >
+                          {savingToBankKey === q.id ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <BookOpen className="h-3 w-3" />
+                          )}
+                          <span className="hidden sm:inline">Bank-এ Save</span>
+                        </button>
+                      )}
                       {!hasAttempts && (
                         <>
                           <button
