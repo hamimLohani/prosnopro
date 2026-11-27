@@ -866,7 +866,7 @@ export function TeacherQuestionEditor({
                       type="text"
                       value={bankKeyword}
                       onChange={(e) => setBankKeyword(e.target.value)}
-                      placeholder="কীওয়ার্ড বা Tag দিয়ে খুঁজুন..."
+                      placeholder="Search keyword or tag..."
                       className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-base sm:text-sm"
                     />
                   </div>
@@ -874,7 +874,7 @@ export function TeacherQuestionEditor({
                     type="text"
                     value={bankSubject}
                     onChange={(e) => setBankSubject(e.target.value)}
-                    placeholder="Subject দিয়ে ফিল্টার..."
+                    placeholder="Filter by subject..."
                     className="h-11 sm:h-[42px] rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
                   />
                 </div>

@@ -129,7 +129,7 @@ export function StudentPracticeClient({
             enterKeyHint="search"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="কীওয়ার্ড (বাংলা বা English)..."
+            placeholder="Search keyword..."
             className="h-11 w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-base sm:text-sm"
           />
         </div>
@@ -138,7 +138,7 @@ export function StudentPracticeClient({
           enterKeyHint="search"
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
-          placeholder="Subject (বিষয়)"
+          placeholder="Subject"
           className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
         />
         <input
@@ -146,7 +146,7 @@ export function StudentPracticeClient({
           enterKeyHint="search"
           value={classLevel}
           onChange={(e) => setClassLevel(e.target.value)}
-          placeholder="Class (যেমন: HSC)"
+          placeholder="Class (e.g. HSC)"
           className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
         />
         <div className="flex gap-2">
@@ -155,8 +155,8 @@ export function StudentPracticeClient({
             onChange={(e) => setMedium(e.target.value as "all" | ExamMedium)}
             className="h-11 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-base sm:text-sm"
           >
-            <option value="all">সব মাধ্যম</option>
-            <option value="bn">বাংলা</option>
+            <option value="all">All Media</option>
+            <option value="bn">Bangla</option>
             <option value="en">English</option>
           </select>
           <button
@@ -165,7 +165,7 @@ export function StudentPracticeClient({
             className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            <span>খুঁজুন</span>
+            <span>Search</span>
           </button>
         </div>
       </form>

@@ -49,7 +49,7 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Exam নাম, Subject বা Code দিয়ে খুঁজুন..."
+            placeholder="Search by exam name, subject, or code..."
             className="h-10 w-full rounded-lg border border-slate-300 pl-9 pr-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
           />
         </div>
@@ -57,7 +57,7 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
           type="text"
           value={classFilter}
           onChange={(e) => setClassFilter(e.target.value)}
-          placeholder="Class দিয়ে খুঁজুন (যেমন: HSC)"
+          placeholder="Filter by class (e.g. HSC)"
           className="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
         />
       </div>

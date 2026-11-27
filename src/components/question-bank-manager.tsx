@@ -376,7 +376,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="বাংলা বা English কীওয়ার্ড দিয়ে খুঁজুন..."
+            placeholder="Search keyword..."
             className="h-11 w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-base sm:text-sm"
           />
         </div>
@@ -384,14 +384,14 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
           type="text"
           value={subjectFilter}
           onChange={(e) => setSubjectFilter(e.target.value)}
-          placeholder="Subject ফিল্টার"
+          placeholder="Filter by subject"
           className="h-11 rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
         />
         <input
           type="text"
           value={classFilter}
           onChange={(e) => setClassFilter(e.target.value)}
-          placeholder="Class ফিল্টার"
+          placeholder="Filter by class"
           className="h-11 rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
         />
         <div className="grid grid-cols-2 gap-2">
@@ -400,8 +400,8 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
             onChange={(e) => setMediumFilter(e.target.value as "all" | ExamMedium)}
             className="h-11 rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm sm:text-xs"
           >
-            <option value="all">সব মাধ্যম</option>
-            <option value="bn">বাংলা</option>
+            <option value="all">All Media</option>
+            <option value="bn">Bangla</option>
             <option value="en">English</option>
           </select>
           <select
@@ -409,8 +409,8 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
             onChange={(e) => setScope(e.target.value as "all" | "mine" | "shared")}
             className="h-11 rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm sm:text-xs"
           >
-            <option value="all">সব</option>
-            <option value="mine">আমারগুলো</option>
+            <option value="all">All</option>
+            <option value="mine">Mine</option>
             <option value="shared">Shared</option>
           </select>
         </div>
