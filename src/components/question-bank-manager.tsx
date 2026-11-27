@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { ConfirmModal } from "@/components/confirm-modal";
 import { MathText } from "@/components/math-text";
 import { createClient } from "@/lib/supabase/client";
 import type { ExamMedium, QuestionBankItem } from "@/lib/types";
@@ -46,6 +47,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
   const [visibility, setVisibility] = useState<"private" | "shared">("private");
 
   const [busy, setBusy] = useState(false);
+  const [pendingDeleteItem, setPendingDeleteItem] = useState<QuestionBankItem | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -175,12 +177,20 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
   }
 
   async function handleDelete(item: QuestionBankItem) {
-    if (item.teacher_id !== teacherId) return;
-    if (!window.confirm("Delete this question from your bank?")) return;
+    if (item.teacher_id !== teacherId) {
+      setPendingDeleteItem(null);
+      return;
+    }
 
     const supabase = createClient();
-    if (!supabase) return;
+    if (!supabase) {
+      setPendingDeleteItem(null);
+      return;
+    }
+    setBusy(true);
     const { error: err } = await supabase.from("question_bank").delete().eq("id", item.id);
+    setBusy(false);
+    setPendingDeleteItem(null);
     if (!err) {
       setItems((prev) => prev.filter((it) => it.id !== item.id));
     }
@@ -472,9 +482,10 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleDelete(item)}
+                          disabled={busy}
+                          onClick={() => setPendingDeleteItem(item)}
                           title="Delete"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-rose-600 hover:bg-rose-50 cursor-pointer"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-rose-600 hover:bg-rose-50 disabled:opacity-50 cursor-pointer"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -511,6 +522,18 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
           })
         )}
       </div>
+
+      <ConfirmModal
+        open={pendingDeleteItem !== null}
+        title="Delete Question?"
+        message="Delete this question from your bank?"
+        confirmLabel="Delete"
+        busy={busy}
+        onCancel={() => setPendingDeleteItem(null)}
+        onConfirm={() => {
+          if (pendingDeleteItem) void handleDelete(pendingDeleteItem);
+        }}
+      />
     </div>
   );
 }

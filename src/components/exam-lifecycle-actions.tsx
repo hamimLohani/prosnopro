@@ -3,6 +3,7 @@
 import { CopyPlus, Loader2, Lock, Rocket, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ConfirmModal } from "@/components/confirm-modal";
 import { createClient } from "@/lib/supabase/client";
 import type { ExamStatus } from "@/lib/types";
 import { generateExamCode } from "@/lib/validation";
@@ -22,6 +23,7 @@ export function ExamLifecycleActions({
 }: ExamLifecycleActionsProps) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handlePublish() {
@@ -84,17 +86,18 @@ export function ExamLifecycleActions({
   }
 
   async function handleDelete() {
-    if (!window.confirm("Delete this exam and all its questions and attempts? This cannot be undone.")) {
-      return;
-    }
     setError(null);
     const supabase = createClient();
-    if (!supabase) return;
+    if (!supabase) {
+      setConfirmDeleteOpen(false);
+      return;
+    }
 
     setBusy("delete");
     const { error: err } = await supabase.from("exams").delete().eq("id", examId);
 
     setBusy(null);
+    setConfirmDeleteOpen(false);
     if (err) {
       setError(err.message);
       return;
@@ -161,7 +164,7 @@ export function ExamLifecycleActions({
         <button
           type="button"
           disabled={busy !== null}
-          onClick={handleDelete}
+          onClick={() => setConfirmDeleteOpen(true)}
           className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-white px-3.5 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-50 cursor-pointer"
         >
           {busy === "delete" ? (
@@ -172,6 +175,16 @@ export function ExamLifecycleActions({
           <span>Delete</span>
         </button>
       </div>
+
+      <ConfirmModal
+        open={confirmDeleteOpen}
+        title="Delete Exam?"
+        message="Delete this exam and all its questions and attempts? This cannot be undone."
+        confirmLabel="Delete Exam"
+        busy={busy === "delete"}
+        onCancel={() => setConfirmDeleteOpen(false)}
+        onConfirm={() => void handleDelete()}
+      />
     </div>
   );
 }

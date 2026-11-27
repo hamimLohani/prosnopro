@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ConfirmModal } from "@/components/confirm-modal";
 import { TeacherCodeInput } from "@/components/teacher-code-input";
 import { PROVIDER_CATALOG, type AiProviderId } from "@/lib/ai/providers";
 import { createClient } from "@/lib/supabase/client";
@@ -57,6 +58,7 @@ export function TeacherSettingsForm({
   const [hasKey, setHasKey] = useState(initialHasKey);
   const [keyHint, setKeyHint] = useState<string | null>(initialKeyHint);
   const [aiBusy, setAiBusy] = useState<"save" | "test" | "remove" | null>(null);
+  const [confirmRemoveKeyOpen, setConfirmRemoveKeyOpen] = useState(false);
   const [aiStatus, setAiStatus] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
 
@@ -214,9 +216,6 @@ export function TeacherSettingsForm({
   }
 
   async function handleRemoveKey() {
-    if (!window.confirm("Remove your saved AI API key? Manual entry and Question Bank still work.")) {
-      return;
-    }
     setAiStatus(null);
     setAiError(null);
     setAiBusy("remove");
@@ -236,6 +235,7 @@ export function TeacherSettingsForm({
       setAiError("Network error while removing key.");
     } finally {
       setAiBusy(null);
+      setConfirmRemoveKeyOpen(false);
     }
   }
 
@@ -476,7 +476,7 @@ export function TeacherSettingsForm({
               <button
                 type="button"
                 disabled={!serverEncryptionReady || aiBusy !== null}
-                onClick={handleRemoveKey}
+                onClick={() => setConfirmRemoveKeyOpen(true)}
                 className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-50 cursor-pointer"
               >
                 {aiBusy === "remove" ? (
@@ -490,6 +490,16 @@ export function TeacherSettingsForm({
           )}
         </div>
       </form>
+
+      <ConfirmModal
+        open={confirmRemoveKeyOpen}
+        title="Remove AI API Key?"
+        message="Remove your saved AI API key? Manual entry and Question Bank still work."
+        confirmLabel="Remove Key"
+        busy={aiBusy === "remove"}
+        onCancel={() => setConfirmRemoveKeyOpen(false)}
+        onConfirm={() => void handleRemoveKey()}
+      />
     </div>
   );
 }

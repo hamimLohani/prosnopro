@@ -19,6 +19,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { ConfirmModal } from "@/components/confirm-modal";
 import { MathText } from "@/components/math-text";
 import type { DraftMcqQuestion } from "@/lib/ai/schema";
 import { createClient } from "@/lib/supabase/client";
@@ -92,6 +93,7 @@ export function TeacherQuestionEditor({
   const [savingDrafts, setSavingDrafts] = useState(false);
 
   const [busy, setBusy] = useState(false);
+  const [pendingDeleteQuestion, setPendingDeleteQuestion] = useState<Question | null>(null);
   const [regrading, setRegrading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -567,15 +569,18 @@ export function TeacherQuestionEditor({
 
   async function handleDelete(q: Question) {
     if (hasAttempts) return;
-    if (!window.confirm("Remove this question from the exam?")) return;
 
     const supabase = createClient();
-    if (!supabase) return;
+    if (!supabase) {
+      setPendingDeleteQuestion(null);
+      return;
+    }
 
     setBusy(true);
     setError(null);
     const { error: delErr } = await supabase.from("questions").delete().eq("id", q.id);
     setBusy(false);
+    setPendingDeleteQuestion(null);
 
     if (delErr) {
       setError(delErr.message);
@@ -1530,7 +1535,7 @@ export function TeacherQuestionEditor({
                         <button
                           type="button"
                           disabled={busy}
-                          onClick={() => handleDelete(q)}
+                          onClick={() => setPendingDeleteQuestion(q)}
                           title="Delete"
                           className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-rose-600 hover:bg-rose-50 cursor-pointer"
                         >
@@ -1579,6 +1584,18 @@ export function TeacherQuestionEditor({
           </div>
         )}
       </section>
+
+      <ConfirmModal
+        open={pendingDeleteQuestion !== null}
+        title="Remove Question?"
+        message="Remove this question from the exam?"
+        confirmLabel="Remove"
+        busy={busy}
+        onCancel={() => setPendingDeleteQuestion(null)}
+        onConfirm={() => {
+          if (pendingDeleteQuestion) void handleDelete(pendingDeleteQuestion);
+        }}
+      />
     </div>
   );
 }
