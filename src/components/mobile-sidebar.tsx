@@ -5,6 +5,7 @@ import {
   ClipboardList,
   GraduationCap,
   Home,
+  Info,
   LayoutDashboard,
   LogIn,
   Menu,
@@ -232,7 +233,19 @@ export function MobileSidebar({
                 })}
               </nav>
 
-              <div className="shrink-0 border-t border-slate-200 bg-white px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] space-y-2.5">
+              <div className="shrink-0 border-t border-slate-200 bg-white px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] space-y-2">
+                <Link
+                  href="/about"
+                  onClick={() => setOpenForPath(null)}
+                  className={`flex min-h-[40px] items-center gap-2.5 rounded-xl px-3.5 py-2 text-xs font-medium transition ${
+                    pathname === "/about"
+                      ? "bg-navy font-semibold text-white"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  }`}
+                >
+                  <Info className="h-4 w-4 shrink-0" />
+                  <span>ProsnoPro সম্পর্কে (About)</span>
+                </Link>
                 <Link
                   href="/privacy"
                   onClick={() => setOpenForPath(null)}
