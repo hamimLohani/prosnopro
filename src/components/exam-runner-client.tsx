@@ -723,7 +723,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
 
         {/* Main Content + Desktop Navigator */}
         <div className="mx-auto grid max-w-5xl gap-5 px-3 py-4 sm:gap-6 sm:px-4 sm:py-6 lg:grid-cols-[1fr_240px]">
-          <div className="space-y-3.5 sm:space-y-4">
+          <div className="min-w-0 space-y-3.5 sm:space-y-4">
             {questions.map((q, idx) => {
               const selected = answers[q.id];
               const isQuestionAnswered = typeof selected === "number";
@@ -736,7 +736,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                   }`}
                 >
                   <div className="flex items-baseline justify-between gap-3">
-                    <p className="text-[15px] font-semibold leading-relaxed text-slate-900 break-words sm:text-base">
+                    <p className="min-w-0 flex-1 text-[15px] font-semibold leading-relaxed text-slate-900 break-words sm:text-base">
                       <span className="mr-1.5 text-navy">{idx + 1}.</span>
                       <MathText text={q.text} />
                     </p>

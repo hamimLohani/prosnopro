@@ -31,12 +31,15 @@ export function NavLink({ href, exact = false, className = "", children }: NavLi
   const isActive = exact
     ? pathname === href
     : pathname === href || pathname.startsWith(`${href}/`);
+  const defaultDisplay = /\b(hidden|block|inline-block|flex|inline-flex|grid)\b/.test(className)
+    ? ""
+    : "inline-flex ";
 
   return (
     <Link
       href={href}
       prefetch={true}
-      className={`inline-flex min-h-[38px] items-center rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+      className={`${defaultDisplay}min-h-[38px] items-center rounded-lg px-2.5 sm:px-3 py-1.5 text-sm font-medium transition ${
         isActive
           ? "bg-slate-100 font-semibold text-navy"
           : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"

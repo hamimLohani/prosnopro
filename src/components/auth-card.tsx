@@ -174,9 +174,9 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
   }
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-      <div className="mb-6 space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-navy">
+    <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+      <div className="mb-5 sm:mb-6 space-y-1">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-navy">
           {isLogin
             ? "Welcome back"
             : role === "teacher"

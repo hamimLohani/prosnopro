@@ -90,9 +90,9 @@ export function OnboardingForm({
   }
 
   return (
-    <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-      <div className="mb-6 space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-navy">Finish setting up your account</h1>
+    <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+      <div className="mb-5 sm:mb-6 space-y-1">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-navy">Finish setting up your account</h1>
         <p className="text-sm text-slate-600">
           {email ? (
             <>

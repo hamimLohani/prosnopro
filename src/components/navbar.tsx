@@ -15,10 +15,10 @@ export function Navbar({ ctx }: NavbarProps) {
 
   return (
     <header className="no-print sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex h-14 sm:h-16 max-w-5xl items-center justify-between gap-3 px-3 sm:px-4">
+      <div className="mx-auto flex min-h-14 sm:min-h-16 max-w-5xl items-center justify-between gap-2.5 sm:gap-4 px-3 py-1.5 sm:px-4 sm:py-0">
         <BrandMark href={ctx?.userId ? dashboardHref : "/"} />
 
-        <nav className="flex items-center gap-1.5 sm:gap-2">
+        <nav className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <NavLink href="/tools/bangla-spike" className="hidden sm:inline-flex">
             Bangla PDF Spike
           </NavLink>
@@ -60,13 +60,13 @@ export function Navbar({ ctx }: NavbarProps) {
             <>
               <Link
                 href="/login"
-                className="inline-flex min-h-[38px] items-center rounded-lg px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-100 whitespace-nowrap"
+                className="inline-flex min-h-[38px] items-center rounded-lg px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-100 whitespace-nowrap"
               >
                 Sign in
               </Link>
               <Link
                 href="/signup"
-                className="inline-flex min-h-[38px] items-center rounded-lg bg-navy px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-navy-strong whitespace-nowrap"
+                className="inline-flex min-h-[38px] items-center rounded-lg bg-navy px-3 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-navy-strong whitespace-nowrap"
               >
                 Get started
               </Link>
