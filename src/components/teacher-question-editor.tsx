@@ -1091,10 +1091,94 @@ export function TeacherQuestionEditor({
                       </div>
                     </div>
 
-                    <div className="space-y-1.5">
-                      <label htmlFor="ai-notes" className="block text-sm font-medium text-slate-700">
-                        Chapter, syllabus, or extra notes
-                      </label>
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <label htmlFor="ai-notes" className="block text-sm font-medium text-slate-700">
+                          Chapter, syllabus, or extra notes
+                        </label>
+                        <span className="text-[11px] font-medium text-slate-400">
+                          Tap a sample prompt to auto-fill:
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1.5">
+                        {(exam.medium === "bn"
+                          ? [
+                              {
+                                label: "Physics (গতিসূত্র ও গাণিতিক)",
+                                classLevel: "HSC / Class 11–12",
+                                subject: "পদার্থবিজ্ঞান",
+                                notes:
+                                  "নিউটনের গতিসূত্র, কাজ-শক্তি-ক্ষমতা ও মহাকর্ষ অধ্যায় থেকে বোর্ড পরীক্ষার মানের গাণিতিক ও তাত্ত্বিক MCQ তৈরি করুন (প্রয়োজনে $...$ সূত্রসহ)।",
+                              },
+                              {
+                                label: "Chemistry (মোল ও পর্যায় সারণি)",
+                                classLevel: "SSC / Class 9–10",
+                                subject: "রসায়ন",
+                                notes:
+                                  "মোল ও রাসায়নিক গণনা, পর্যায় সারণি এবং রাসায়নিক বন্ধন থেকে ধারণাগত ও প্রয়োগমূলক MCQ তৈরি করুন।",
+                              },
+                              {
+                                label: "Higher Math (অন্তরীকরণ ও ম্যাট্রিক্স)",
+                                classLevel: "HSC",
+                                subject: "উচ্চতর গণিত",
+                                notes:
+                                  "অন্তরীকরণ, যোগজীকরণ ও ম্যাট্রিক্স-নির্ণায়ক থেকে মাঝারি ও কঠিন মানের $...$ সূত্রযুক্ত MCQ তৈরি করুন।",
+                              },
+                              {
+                                label: "ICT (সংখ্যা পদ্ধতি ও লজিক গেট)",
+                                classLevel: "HSC",
+                                subject: "তথ্য ও যোগাযোগ প্রযুক্তি",
+                                notes:
+                                  "সংখ্যা পদ্ধতি (বাইনারি-হেক্সাডেসিমেল রূপান্তর), লজিক গেট ও HTML ট্যাগ থেকে বোর্ড মানের MCQ তৈরি করুন।",
+                              },
+                            ]
+                          : [
+                              {
+                                label: "Physics (Kinematics & Forces)",
+                                classLevel: "HSC / Grade 11–12",
+                                subject: "Physics",
+                                notes:
+                                  "Create conceptual and numerical MCQs on Kinematics, Newton's Laws, and Work-Energy using $...$ LaTeX formulas where appropriate.",
+                              },
+                              {
+                                label: "Chemistry (Periodic Table & Moles)",
+                                classLevel: "SSC / Grade 9–10",
+                                subject: "Chemistry",
+                                notes:
+                                  "Create MCQs on Atomic Structure, Periodic Table trends, and Mole Concept calculations with brief explanations.",
+                              },
+                              {
+                                label: "Mathematics (Algebra & Trig)",
+                                classLevel: "Grade 10–12",
+                                subject: "Mathematics",
+                                notes:
+                                  "Generate mixed-difficulty MCQs on Quadratic Equations, Trigonometry, and Probability using inline $...$ notation.",
+                              },
+                              {
+                                label: "English Grammar & Usage",
+                                classLevel: "HSC / Admission",
+                                subject: "English",
+                                notes:
+                                  "Generate MCQs on Right Form of Verbs, Prepositions, Clauses, and Synonyms/Antonyms with clear grammar explanations.",
+                              },
+                            ]
+                        ).map((sample) => (
+                          <button
+                            key={sample.label}
+                            type="button"
+                            onClick={() => {
+                              setAiClassLevel(sample.classLevel);
+                              setAiSubject(sample.subject);
+                              setAiNotes(sample.notes);
+                            }}
+                            className="inline-flex min-h-[34px] items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700 hover:border-navy hover:bg-navy/5 hover:text-navy active:scale-95 transition cursor-pointer"
+                          >
+                            {sample.label}
+                          </button>
+                        ))}
+                      </div>
+
                       <textarea
                         id="ai-notes"
                         rows={3}
