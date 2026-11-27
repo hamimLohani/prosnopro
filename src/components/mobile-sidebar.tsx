@@ -3,7 +3,6 @@
 import {
   BookOpen,
   ClipboardList,
-  FileSpreadsheet,
   GraduationCap,
   Home,
   LayoutDashboard,
@@ -91,11 +90,6 @@ export function MobileSidebar({
         label: "Settings & AI Key",
         icon: <Settings className="h-4 w-4 shrink-0" />,
       },
-      {
-        href: "/tools/bangla-spike",
-        label: "Bangla PDF Spike",
-        icon: <FileSpreadsheet className="h-4 w-4 shrink-0" />,
-      },
     );
   } else if (userId && role === "student") {
     links.push(
@@ -114,11 +108,6 @@ export function MobileSidebar({
         href: "/student/practice",
         label: "Practice Search",
         icon: <Search className="h-4 w-4 shrink-0" />,
-      },
-      {
-        href: "/tools/bangla-spike",
-        label: "Bangla PDF Spike",
-        icon: <FileSpreadsheet className="h-4 w-4 shrink-0" />,
       },
     );
   } else if (userId) {
@@ -149,11 +138,6 @@ export function MobileSidebar({
         href: "/signup/teacher",
         label: "Create Teacher Account",
         icon: <ShieldCheck className="h-4 w-4 shrink-0" />,
-      },
-      {
-        href: "/tools/bangla-spike",
-        label: "Bangla PDF Spike",
-        icon: <FileSpreadsheet className="h-4 w-4 shrink-0" />,
       },
     );
   }

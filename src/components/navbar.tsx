@@ -20,10 +20,6 @@ export function Navbar({ ctx }: NavbarProps) {
         <BrandMark href={ctx?.userId ? dashboardHref : "/"} />
 
         <nav className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-          <NavLink href="/tools/bangla-spike" className="hidden sm:inline-flex">
-            Bangla PDF Spike
-          </NavLink>
-
           {ctx?.userId ? (
             <>
               <NavLink

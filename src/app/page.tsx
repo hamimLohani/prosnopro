@@ -1,14 +1,4 @@
-import {
-  ArrowRight,
-  BookOpen,
-  CheckCircle2,
-  Clock,
-  FileText,
-  GraduationCap,
-  ShieldCheck,
-  Sparkles,
-  Wifi,
-} from "lucide-react";
+import { ArrowRight, GraduationCap, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { Navbar } from "@/components/navbar";
 import { getCurrentUserContext } from "@/lib/supabase/server";
@@ -28,25 +18,22 @@ export default async function HomePage() {
 
       <main className="flex-1">
         <section className="border-b border-slate-200 bg-white">
-          <div className="mx-auto max-w-5xl px-4 py-10 sm:py-20">
-            <div className="max-w-2xl space-y-5">
+          <div className="mx-auto max-w-4xl px-4 py-10 sm:py-16">
+            <div className="max-w-xl space-y-4">
               <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900">
-                <span>বাংলা &amp; English MCQ Platform</span>
-                <span className="text-amber-500">•</span>
-                <span>Zero-Cost Edition</span>
+                <span>বাংলা &amp; English MCQ Exams</span>
               </div>
 
-              <h1 className="text-2xl font-extrabold tracking-tight text-navy sm:text-5xl">
-                Fair, fast online exams that work even on weak mobile networks.
+              <h1 className="text-2xl font-extrabold tracking-tight text-navy sm:text-4xl">
+                Simple, fast online exams made for mobile phones.
               </h1>
 
-              <p className="text-base leading-relaxed text-slate-600 sm:text-lg">
-                Teachers publish timed exams with one Teacher Code and Exam Code. Students join in
-                seconds, keep answers backed up offline if 3G drops, and practice with past
-                questions.
+              <p className="text-sm leading-relaxed text-slate-600 sm:text-base">
+                Teachers publish timed exams with one code. Students join in seconds, keep answers
+                saved offline if the network drops, and check results anytime.
               </p>
 
-              <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 pt-2">
                 {ctx.userId ? (
                   <Link
                     href={dashboardHref}
@@ -72,107 +59,55 @@ export default async function HomePage() {
                     </Link>
                   </>
                 )}
-
-                <Link
-                  href="/tools/bangla-spike"
-                  className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-4 py-3 text-sm font-medium text-slate-600 hover:bg-slate-100"
-                >
-                  <FileText className="h-4 w-4" />
-                  <span>Bangla Print &amp; PDF Spike</span>
-                </Link>
               </div>
+
+              {!ctx.userId && (
+                <p className="text-xs text-slate-500 pt-1">
+                  Already registered?{" "}
+                  <Link href="/login" className="font-semibold text-navy hover:underline">
+                    Sign in here
+                  </Link>
+                </p>
+              )}
             </div>
           </div>
         </section>
 
-        <section className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
-          <div className="grid gap-3.5 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <div className="mb-3 inline-flex rounded-lg bg-navy/10 p-2.5 text-navy">
-                <Wifi className="h-5 w-5" />
-              </div>
-              <h2 className="font-bold text-slate-900">Weak-network resilient</h2>
-              <p className="mt-1 text-sm text-slate-600">
-                Lightweight exam screens save every tap locally and sync batched drafts so short
-                dropouts never lose answers.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <div className="mb-3 inline-flex rounded-lg bg-amber-100 p-2.5 text-amber-700">
-                <Clock className="h-5 w-5" />
-              </div>
-              <h2 className="font-bold text-slate-900">Server-enforced timing</h2>
-              <p className="mt-1 text-sm text-slate-600">
-                Server deadlines, per-student shuffled questions/options, negative marking, and
-                automatic submit on expiry.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <div className="mb-3 inline-flex rounded-lg bg-emerald-100 p-2.5 text-emerald-700">
-                <ShieldCheck className="h-5 w-5" />
-              </div>
-              <h2 className="font-bold text-slate-900">Standard exam protection</h2>
-              <p className="mt-1 text-sm text-slate-600">
-                Copy/print block, faint student-roll watermark, second-device takeover alerts, and
-                server-only answer keys.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <div className="mb-3 inline-flex rounded-lg bg-navy/10 p-2.5 text-navy">
-                <Sparkles className="h-5 w-5" />
-              </div>
-              <h2 className="font-bold text-slate-900">BYOK AI &amp; PDF draft import</h2>
-              <p className="mt-1 text-sm text-slate-600">
-                Bring your own free Gemini or Groq key. Browser-side PDF processing keeps storage
-                at zero bytes.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <div className="mb-3 inline-flex rounded-lg bg-amber-100 p-2.5 text-amber-700">
-                <BookOpen className="h-5 w-5" />
-              </div>
-              <h2 className="font-bold text-slate-900">Question bank &amp; practice</h2>
-              <p className="mt-1 text-sm text-slate-600">
-                Reuse shared questions safely—active exam questions stay hidden from student search
-                until exams close.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <div className="mb-3 inline-flex rounded-lg bg-emerald-100 p-2.5 text-emerald-700">
+        <section className="mx-auto max-w-4xl px-4 py-8 sm:py-12">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-2.5">
+              <div className="inline-flex rounded-lg bg-amber-100 p-2 text-amber-700">
                 <GraduationCap className="h-5 w-5" />
               </div>
-              <h2 className="font-bold text-slate-900">Crisp Bangla exports</h2>
-              <p className="mt-1 text-sm text-slate-600">
-                Print-ready Bangla question papers and answer keys, UTF-8 BOM Excel CSVs, and Word
-                exports directly from your browser.
-              </p>
+              <h2 className="text-base font-bold text-slate-900">For Students</h2>
+              <ol className="list-decimal pl-4 space-y-1 text-sm text-slate-600">
+                <li>Sign in once with Google or email.</li>
+                <li>Enter the Teacher Code and Exam Code.</li>
+                <li>Tap answers — saved offline even on weak 3G/4G.</li>
+              </ol>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-2.5">
+              <div className="inline-flex rounded-lg bg-navy/10 p-2 text-navy">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <h2 className="text-base font-bold text-slate-900">For Teachers</h2>
+              <ol className="list-decimal pl-4 space-y-1 text-sm text-slate-600">
+                <li>Create an exam and add questions (manual, AI, or PDF).</li>
+                <li>Publish and share your Teacher Code + Exam Code.</li>
+                <li>Monitor live entries and export results in Excel, CSV, or Word.</li>
+              </ol>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-slate-200 bg-white py-6 text-xs text-slate-500">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4">
-          <span className="inline-flex items-center gap-1.5">
-            <CheckCircle2 className="h-3.5 w-3.5 text-amber" />
-            ProsnoPro — Step 1 Foundation (Auth, Onboarding &amp; Bangla Spike)
-          </span>
-          <div className="flex items-center gap-4">
-            <Link href="/privacy" className="hover:text-slate-800">
-              Privacy Notice
-            </Link>
-            <Link href="/api/health" className="hover:text-slate-800">
-              Health Status
-            </Link>
-            <Link href="/tools/bangla-spike" className="hover:text-slate-800">
-              Bangla PDF Spike
-            </Link>
-          </div>
+      <footer className="border-t border-slate-200 bg-white py-5 text-xs text-slate-500">
+        <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4">
+          <span>ProsnoPro • Online Exam Platform</span>
+          <Link href="/privacy" className="hover:text-slate-800">
+            Privacy Notice
+          </Link>
         </div>
       </footer>
     </div>

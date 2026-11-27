@@ -85,35 +85,47 @@ export function StudentJoinForm() {
           </div>
         )}
 
-        <form onSubmit={handleJoin} className="grid gap-3 sm:grid-cols-3">
-          <input
-            type="text"
-            required
-            maxLength={12}
-            autoCapitalize="characters"
-            autoCorrect="off"
-            autoComplete="off"
-            spellCheck={false}
-            enterKeyHint="next"
-            value={teacherCode}
-            onChange={(e) => setTeacherCode(normalizeTeacherCode(e.target.value))}
-            placeholder="Teacher Code (e.g. RAHIM26)"
-            className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-base sm:text-sm uppercase tracking-wider text-slate-900 placeholder:normal-case placeholder:tracking-normal focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-          />
-          <input
-            type="text"
-            required
-            maxLength={16}
-            autoCapitalize="characters"
-            autoCorrect="off"
-            autoComplete="off"
-            spellCheck={false}
-            enterKeyHint="go"
-            value={examCode}
-            onChange={(e) => setExamCode(normalizeExamCode(e.target.value))}
-            placeholder="Exam Code (e.g. PHY01)"
-            className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-base sm:text-sm uppercase tracking-wider text-slate-900 placeholder:normal-case placeholder:tracking-normal focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-          />
+        <form onSubmit={handleJoin} className="grid gap-3 sm:grid-cols-3 sm:items-end">
+          <div className="space-y-1">
+            <label htmlFor="join-teacher-code" className="block text-xs font-semibold text-slate-700">
+              Teacher Code
+            </label>
+            <input
+              id="join-teacher-code"
+              type="text"
+              required
+              maxLength={12}
+              autoCapitalize="characters"
+              autoCorrect="off"
+              autoComplete="off"
+              spellCheck={false}
+              enterKeyHint="next"
+              value={teacherCode}
+              onChange={(e) => setTeacherCode(normalizeTeacherCode(e.target.value))}
+              placeholder="e.g. RAHIM26"
+              className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-base sm:text-sm uppercase tracking-wider text-slate-900 placeholder:normal-case placeholder:tracking-normal focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+            />
+          </div>
+          <div className="space-y-1">
+            <label htmlFor="join-exam-code" className="block text-xs font-semibold text-slate-700">
+              Exam Code
+            </label>
+            <input
+              id="join-exam-code"
+              type="text"
+              required
+              maxLength={16}
+              autoCapitalize="characters"
+              autoCorrect="off"
+              autoComplete="off"
+              spellCheck={false}
+              enterKeyHint="go"
+              value={examCode}
+              onChange={(e) => setExamCode(normalizeExamCode(e.target.value))}
+              placeholder="e.g. PHY01"
+              className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-base sm:text-sm uppercase tracking-wider text-slate-900 placeholder:normal-case placeholder:tracking-normal focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+            />
+          </div>
           <button
             type="submit"
             disabled={loading}

@@ -84,18 +84,26 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
           </Link>
         </div>
 
-        {/* Share Codes Banner */}
+        {/* Guided Next-Step & Join Codes Banner */}
         <section className="rounded-2xl bg-navy p-4 sm:p-6 text-white flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <p className="text-xs font-semibold uppercase tracking-wider text-amber">
-              Student Join Codes
+              {exam.status === "published"
+                ? "Live • Share Join Codes"
+                : exam.status === "draft"
+                  ? exam.question_count === 0
+                    ? "Step 1 • Add Questions"
+                    : "Step 2 • Ready to Publish"
+                  : "Closed Exam"}
             </p>
             <p className="text-sm text-slate-200">
               {exam.status === "published"
-                ? "Exam is live. Share both codes with your students:"
+                ? "Exam is live. Share both codes with students:"
                 : exam.status === "draft"
-                  ? "Publish this exam after reviewing questions so students can join with:"
-                  : "Exam is closed to new entries."}
+                  ? exam.question_count === 0
+                    ? "Add at least one question before publishing this exam."
+                    : "Preview your questions or publish below so students can join."
+                  : "Exam is closed to new entries. Check results or export below."}
             </p>
           </div>
 
@@ -133,14 +141,7 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
               className="inline-flex min-h-[44px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               <Eye className="h-4 w-4 shrink-0" />
-              <span>Review</span>
-            </Link>
-            <Link
-              href={`/teacher/exams/${exam.id}/edit`}
-              className="inline-flex min-h-[44px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
-            >
-              <Settings2 className="h-4 w-4 shrink-0" />
-              <span>Settings</span>
+              <span>Preview</span>
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}/monitor`}
@@ -154,14 +155,24 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
               className="inline-flex min-h-[44px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               <BarChart3 className="h-4 w-4 shrink-0 text-navy" />
-              <span>Results</span>
+              <span>Results &amp; Export</span>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+            <Link
+              href={`/teacher/exams/${exam.id}/edit`}
+              className="inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+            >
+              <Settings2 className="h-3.5 w-3.5 shrink-0" />
+              <span>Exam Settings</span>
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}/print?mode=paper`}
-              className="inline-flex min-h-[44px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
             >
-              <Printer className="h-4 w-4 shrink-0 text-slate-600" />
-              <span>Print PDF</span>
+              <Printer className="h-3.5 w-3.5 shrink-0 text-slate-600" />
+              <span>Print Paper</span>
             </Link>
           </div>
 

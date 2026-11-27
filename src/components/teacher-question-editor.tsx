@@ -56,6 +56,7 @@ export function TeacherQuestionEditor({
 
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [activeTab, setActiveTab] = useState<SourceTab>("manual");
+  const [composerOpen, setComposerOpen] = useState(initialQuestions.length === 0);
 
   // Question Bank import state
   const [bankKeyword, setBankKeyword] = useState("");
@@ -699,58 +700,138 @@ export function TeacherQuestionEditor({
         </div>
       )}
 
+      {/* Collapsible Add Question Launcher when questions already exist */}
+      {!hasAttempts && !editingId && !composerOpen && (
+        <section className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              Add More Questions
+            </span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("manual");
+                setComposerOpen(true);
+              }}
+              className="inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl bg-navy px-3 py-2 text-xs font-semibold text-white hover:bg-navy-strong cursor-pointer"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>Manual</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("bank");
+                setComposerOpen(true);
+              }}
+              className="inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+            >
+              <BookOpen className="h-3.5 w-3.5 text-emerald-700" />
+              <span>Bank</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("ai");
+                setComposerOpen(true);
+              }}
+              className="inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-amber" />
+              <span>With AI</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("pdf");
+                setComposerOpen(true);
+              }}
+              className="inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+            >
+              <FileUp className="h-3.5 w-3.5 text-navy" />
+              <span>PDF Import</span>
+            </button>
+          </div>
+        </section>
+      )}
+
       {/* Source Tabs + Forms */}
-      {(!hasAttempts || editingId) && (
+      {((!hasAttempts && composerOpen) || editingId) && (
         <section className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           {!editingId && (
-            <div className="grid grid-cols-2 sm:flex border-b border-slate-200 bg-slate-50 p-2 sm:px-4 sm:pt-3 sm:pb-0 gap-1.5 sm:gap-1">
-              <button
-                type="button"
-                onClick={() => setActiveTab("manual")}
-                className={`inline-flex min-h-[42px] items-center justify-center rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
-                  activeTab === "manual"
-                    ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                Manual
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("bank")}
-                className={`inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
-                  activeTab === "bank"
-                    ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                <BookOpen className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
-                <span>Question Bank</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("ai")}
-                className={`inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
-                  activeTab === "ai"
-                    ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                <Sparkles className="h-3.5 w-3.5 text-amber shrink-0" />
-                <span>With AI</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("pdf")}
-                className={`inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
-                  activeTab === "pdf"
-                    ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                <FileUp className="h-3.5 w-3.5 text-navy shrink-0" />
-                <span>PDF Import</span>
-              </button>
+            <div className="border-b border-slate-200 bg-slate-50 p-2 sm:px-4 sm:pt-3 sm:pb-0 space-y-2 sm:space-y-0">
+              {questions.length > 0 && (
+                <div className="flex items-center justify-between px-1 sm:hidden">
+                  <span className="text-xs font-semibold text-slate-500">Add Questions</span>
+                  <button
+                    type="button"
+                    onClick={() => setComposerOpen(false)}
+                    className="text-xs font-semibold text-navy hover:underline cursor-pointer"
+                  >
+                    Hide form
+                  </button>
+                </div>
+              )}
+              <div className="grid grid-cols-2 sm:flex items-center gap-1.5 sm:gap-1">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("manual")}
+                  className={`inline-flex min-h-[42px] items-center justify-center rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
+                    activeTab === "manual"
+                      ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  Manual
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("bank")}
+                  className={`inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
+                    activeTab === "bank"
+                      ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  <BookOpen className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
+                  <span>Question Bank</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("ai")}
+                  className={`inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
+                    activeTab === "ai"
+                      ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  <Sparkles className="h-3.5 w-3.5 text-amber shrink-0" />
+                  <span>With AI</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("pdf")}
+                  className={`inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
+                    activeTab === "pdf"
+                      ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  <FileUp className="h-3.5 w-3.5 text-navy shrink-0" />
+                  <span>PDF Import</span>
+                </button>
+                {questions.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setComposerOpen(false)}
+                    className="hidden sm:inline-flex ml-auto px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 cursor-pointer"
+                  >
+                    Hide form
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
