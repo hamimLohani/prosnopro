@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { MathText } from "@/components/math-text";
+import { CLASS_OPTIONS, SUBJECT_OPTIONS } from "@/lib/academic-options";
 import type { DraftMcqQuestion } from "@/lib/ai/schema";
 import { parseBulkMcqText } from "@/lib/bulk-mcq";
 import { createClient } from "@/lib/supabase/client";
@@ -1228,28 +1229,44 @@ export function TeacherQuestionEditor({
                         <label htmlFor="ai-class" className="block text-sm font-medium text-slate-700">
                           Class / শ্রেণি
                         </label>
-                        <input
+                        <select
                           id="ai-class"
-                          type="text"
                           value={aiClassLevel}
                           onChange={(e) => setAiClassLevel(e.target.value)}
-                          placeholder="যেমন: Class 9–10 / HSC"
-                          className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-                        />
+                          className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+                        >
+                          <option value="">Class নির্বাচন করুন</option>
+                          {aiClassLevel && !CLASS_OPTIONS.some((o) => o.value === aiClassLevel) && (
+                            <option value={aiClassLevel}>{aiClassLevel}</option>
+                          )}
+                          {CLASS_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
                       <div className="space-y-1.5">
                         <label htmlFor="ai-subj" className="block text-sm font-medium text-slate-700">
                           Subject (বিষয়)
                         </label>
-                        <input
+                        <select
                           id="ai-subj"
-                          type="text"
                           value={aiSubject}
                           onChange={(e) => setAiSubject(e.target.value)}
-                          placeholder="যেমন: পদার্থবিজ্ঞান"
-                          className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-                        />
+                          className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+                        >
+                          <option value="">বিষয় নির্বাচন করুন</option>
+                          {aiSubject && !SUBJECT_OPTIONS.some((o) => o.value === aiSubject) && (
+                            <option value={aiSubject}>{aiSubject}</option>
+                          )}
+                          {SUBJECT_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
                       <div className="space-y-1.5">

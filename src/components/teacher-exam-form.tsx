@@ -4,6 +4,7 @@ import { BookOpen, ChevronDown, ChevronUp, Loader2, Lock, RefreshCw, Search } fr
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { CLASS_OPTIONS, SUBJECT_OPTIONS } from "@/lib/academic-options";
 import { createClient } from "@/lib/supabase/client";
 import type { Exam, ExamMedium, QuestionBankItem, ResultReleaseMode } from "@/lib/types";
 import { generateExamCode, isValidExamCode, normalizeExamCode } from "@/lib/validation";
@@ -287,42 +288,45 @@ export function TeacherExamForm({
             <label htmlFor="exam-subject" className="block text-sm font-medium text-slate-700">
               Subject (বিষয়)
             </label>
-            <input
+            <select
               id="exam-subject"
-              type="text"
-              maxLength={100}
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              placeholder="যেমন: পদার্থবিজ্ঞান / Physics"
-              className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-            />
+              className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+            >
+              <option value="">বিষয় নির্বাচন করুন</option>
+              {subject && !SUBJECT_OPTIONS.some((o) => o.value === subject) && (
+                <option value={subject}>{subject}</option>
+              )}
+              {SUBJECT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="space-y-1.5">
             <label htmlFor="exam-class" className="block text-sm font-medium text-slate-700">
               Class / শ্রেণি
             </label>
-            <input
+            <select
               id="exam-class"
-              type="text"
               required
-              list="exam-class-presets"
-              maxLength={60}
               value={classLevel}
               onChange={(e) => setClassLevel(e.target.value)}
-              placeholder="যেমন: Class 9-10 / HSC / Admission"
-              className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-            />
-            <datalist id="exam-class-presets">
-              <option value="Class 6" />
-              <option value="Class 7" />
-              <option value="Class 8" />
-              <option value="Class 9-10" />
-              <option value="SSC" />
-              <option value="HSC" />
-              <option value="Admission" />
-              <option value="BCS / Job" />
-            </datalist>
+              className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+            >
+              <option value="">Class নির্বাচন করুন</option>
+              {classLevel && !CLASS_OPTIONS.some((o) => o.value === classLevel) && (
+                <option value={classLevel}>{classLevel}</option>
+              )}
+              {CLASS_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="space-y-1.5">

@@ -1,0 +1,55 @@
+export interface AcademicOption {
+  value: string;
+  label: string;
+}
+
+export const CLASS_OPTIONS: AcademicOption[] = [
+  { value: "Class 1", label: "Class 1 (১ম শ্রেণি)" },
+  { value: "Class 2", label: "Class 2 (২য় শ্রেণি)" },
+  { value: "Class 3", label: "Class 3 (৩য় শ্রেণি)" },
+  { value: "Class 4", label: "Class 4 (৪র্থ শ্রেণি)" },
+  { value: "Class 5", label: "Class 5 (৫ম শ্রেণি)" },
+  { value: "Class 6", label: "Class 6 (৬ষ্ঠ শ্রেণি)" },
+  { value: "Class 7", label: "Class 7 (৭ম শ্রেণি)" },
+  { value: "Class 8", label: "Class 8 (৮ম শ্রেণি)" },
+  { value: "Class 9", label: "Class 9 (৯ম শ্রেণি)" },
+  { value: "Class 10", label: "Class 10 (১০ম শ্রেণি)" },
+  { value: "Class 11", label: "Class 11 (১১শ শ্রেণি)" },
+  { value: "Class 12", label: "Class 12 (১২শ শ্রেণি)" },
+  { value: "SSC", label: "SSC" },
+  { value: "HSC", label: "HSC" },
+  { value: "Admission", label: "Admission" },
+  { value: "BCS / Job", label: "BCS / Job" },
+];
+
+export const SUBJECT_OPTIONS: AcademicOption[] = [
+  { value: "Bangla", label: "Bangla (বাংলা)" },
+  { value: "English", label: "English (ইংরেজি)" },
+  { value: "Mathematics", label: "Mathematics (গণিত)" },
+  { value: "Higher Mathematics", label: "Higher Mathematics (উচ্চতর গণিত)" },
+  { value: "General Science", label: "General Science (সাধারণ বিজ্ঞান)" },
+  { value: "Physics", label: "Physics (পদার্থবিজ্ঞান)" },
+  { value: "Chemistry", label: "Chemistry (রসায়ন)" },
+  { value: "Biology", label: "Biology (জীববিজ্ঞান)" },
+  { value: "ICT", label: "ICT (তথ্য ও যোগাযোগ প্রযুক্তি)" },
+  { value: "Bangladesh & Global Studies", label: "Bangladesh & Global Studies (বাংলাদেশ ও বিশ্বপরিচয়)" },
+  { value: "Islam & Moral Education", label: "Islam & Moral Education (ইসলাম ও নৈতিক শিক্ষা)" },
+  { value: "Hindu Religion & Moral Education", label: "Hindu Religion & Moral Education (হিন্দুধর্ম ও নৈতিক শিক্ষা)" },
+  { value: "Accounting", label: "Accounting (হিসাববিজ্ঞান)" },
+  { value: "Finance & Banking", label: "Finance & Banking (ফিন্যান্স ও ব্যাংকিং)" },
+  { value: "Business Entrepreneurship", label: "Business Entrepreneurship (ব্যবসায় উদ্যোগ)" },
+  { value: "Business Organization & Management", label: "Business Organization & Management (ব্যবসায় সংগঠন ও ব্যবস্থাপনা)" },
+  { value: "Economics", label: "Economics (অর্থনীতি)" },
+  { value: "Civics & Good Governance", label: "Civics & Good Governance (পৌরনীতি ও সুশাসন)" },
+  { value: "History", label: "History (ইতিহাস)" },
+  { value: "Geography & Environment", label: "Geography & Environment (ভূগোল ও পরিবেশ)" },
+  { value: "Sociology", label: "Sociology (সমাজবিজ্ঞান)" },
+  { value: "Social Work", label: "Social Work (সমাজকর্ম)" },
+  { value: "Logic", label: "Logic (যুক্তিবিদ্যা)" },
+  { value: "Psychology", label: "Psychology (মনোবিজ্ঞান)" },
+  { value: "Statistics", label: "Statistics (পরিসংখ্যান)" },
+  { value: "Agricultural Education", label: "Agricultural Education (কৃষিশিক্ষা)" },
+  { value: "Home Science", label: "Home Science (গার্হস্থ্য বিজ্ঞান)" },
+  { value: "General Knowledge", label: "General Knowledge (সাধারণ জ্ঞান)" },
+  { value: "Other", label: "Other (অন্যান্য)" },
+];

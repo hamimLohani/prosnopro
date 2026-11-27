@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { CLASS_OPTIONS, SUBJECT_OPTIONS } from "@/lib/academic-options";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { MathText } from "@/components/math-text";
 import { createClient } from "@/lib/supabase/client";
@@ -299,20 +300,36 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
           </div>
 
           <div className="grid gap-3 sm:grid-cols-4">
-            <input
-              type="text"
+            <select
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              placeholder="Subject (বিষয়)"
-              className="h-11 sm:h-[42px] rounded-lg border border-slate-300 px-3 text-base sm:text-sm"
-            />
-            <input
-              type="text"
+              className="h-11 sm:h-[42px] rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm"
+            >
+              <option value="">Subject (বিষয়)</option>
+              {subject && !SUBJECT_OPTIONS.some((o) => o.value === subject) && (
+                <option value={subject}>{subject}</option>
+              )}
+              {SUBJECT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <select
               value={classLevel}
               onChange={(e) => setClassLevel(e.target.value)}
-              placeholder="Class (যেমন: HSC)"
-              className="h-11 sm:h-[42px] rounded-lg border border-slate-300 px-3 text-base sm:text-sm"
-            />
+              className="h-11 sm:h-[42px] rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm"
+            >
+              <option value="">Class / শ্রেণি</option>
+              {classLevel && !CLASS_OPTIONS.some((o) => o.value === classLevel) && (
+                <option value={classLevel}>{classLevel}</option>
+              )}
+              {CLASS_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
             <select
               value={medium}
               onChange={(e) => setMedium(e.target.value as ExamMedium)}
