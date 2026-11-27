@@ -9,6 +9,7 @@ import {
   FileText,
   Loader2,
   Printer,
+  RefreshCw,
   Send,
 } from "lucide-react";
 import Link from "next/link";
@@ -44,6 +45,7 @@ export function ExamResultsClient({
   const [expandedAttemptId, setExpandedAttemptId] = useState<string | null>(null);
   const [exportBusy, setExportBusy] = useState<string | null>(null);
   const [releasing, setReleasing] = useState(false);
+  const [regrading, setRegrading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   async function handleReleaseManual() {
@@ -57,6 +59,20 @@ export function ExamResultsClient({
     setReleasing(false);
     if (!error) {
       setStatusMessage("Student-দের জন্য Result প্রকাশ করা হয়েছে।");
+      router.refresh();
+    }
+  }
+
+  async function handleRegrade() {
+    const supabase = createClient();
+    if (!supabase) return;
+    setRegrading(true);
+    const { data, error } = await supabase.rpc("regrade_exam_attempts", {
+      p_exam_id: exam.id,
+    });
+    setRegrading(false);
+    if (!error) {
+      setStatusMessage(`${Number(data ?? 0)}টি Submit করা Attempt পুনরায় মূল্যায়ন (Re-grade) করা হয়েছে।`);
       router.refresh();
     }
   }
@@ -246,7 +262,24 @@ export function ExamResultsClient({
 
       {/* Student Scores Table / Mobile Cards */}
       <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-4">
-        <h2 className="text-base font-bold text-navy">Student-দের Result ({attempts.length})</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-base font-bold text-navy">Student-দের Result ({attempts.length})</h2>
+          {analytics.submittedCount > 0 && (
+            <button
+              type="button"
+              disabled={regrading}
+              onClick={handleRegrade}
+              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
+            >
+              {regrading ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="h-3.5 w-3.5" />
+              )}
+              <span>Re-grade করুন</span>
+            </button>
+          )}
+        </div>
 
         {attempts.length === 0 ? (
           <p className="text-sm text-slate-500">এখনো কোনো Attempt রেকর্ড হয়নি।</p>

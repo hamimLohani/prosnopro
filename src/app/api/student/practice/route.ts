@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
   if (!supabase) {
-    return NextResponse.json({ ok: false, message: "Supabase is not configured." }, { status: 503 });
+    return NextResponse.json({ ok: false, message: "Supabase কনফিগার করা নেই।" }, { status: 503 });
   }
 
   const sp = request.nextUrl.searchParams;
