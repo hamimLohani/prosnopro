@@ -510,15 +510,25 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
       </div>
 
       <div className="no-print relative min-h-screen select-none [-webkit-touch-callout:none] pb-32 sm:pb-12">
-        {/* Faint repeating watermark */}
+        {/* Dense repeating ProsnoPro + student identity watermark */}
         <div
           aria-hidden="true"
-          className="pointer-events-none fixed inset-0 z-10 overflow-hidden opacity-[0.045]"
+          className="pointer-events-none fixed inset-0 z-10 overflow-hidden opacity-[0.07]"
         >
-          <div className="grid h-full w-full -rotate-12 scale-125 grid-cols-3 gap-12 p-6 text-xs font-bold text-navy">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="flex items-center justify-center whitespace-nowrap">
-                {watermarkText}
+          <div className="grid h-full w-full -rotate-12 scale-125 grid-cols-3 sm:grid-cols-5 gap-x-3 gap-y-5 sm:gap-x-5 sm:gap-y-7 p-2">
+            {Array.from({ length: 60 }).map((_, i) => (
+              <div
+                key={i}
+                className={`flex flex-col items-center justify-center text-center leading-tight ${
+                  i % 2 === 1 ? "translate-x-3" : ""
+                }`}
+              >
+                <span className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-navy">
+                  ProsnoPro
+                </span>
+                <span className="max-w-[125px] sm:max-w-[165px] truncate text-[9px] sm:text-[11px] font-semibold text-navy">
+                  {watermarkText}
+                </span>
               </div>
             ))}
           </div>
