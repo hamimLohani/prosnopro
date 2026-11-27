@@ -1,26 +1,55 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --navy: #162456;
+  --navy-strong: #0f1a42;
+  --amber: #f59e0b;
+  --amber-hover: #d97706;
+  --surface: #ffffff;
+  --border: #e2e8f0;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-navy: var(--navy);
+  --color-navy-strong: var(--navy-strong);
+  --color-amber: var(--amber);
+  --color-amber-hover: var(--amber-hover);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --font-sans: var(--font-jakarta), var(--font-bengali), system-ui, sans-serif;
+  --font-bengali: var(--font-bengali), system-ui, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* Clean browser print-to-PDF defaults for Bangla & English exam papers */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
 }

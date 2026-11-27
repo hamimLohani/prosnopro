@@ -1,0 +1,19 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Runs once every 3 days at 03:15 UTC to prevent Supabase Free 7-day inactivity pause
+    - cron: '15 3 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping /api/health
+        run: |
+          if [ -z "${{ vars.APP_URL }}" ]; then
+            echo "Set repository variable APP_URL (e.g. https://prosnopro.vercel.app) to enable external keep-alive."
+            exit 0
+          fi
+          curl --fail --silent --show-error "${{ vars.APP_URL }}/api/health"

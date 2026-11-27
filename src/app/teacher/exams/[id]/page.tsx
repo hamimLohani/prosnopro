@@ -1,0 +1,253 @@
+import { BarChart3, Clock, Edit3, Eye, HelpCircle, Printer, Radio, Settings2, Users } from "lucide-react";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { ExamLifecycleActions } from "@/components/exam-lifecycle-actions";
+import { Navbar } from "@/components/navbar";
+import { TeacherCodeCopy } from "@/components/teacher-code-copy";
+import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
+import type { AttemptStatus, Exam } from "@/lib/types";
+
+interface ExamDetailPageProps {
+  params: Promise<{ id: string }>;
+}
+
+interface AttemptSummaryRow {
+  id: string;
+  student_name: string;
+  student_roll: string | null;
+  status: AttemptStatus;
+  started_at: string;
+  submitted_at: string | null;
+  score: number | null;
+  total_marks: number | null;
+}
+
+export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
+  const ctx = await getCurrentUserContext();
+  if (!ctx.configured || !ctx.userId) redirect("/login");
+  if (!ctx.profile) redirect("/onboarding");
+  if (ctx.profile.role !== "teacher") redirect("/student");
+
+  const { id } = await params;
+  const supabase = await createClient();
+  if (!supabase) redirect("/login");
+
+  // Lazy finalization so expired attempts update cleanly before rendering teacher results
+  await supabase.rpc("finalize_expired_attempts");
+
+  const { data: exam } = await supabase
+    .from("exams")
+    .select("*")
+    .eq("id", id)
+    .eq("teacher_id", ctx.userId)
+    .maybeSingle<Exam>();
+
+  if (!exam) notFound();
+
+  const { data: attempts } = await supabase
+    .from("attempts")
+    .select("id, student_name, student_roll, status, started_at, submitted_at, score, total_marks")
+    .eq("exam_id", exam.id)
+    .order("started_at", { ascending: false })
+    .returns<AttemptSummaryRow[]>();
+
+  const attemptList = attempts ?? [];
+  const teacherCode = ctx.teacherProfile?.teacher_code ?? "";
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar ctx={ctx} />
+      <main className="mx-auto w-full max-w-5xl flex-1 space-y-6 px-4 py-8">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <span
+                className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${
+                  exam.status === "published"
+                    ? "bg-emerald-100 text-emerald-800"
+                    : exam.status === "closed"
+                      ? "bg-slate-200 text-slate-700"
+                      : "bg-amber-100 text-amber-900"
+                }`}
+              >
+                {exam.status}
+              </span>
+              <span className="text-xs text-slate-500">
+                {exam.subject || "General"} • {exam.medium === "bn" ? "Bangla" : "English"}
+              </span>
+            </div>
+            <h1 className="text-2xl font-bold text-navy sm:text-3xl">{exam.name}</h1>
+          </div>
+
+          <Link href="/teacher" className="text-sm font-semibold text-navy hover:underline">
+            ← Back to Dashboard
+          </Link>
+        </div>
+
+        {/* Share Codes Banner */}
+        <section className="rounded-2xl bg-navy p-6 text-white flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-amber">
+              Student Join Codes
+            </p>
+            <p className="text-sm text-slate-200">
+              {exam.status === "published"
+                ? "Exam is live. Share both codes with your students:"
+                : exam.status === "draft"
+                  ? "Publish this exam after reviewing questions so students can join with:"
+                  : "Exam is closed to new entries."}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5">
+              <span className="block text-[10px] uppercase text-slate-300">Teacher Code</span>
+              <span className="font-mono text-lg font-bold tracking-wider text-white">
+                {teacherCode}
+              </span>
+            </div>
+            <div className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 flex items-center gap-3">
+              <div>
+                <span className="block text-[10px] uppercase text-slate-300">Exam Code</span>
+                <span className="font-mono text-lg font-bold tracking-wider text-amber">
+                  {exam.code}
+                </span>
+              </div>
+              <TeacherCodeCopy code={`Teacher: ${teacherCode} | Exam: ${exam.code}`} />
+            </div>
+          </div>
+        </section>
+
+        {/* Actions & Navigation */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href={`/teacher/exams/${exam.id}/questions`}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong"
+            >
+              <Edit3 className="h-4 w-4" />
+              <span>Questions ({exam.question_count})</span>
+            </Link>
+            <Link
+              href={`/teacher/exams/${exam.id}/review`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              <Eye className="h-4 w-4" />
+              <span>Review Preview</span>
+            </Link>
+            <Link
+              href={`/teacher/exams/${exam.id}/edit`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              <Settings2 className="h-4 w-4" />
+              <span>Edit Settings</span>
+            </Link>
+            <Link
+              href={`/teacher/exams/${exam.id}/monitor`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              <Radio className="h-4 w-4 text-emerald-600" />
+              <span>Monitor</span>
+            </Link>
+            <Link
+              href={`/teacher/exams/${exam.id}/results`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              <BarChart3 className="h-4 w-4 text-navy" />
+              <span>Results &amp; Exports</span>
+            </Link>
+            <Link
+              href={`/teacher/exams/${exam.id}/print?mode=paper`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              <Printer className="h-4 w-4 text-slate-600" />
+              <span>Print PDF</span>
+            </Link>
+          </div>
+
+          <div className="border-t border-slate-100 pt-4">
+            <ExamLifecycleActions
+              examId={exam.id}
+              status={exam.status}
+              canPublish={exam.question_count > 0}
+              forceCloseDefault={exam.force_close_active}
+            />
+          </div>
+        </section>
+
+        {/* Quick Stats */}
+        <section className="grid gap-4 sm:grid-cols-3">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 flex items-center gap-3">
+            <HelpCircle className="h-5 w-5 text-navy" />
+            <div>
+              <p className="text-xs text-slate-500">Questions</p>
+              <p className="text-xl font-bold text-slate-900">{exam.question_count}</p>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 flex items-center gap-3">
+            <Clock className="h-5 w-5 text-amber-600" />
+            <div>
+              <p className="text-xs text-slate-500">Duration</p>
+              <p className="text-xl font-bold text-slate-900">{exam.duration_minutes} min</p>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 flex items-center gap-3">
+            <Users className="h-5 w-5 text-emerald-600" />
+            <div>
+              <p className="text-xs text-slate-500">Attempts</p>
+              <p className="text-xl font-bold text-slate-900">{attemptList.length}</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Attempts List Preview (full analytics & export arrive in Step 4) */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold text-navy">Student Attempts</h2>
+            <Link
+              href={`/teacher/exams/${exam.id}/results`}
+              className="text-xs font-semibold text-navy hover:underline"
+            >
+              Open Full Results, Analytics &amp; Exports →
+            </Link>
+          </div>
+
+          {attemptList.length === 0 ? (
+            <p className="text-sm text-slate-500">No students have entered this exam yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-xs uppercase text-slate-500">
+                    <th className="py-2 pr-4">Student</th>
+                    <th className="py-2 pr-4">Roll / ID</th>
+                    <th className="py-2 pr-4">Status</th>
+                    <th className="py-2 pr-4">Score</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {attemptList.map((a) => (
+                    <tr key={a.id}>
+                      <td className="py-2.5 pr-4 font-medium text-slate-900">{a.student_name}</td>
+                      <td className="py-2.5 pr-4 text-slate-600">{a.student_roll ?? "—"}</td>
+                      <td className="py-2.5 pr-4">
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium capitalize text-slate-700">
+                          {a.status.replace("_", " ")}
+                        </span>
+                      </td>
+                      <td className="py-2.5 pr-4 font-semibold text-slate-900">
+                        {a.score !== null && a.total_marks !== null
+                          ? `${a.score} / ${a.total_marks}`
+                          : "In progress"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </main>
+    </div>
+  );
+}
