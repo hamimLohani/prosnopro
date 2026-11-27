@@ -108,6 +108,7 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
           <div>
             <h1 className="text-2xl font-bold text-slate-900">{exam.name}</h1>
             <p className="text-sm text-slate-700">
+              {exam.class ? `${exam.class} • ` : ""}
               {exam.subject || "General"} • {exam.medium === "bn" ? "বাংলা" : "English"} • Time:{" "}
               {exam.duration_minutes} min • Total Marks: {totalMarks}
               {exam.negative_marking ? ` • Negative: -${exam.negative_value}` : ""}

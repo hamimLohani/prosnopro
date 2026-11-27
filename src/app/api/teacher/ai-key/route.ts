@@ -83,12 +83,12 @@ export async function POST(request: NextRequest) {
   try {
     body = (await request.json()) as typeof body;
   } catch {
-    return NextResponse.json({ ok: false, message: "Invalid JSON payload." }, { status: 400 });
+    return NextResponse.json({ ok: false, message: "অনুরোধের JSON সঠিক নয়।" }, { status: 400 });
   }
 
   const admin = createAdminClient();
   if (!admin) {
-    return NextResponse.json({ ok: false, message: "Admin client unavailable." }, { status: 503 });
+    return NextResponse.json({ ok: false, message: "Server admin client পাওয়া যাচ্ছে না।" }, { status: 503 });
   }
 
   // Test currently saved encrypted key without returning it to the client
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
       }>();
 
     if (!tp?.ai_key_encrypted || !isValidProvider(tp.ai_provider)) {
-      return NextResponse.json({ ok: false, message: "No saved API key found." }, { status: 400 });
+      return NextResponse.json({ ok: false, message: "কোনো সংরক্ষিত API Key পাওয়া যায়নি।" }, { status: 400 });
     }
 
     const decrypted = decryptSecret(tp.ai_key_encrypted);
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (!isValidProvider(body.provider)) {
-    return NextResponse.json({ ok: false, message: "Select a valid AI provider." }, { status: 400 });
+    return NextResponse.json({ ok: false, message: "সঠিক AI Provider সিলেক্ট করুন।" }, { status: 400 });
   }
 
   const cleanModel = body.model?.trim() || null;
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
 
     if (!existing?.ai_key_encrypted) {
       return NextResponse.json(
-        { ok: false, message: "Please paste your AI API key." },
+        { ok: false, message: "অনুগ্রহ করে আপনার AI API Key পেস্ট করুন।" },
         { status: 400 },
       );
     }
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
       aiProvider: body.provider,
       aiModel: cleanModel,
       keyHint: existing.ai_key_hint,
-      message: "Provider settings updated.",
+      message: "Provider সেটিংস আপডেট হয়েছে।",
     });
   }
 
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
     });
     if (!check.ok) {
       return NextResponse.json(
-        { ok: false, message: `Key check failed: ${check.message}` },
+        { ok: false, message: `Key যাচাই ব্যর্থ হয়েছে: ${check.message}` },
         { status: 400 },
       );
     }
@@ -197,7 +197,9 @@ export async function POST(request: NextRequest) {
     aiProvider: body.provider,
     aiModel: cleanModel,
     keyHint,
-    message: body.verifyKey ? "API key verified and encrypted on server." : "API key encrypted and saved.",
+    message: body.verifyKey
+      ? "API Key যাচাই করে নিরাপদভাবে Save করা হয়েছে।"
+      : "API Key নিরাপদভাবে Save করা হয়েছে।",
   });
 }
 
@@ -209,14 +211,14 @@ export async function DELETE() {
 
   if (!isAdminClientConfigured()) {
     return NextResponse.json(
-      { ok: false, message: "SUPABASE_SERVICE_ROLE_KEY is not configured." },
+      { ok: false, message: "SUPABASE_SERVICE_ROLE_KEY কনফিগার করা নেই।" },
       { status: 503 },
     );
   }
 
   const admin = createAdminClient();
   if (!admin) {
-    return NextResponse.json({ ok: false, message: "Admin client unavailable." }, { status: 503 });
+    return NextResponse.json({ ok: false, message: "Server admin client পাওয়া যাচ্ছে না।" }, { status: 503 });
   }
 
   const { error } = await admin
@@ -233,5 +235,5 @@ export async function DELETE() {
     return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, hasKey: false, message: "Saved API key removed." });
+  return NextResponse.json({ ok: true, hasKey: false, message: "সংরক্ষিত API Key মুছে ফেলা হয়েছে।" });
 }

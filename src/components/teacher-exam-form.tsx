@@ -252,12 +252,23 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
               id="exam-class"
               type="text"
               required
+              list="exam-class-presets"
               maxLength={60}
               value={classLevel}
               onChange={(e) => setClassLevel(e.target.value)}
               placeholder="যেমন: Class 9-10 / HSC / Admission"
               className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
+            <datalist id="exam-class-presets">
+              <option value="Class 6" />
+              <option value="Class 7" />
+              <option value="Class 8" />
+              <option value="Class 9-10" />
+              <option value="SSC" />
+              <option value="HSC" />
+              <option value="Admission" />
+              <option value="BCS / Job" />
+            </datalist>
           </div>
 
           <div className="space-y-1.5">
@@ -333,7 +344,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
             </label>
             <select
               id="exam-options"
-              disabled={hasAttempts}
+              disabled={hasAttempts || Boolean(exam && exam.question_count > 0)}
               value={optionsPerQuestion}
               onChange={(e) => setOptionsPerQuestion(e.target.value)}
               className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15 disabled:bg-slate-100"

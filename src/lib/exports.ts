@@ -162,7 +162,7 @@ export async function exportQuestionsDocx(
     new Paragraph({
       children: [
         new TextRun({
-          text: `${exam.subject || "General"} • ${exam.medium === "bn" ? "Bangla" : "English"} • Duration: ${exam.duration_minutes} min • Total Marks: ${totalMarks}`,
+          text: `${exam.class ? `${exam.class} • ` : ""}${exam.subject || "General"} • ${exam.medium === "bn" ? "Bangla" : "English"} • Duration: ${exam.duration_minutes} min • Total Marks: ${totalMarks}`,
           italics: true,
         }),
       ],
@@ -225,6 +225,19 @@ export async function exportQuestionsDocx(
       );
     }
   });
+
+  children.push(
+    new Paragraph({
+      children: [
+        new TextRun({
+          text: "Prepared by ProsnoPro",
+          italics: true,
+          color: "64748B",
+        }),
+      ],
+      spacing: { before: 360 },
+    }),
+  );
 
   const doc = new Document({
     sections: [{ children }],

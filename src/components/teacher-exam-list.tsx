@@ -3,7 +3,7 @@
 import { Clock, HelpCircle, Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import type { Exam } from "@/lib/types";
+import type { Exam, ExamStatus } from "@/lib/types";
 
 interface TeacherExamListProps {
   exams: Exam[];
@@ -12,12 +12,16 @@ interface TeacherExamListProps {
 export function TeacherExamList({ exams }: TeacherExamListProps) {
   const [keyword, setKeyword] = useState("");
   const [classFilter, setClassFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | ExamStatus>("all");
 
   const filtered = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
     const cls = classFilter.trim().toLowerCase();
 
     return exams.filter((exam) => {
+      if (statusFilter !== "all" && exam.status !== statusFilter) {
+        return false;
+      }
       if (cls && !(exam.class ?? "").toLowerCase().includes(cls)) {
         return false;
       }
@@ -27,7 +31,7 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
       }
       return true;
     });
-  }, [classFilter, exams, keyword]);
+  }, [classFilter, exams, keyword, statusFilter]);
 
   if (exams.length === 0) {
     return (
@@ -42,24 +46,50 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
 
   return (
     <div className="space-y-3">
-      <div className="grid gap-2.5 sm:grid-cols-3 rounded-2xl border border-slate-200 bg-white p-3">
-        <div className="relative sm:col-span-2">
-          <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400" />
+      <div className="space-y-2.5 rounded-2xl border border-slate-200 bg-white p-3">
+        <div className="grid gap-2.5 sm:grid-cols-3">
+          <div className="relative sm:col-span-2">
+            <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400" />
+            <input
+              type="text"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder="Search by exam name, subject, or code..."
+              className="h-10 w-full rounded-lg border border-slate-300 pl-9 pr-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+            />
+          </div>
           <input
             type="text"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Search by exam name, subject, or code..."
-            className="h-10 w-full rounded-lg border border-slate-300 pl-9 pr-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+            value={classFilter}
+            onChange={(e) => setClassFilter(e.target.value)}
+            placeholder="Filter by class (e.g. HSC)"
+            className="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
           />
         </div>
-        <input
-          type="text"
-          value={classFilter}
-          onChange={(e) => setClassFilter(e.target.value)}
-          placeholder="Filter by class (e.g. HSC)"
-          className="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-        />
+
+        <div className="flex flex-wrap items-center gap-1.5">
+          {(
+            [
+              { value: "all", label: "All" },
+              { value: "published", label: "Published" },
+              { value: "draft", label: "Draft" },
+              { value: "closed", label: "Closed" },
+            ] as const
+          ).map((tab) => (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => setStatusFilter(tab.value)}
+              className={`min-h-[32px] rounded-lg px-3 py-1 text-xs font-semibold transition cursor-pointer ${
+                statusFilter === tab.value
+                  ? "bg-navy text-white"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {filtered.length === 0 ? (

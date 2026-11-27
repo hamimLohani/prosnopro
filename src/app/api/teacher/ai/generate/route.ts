@@ -23,16 +23,16 @@ export async function POST(request: NextRequest) {
   try {
     body = (await request.json()) as typeof body;
   } catch {
-    return NextResponse.json({ ok: false, message: "Invalid JSON payload." }, { status: 400 });
+    return NextResponse.json({ ok: false, message: "অনুরোধের JSON সঠিক নয়।" }, { status: 400 });
   }
 
   if (!body.examId) {
-    return NextResponse.json({ ok: false, message: "examId is required." }, { status: 400 });
+    return NextResponse.json({ ok: false, message: "examId দেওয়া আবশ্যক।" }, { status: 400 });
   }
 
   const supabase = await createClient();
   if (!supabase) {
-    return NextResponse.json({ ok: false, message: "Supabase unavailable." }, { status: 503 });
+    return NextResponse.json({ ok: false, message: "Supabase পাওয়া যাচ্ছে না।" }, { status: 503 });
   }
 
   const { data: exam } = await supabase
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle<Exam>();
 
   if (!exam) {
-    return NextResponse.json({ ok: false, message: "Exam not found." }, { status: 404 });
+    return NextResponse.json({ ok: false, message: "Exam পাওয়া যায়নি।" }, { status: 404 });
   }
 
   const count = Math.min(100, Math.max(1, Math.floor(Number(body.count) || 5)));
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       apiKey: credResult.credentials.apiKey,
       medium: exam.medium,
       subject: body.subject?.trim() || exam.subject,
-      classLevel: body.classLevel?.trim() || "",
+      classLevel: body.classLevel?.trim() || exam.class,
       count,
       optionsPerQuestion: exam.options_per_question,
       defaultMarks: Number(exam.default_marks),
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         ok: false,
-        message: err instanceof Error ? err.message : "Failed to generate questions.",
+        message: err instanceof Error ? err.message : "প্রশ্ন তৈরি করা যায়নি।",
       },
       { status: 502 },
     );

@@ -6,14 +6,14 @@ import { normalizeExamCode, normalizeTeacherCode } from "@/lib/validation";
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   if (!supabase) {
-    return NextResponse.json({ ok: false, message: "Supabase is not configured." }, { status: 503 });
+    return NextResponse.json({ ok: false, message: "Supabase কনফিগার করা নেই।" }, { status: 503 });
   }
 
   let body: { teacherCode?: string; examCode?: string };
   try {
     body = (await request.json()) as { teacherCode?: string; examCode?: string };
   } catch {
-    return NextResponse.json({ ok: false, message: "Invalid request payload." }, { status: 400 });
+    return NextResponse.json({ ok: false, message: "অনুরোধের তথ্য সঠিক নয়।" }, { status: 400 });
   }
 
   const teacherCode = normalizeTeacherCode(body.teacherCode ?? "");
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
 
   if (!teacherCode || !examCode) {
     return NextResponse.json(
-      { ok: false, message: "Enter both Teacher Code and Exam Code." },
+      { ok: false, message: "Teacher Code এবং Exam Code দুটিই লিখুন।" },
       { status: 400 },
     );
   }
