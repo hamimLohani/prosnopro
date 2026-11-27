@@ -235,6 +235,10 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
             </ol>
           </div>
         )}
+
+        <footer className="mt-8 border-t border-slate-300 pt-3 text-center text-xs font-medium text-slate-500">
+          Prepared by ProsnoPro
+        </footer>
       </article>
     </div>
   );
