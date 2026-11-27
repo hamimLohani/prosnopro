@@ -36,11 +36,11 @@ export default async function TeacherSettingsPage() {
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-navy">Settings</h1>
             <p className="text-sm text-slate-600">
-              Manage your Teacher Code and personal BYOK AI API key.
+              আপনার Teacher Code এবং নিজস্ব BYOK AI API Key পরিচালনা করুন।
             </p>
           </div>
           <Link href="/teacher" className="py-1 text-sm font-semibold text-navy hover:underline shrink-0">
-            ← Back to Dashboard
+            ← Dashboard-এ ফিরে যান
           </Link>
         </div>
 

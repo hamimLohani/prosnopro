@@ -50,12 +50,12 @@ export default async function ExamSubmittedPage({ params }: SubmittedPageProps) 
       <main className="mx-auto flex w-full max-w-2xl flex-1 items-start sm:items-center justify-center px-3 py-6 sm:px-4 sm:py-10">
         {!summary?.ok || !summary.exam || !summary.attempt ? (
           <div className="w-full rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 text-center space-y-4">
-            <h1 className="text-xl font-bold text-navy">Attempt not found</h1>
+            <h1 className="text-xl font-bold text-navy">Attempt পাওয়া যায়নি</h1>
             <Link
               href="/student"
               className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl bg-navy px-5 py-2.5 text-sm font-semibold text-white"
             >
-              Back to Student Dashboard
+              Student Dashboard-এ ফিরে যান
             </Link>
           </div>
         ) : (
@@ -70,7 +70,7 @@ export default async function ExamSubmittedPage({ params }: SubmittedPageProps) 
                 </p>
                 <h1 className="text-xl sm:text-2xl font-bold text-navy">{summary.exam.name}</h1>
                 <p className="text-xs text-slate-500">
-                  Submitted at {new Date(summary.attempt.submitted_at).toLocaleString()}
+                  Submit সময়: {new Date(summary.attempt.submitted_at).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -80,7 +80,7 @@ export default async function ExamSubmittedPage({ params }: SubmittedPageProps) 
             summary.attempt.total_marks !== null ? (
               <div className="rounded-2xl bg-navy p-5 text-white flex items-center justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-slate-300">Your Score</p>
+                  <p className="text-xs uppercase tracking-wider text-slate-300">আপনার Score</p>
                   <p className="mt-1 text-3xl font-extrabold text-amber">
                     {summary.attempt.score}{" "}
                     <span className="text-lg font-semibold text-white">
@@ -89,7 +89,7 @@ export default async function ExamSubmittedPage({ params }: SubmittedPageProps) 
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-slate-300">Percentage</p>
+                  <p className="text-xs text-slate-300">শতকরা (Percentage)</p>
                   <p className="text-2xl font-bold">
                     {summary.attempt.total_marks > 0
                       ? Math.round((summary.attempt.score / summary.attempt.total_marks) * 100)
@@ -102,12 +102,12 @@ export default async function ExamSubmittedPage({ params }: SubmittedPageProps) 
               <div className="flex items-start gap-2.5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
                 <Clock className="h-4 w-4 text-navy shrink-0 mt-0.5" />
                 <span>
-                  Your submission is recorded.{" "}
+                  আপনার উত্তর Submit হয়েছে।{" "}
                   {summary.exam.result_release === "after_close"
-                    ? "Results will appear after the teacher closes the exam."
+                    ? "Teacher Exam বন্ধ করার পর Result দেখা যাবে।"
                     : summary.exam.result_release === "manual"
-                      ? "Results will appear once your teacher releases them."
-                      : "Scores are kept private to the teacher for this exam."}
+                      ? "Teacher প্রকাশ করার পর Result দেখা যাবে।"
+                      : "এই Exam-এর Score শুধু Teacher দেখতে পারবেন।"}
                 </span>
               </div>
             )}
@@ -118,14 +118,14 @@ export default async function ExamSubmittedPage({ params }: SubmittedPageProps) 
                   href={`/student/results/${summary.attempt.id}`}
                   className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-navy hover:bg-slate-50"
                 >
-                  View Result Details
+                  বিস্তারিত Result দেখুন
                 </Link>
               )}
               <Link
                 href="/student"
                 className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl bg-navy px-5 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong"
               >
-                Back to Student Dashboard
+                Student Dashboard-এ ফিরে যান
               </Link>
             </div>
           </div>

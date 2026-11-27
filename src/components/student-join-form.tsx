@@ -19,7 +19,7 @@ export function StudentJoinForm() {
     const tCode = normalizeTeacherCode(teacherCode);
     const eCode = normalizeExamCode(examCode);
     if (!tCode || !eCode) {
-      setError("Enter both Teacher Code and Exam Code.");
+      setError("Teacher Code এবং Exam Code দুটিই লিখুন।");
       return;
     }
 
@@ -39,14 +39,14 @@ export function StudentJoinForm() {
       };
 
       if (!res.ok || !data.ok) {
-        setError(data.message ?? "Could not join exam.");
+        setError(data.message ?? "Exam-এ জয়েন করা যায়নি।");
         setLoading(false);
         return;
       }
 
       const targetExamId = data.exam_id ?? data.exam?.id;
       if (!targetExamId) {
-        setError("Unexpected response from server.");
+        setError("Server থেকে অপ্রত্যাশিত উত্তর এসেছে।");
         setLoading(false);
         return;
       }
@@ -59,7 +59,7 @@ export function StudentJoinForm() {
         router.push(`/student/exams/${targetExamId}/instructions`);
       }
     } catch {
-      setError("Network error while joining exam. Please try again.");
+      setError("Exam-এ জয়েন করার সময় Network সমস্যা হয়েছে। আবার চেষ্টা করুন।");
       setLoading(false);
     }
   }
@@ -72,9 +72,9 @@ export function StudentJoinForm() {
             <KeyRound className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-slate-900">Join an exam</h2>
+            <h2 className="text-lg font-bold text-slate-900">Exam-এ জয়েন করুন</h2>
             <p className="text-sm text-slate-600">
-              Enter the Teacher Code and Exam Code provided by your teacher.
+              আপনার Teacher-এর দেওয়া Teacher Code এবং Exam Code লিখুন।
             </p>
           </div>
         </div>
@@ -102,7 +102,7 @@ export function StudentJoinForm() {
               enterKeyHint="next"
               value={teacherCode}
               onChange={(e) => setTeacherCode(normalizeTeacherCode(e.target.value))}
-              placeholder="e.g. RAHIM26"
+              placeholder="যেমন: RAHIM26"
               className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-base sm:text-sm uppercase tracking-wider text-slate-900 placeholder:normal-case placeholder:tracking-normal focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
           </div>
@@ -122,7 +122,7 @@ export function StudentJoinForm() {
               enterKeyHint="go"
               value={examCode}
               onChange={(e) => setExamCode(normalizeExamCode(e.target.value))}
-              placeholder="e.g. PHY01"
+              placeholder="যেমন: PHY01"
               className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-base sm:text-sm uppercase tracking-wider text-slate-900 placeholder:normal-case placeholder:tracking-normal focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
           </div>
@@ -132,7 +132,7 @@ export function StudentJoinForm() {
             className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong active:scale-[0.99] disabled:opacity-60 cursor-pointer"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            <span>Join Exam</span>
+            <span>Exam-এ জয়েন</span>
           </button>
         </form>
       </div>

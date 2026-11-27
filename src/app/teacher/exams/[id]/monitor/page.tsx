@@ -64,13 +64,13 @@ export default async function ExamMonitorPage({ params }: MonitorPageProps) {
               href={`/teacher/exams/${exam.id}/results`}
               className="inline-flex min-h-[40px] items-center rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              Results &amp; Analytics
+              Result ও Analytics
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}`}
               className="py-1 text-sm font-semibold text-navy hover:underline"
             >
-              ← Back to Exam
+              ← Exam-এ ফিরে যান
             </Link>
           </div>
         </div>

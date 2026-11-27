@@ -21,16 +21,17 @@ export default async function HomePage() {
           <div className="mx-auto max-w-4xl px-4 py-10 sm:py-16">
             <div className="max-w-xl space-y-4">
               <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900">
-                <span>বাংলা &amp; English MCQ Exams</span>
+                <span>বাংলা &amp; English MCQ Exam</span>
               </div>
 
               <h1 className="text-2xl font-extrabold tracking-tight text-navy sm:text-4xl">
-                Simple, fast online exams made for mobile phones.
+                মোবাইলের জন্য তৈরি সহজ ও দ্রুত অনলাইন Exam।
               </h1>
 
               <p className="text-sm leading-relaxed text-slate-600 sm:text-base">
-                Teachers publish timed exams with one code. Students join in seconds, keep answers
-                saved offline if the network drops, and check results anytime.
+                শিক্ষকরা একটি Code দিয়েই টাইমড Exam প্রকাশ করতে পারেন। শিক্ষার্থীরা কয়েক সেকেন্ডেই
+                জয়েন করে, নেটওয়ার্ক চলে গেলেও উত্তর অফলাইনে Save থাকে, এবং যেকোনো সময় Result দেখতে
+                পারে।
               </p>
 
               <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 pt-2">
@@ -39,7 +40,7 @@ export default async function HomePage() {
                     href={dashboardHref}
                     className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl bg-navy px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-strong"
                   >
-                    <span>Open your dashboard</span>
+                    <span>Dashboard খুলুন</span>
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 ) : (
@@ -48,14 +49,14 @@ export default async function HomePage() {
                       href="/signup/student"
                       className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl bg-navy px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-strong"
                     >
-                      <span>Join as Student</span>
+                      <span>Student হিসেবে জয়েন করুন</span>
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                     <Link
                       href="/signup/teacher"
                       className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
                     >
-                      <span>Create Teacher Account</span>
+                      <span>Teacher Account খুলুন</span>
                     </Link>
                   </>
                 )}
@@ -63,9 +64,9 @@ export default async function HomePage() {
 
               {!ctx.userId && (
                 <p className="text-xs text-slate-500 pt-1">
-                  Already registered?{" "}
+                  আগে থেকেই Account আছে?{" "}
                   <Link href="/login" className="font-semibold text-navy hover:underline">
-                    Sign in here
+                    Sign in করুন
                   </Link>
                 </p>
               )}
@@ -79,11 +80,11 @@ export default async function HomePage() {
               <div className="inline-flex rounded-lg bg-amber-100 p-2 text-amber-700">
                 <GraduationCap className="h-5 w-5" />
               </div>
-              <h2 className="text-base font-bold text-slate-900">For Students</h2>
+              <h2 className="text-base font-bold text-slate-900">Student-দের জন্য</h2>
               <ol className="list-decimal pl-4 space-y-1 text-sm text-slate-600">
-                <li>Sign in once with Google or email.</li>
-                <li>Enter the Teacher Code and Exam Code.</li>
-                <li>Tap answers — saved offline even on weak 3G/4G.</li>
+                <li>Google বা Email দিয়ে একবার Sign in করুন।</li>
+                <li>Teacher Code এবং Exam Code দিয়ে জয়েন করুন।</li>
+                <li>উত্তর ট্যাপ করুন — দুর্বল 3G/4G নেটওয়ার্কেও Offline Save থাকবে।</li>
               </ol>
             </div>
 
@@ -91,11 +92,11 @@ export default async function HomePage() {
               <div className="inline-flex rounded-lg bg-navy/10 p-2 text-navy">
                 <ShieldCheck className="h-5 w-5" />
               </div>
-              <h2 className="text-base font-bold text-slate-900">For Teachers</h2>
+              <h2 className="text-base font-bold text-slate-900">Teacher-দের জন্য</h2>
               <ol className="list-decimal pl-4 space-y-1 text-sm text-slate-600">
-                <li>Create an exam and add questions (manual, AI, or PDF).</li>
-                <li>Publish and share your Teacher Code + Exam Code.</li>
-                <li>Monitor live entries and export results in Excel, CSV, or Word.</li>
+                <li>Exam তৈরি করুন এবং Manual, AI বা PDF থেকে প্রশ্ন যোগ করুন।</li>
+                <li>Publish করে আপনার Teacher Code + Exam Code শেয়ার করুন।</li>
+                <li>Live Monitor করুন এবং Excel, CSV বা Word ফরম্যাটে Result Export করুন।</li>
               </ol>
             </div>
           </div>

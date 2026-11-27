@@ -27,7 +27,7 @@ export function TeacherCodeCopy({ code }: TeacherCodeCopyProps) {
       className="inline-flex min-h-[38px] shrink-0 items-center justify-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20 active:scale-95 cursor-pointer"
     >
       {copied ? <Check className="h-3.5 w-3.5 text-amber" /> : <Copy className="h-3.5 w-3.5" />}
-      <span>{copied ? "Copied" : "Copy code"}</span>
+      <span>{copied ? "Copy হয়েছে" : "Code Copy করুন"}</span>
     </button>
   );
 }

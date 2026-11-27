@@ -42,16 +42,16 @@ export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
         return;
       }
 
-      setMessage("If that email is registered, a password reset link has been sent.");
+      setMessage("এই Email-এ Account থাকলে একটি Password reset link পাঠানো হয়েছে।");
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError("Password কমপক্ষে ৮ অক্ষরের হতে হবে।");
       return;
     }
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError("দুটি Password মিলছে না।");
       return;
     }
 
@@ -64,7 +64,7 @@ export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
       return;
     }
 
-    setMessage("Password updated. Redirecting...");
+    setMessage("Password আপডেট হয়েছে। Sign in পেজে নেওয়া হচ্ছে...");
     router.push("/login");
     router.refresh();
   }
@@ -75,12 +75,12 @@ export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
         <KeyRound className="h-6 w-6" />
       </div>
       <h1 className="text-2xl font-bold text-navy">
-        {mode === "request" ? "Reset password" : "Set a new password"}
+        {mode === "request" ? "Password Reset করুন" : "নতুন Password সেট করুন"}
       </h1>
       <p className="mt-1.5 text-sm text-slate-600">
         {mode === "request"
-          ? "Enter your account email and we'll send you a reset link."
-          : "Choose a strong password (at least 8 characters)."}
+          ? "আপনার Account Email লিখুন, আমরা একটি Reset link পাঠিয়ে দেব।"
+          : "একটি শক্তিশালী Password দিন (কমপক্ষে ৮ অক্ষর)।"}
       </p>
 
       {message && (
@@ -98,7 +98,7 @@ export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
         {mode === "request" ? (
           <div className="space-y-1.5">
             <label htmlFor="reset-email" className="block text-sm font-medium text-slate-700">
-              Email address
+              Email ঠিকানা
             </label>
             <input
               id="reset-email"
@@ -114,7 +114,7 @@ export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
           <>
             <div className="space-y-1.5">
               <label htmlFor="new-password" className="block text-sm font-medium text-slate-700">
-                New password
+                নতুন Password
               </label>
               <input
                 id="new-password"
@@ -128,7 +128,7 @@ export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
             </div>
             <div className="space-y-1.5">
               <label htmlFor="confirm-password" className="block text-sm font-medium text-slate-700">
-                Confirm password
+                Password নিশ্চিত করুন
               </label>
               <input
                 id="confirm-password"
@@ -149,13 +149,13 @@ export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          <span>{mode === "request" ? "Send reset link" : "Update password"}</span>
+          <span>{mode === "request" ? "Reset Link পাঠান" : "Password আপডেট করুন"}</span>
         </button>
       </form>
 
       <div className="mt-5 border-t border-slate-100 pt-4 text-center text-sm text-slate-600">
         <Link href="/login" className="font-semibold text-navy hover:underline">
-          Back to Sign in
+          Sign in পেজে ফিরে যান
         </Link>
       </div>
     </div>

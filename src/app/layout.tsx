@@ -24,11 +24,11 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "ProsnoPro — Timed Bangla & English Online Exams",
+    default: "ProsnoPro — বাংলা ও English অনলাইন MCQ Exam",
     template: "%s | ProsnoPro",
   },
   description:
-    "Simple, fair, low-bandwidth online MCQ exam platform for teachers and students in Bangla and English.",
+    "শিক্ষক ও শিক্ষার্থীদের জন্য সহজ, দ্রুত এবং কম নেটওয়ার্কেও চলা বাংলা ও English অনলাইন MCQ Exam প্ল্যাটফর্ম।",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: "/logo-1.png",
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="bn"
       className={`${jakarta.variable} ${notoBengali.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col overflow-x-clip bg-background text-foreground">

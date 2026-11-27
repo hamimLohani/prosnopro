@@ -27,7 +27,7 @@ export function Navbar({ ctx }: NavbarProps) {
                 exact
                 className={ctx.profile ? "hidden sm:inline-flex" : "inline-flex"}
               >
-                {ctx.profile ? (role === "teacher" ? "Teacher Home" : "Student Home") : "Finish Setup"}
+                {ctx.profile ? (role === "teacher" ? "Teacher Home" : "Student Home") : "Setup সম্পন্ন করুন"}
               </NavLink>
 
               {role === "teacher" && (
@@ -44,7 +44,7 @@ export function Navbar({ ctx }: NavbarProps) {
               {role === "student" && (
                 <>
                   <NavLink href="/student/results" className="hidden sm:inline-flex">
-                    My Results
+                    আমার Result
                   </NavLink>
                   <NavLink href="/student/practice" className="hidden sm:inline-flex">
                     Practice
@@ -58,7 +58,7 @@ export function Navbar({ ctx }: NavbarProps) {
               href="/signup"
               className="inline-flex min-h-[36px] sm:min-h-[38px] items-center rounded-lg bg-navy px-3 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-navy-strong whitespace-nowrap"
             >
-              Get started
+              শুরু করুন
             </Link>
           )}
 

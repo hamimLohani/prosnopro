@@ -48,16 +48,16 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
   const warnings: string[] = [];
 
   if (qList.length === 0) {
-    warnings.push("No questions have been added to this exam yet.");
+    warnings.push("এই Exam-এ এখনো কোনো প্রশ্ন যোগ করা হয়নি।");
   }
   qList.forEach((q, idx) => {
     if (q.options.length !== exam.options_per_question) {
       warnings.push(
-        `Question ${idx + 1} has ${q.options.length} options (exam setting expects ${exam.options_per_question}).`,
+        `প্রশ্ন ${idx + 1}-এ ${q.options.length}টি Option আছে (Exam সেটিংস অনুযায়ী ${exam.options_per_question}টি থাকা দরকার)।`,
       );
     }
     if (q.correct_index < 0 || q.correct_index >= q.options.length) {
-      warnings.push(`Question ${idx + 1} does not have a valid correct answer index.`);
+      warnings.push(`প্রশ্ন ${idx + 1}-এ সঠিক উত্তর নির্ধারণ করা নেই।`);
     }
   });
 
@@ -71,7 +71,7 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Student Preview &amp; Review
+              Student Preview ও Review
             </p>
             <h1 className="text-xl sm:text-2xl font-bold text-navy break-words">{exam.name}</h1>
           </div>
@@ -80,13 +80,13 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
               href={`/teacher/exams/${exam.id}/questions`}
               className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              ← Edit Questions
+              ← প্রশ্ন Edit করুন
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}`}
               className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              Exam Detail
+              Exam-এর বিস্তারিত
             </Link>
           </div>
         </div>
@@ -96,7 +96,7 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
           <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 sm:p-5 space-y-2">
             <div className="flex items-center gap-2 font-bold text-amber-950">
               <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
-              <span>Warnings to fix before publishing</span>
+              <span>Publish করার আগে এই সমস্যাগুলো ঠিক করুন</span>
             </div>
             <ul className="list-disc pl-5 text-sm text-amber-900 space-y-1">
               {warnings.map((w, i) => (
@@ -109,10 +109,9 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
             <div className="flex items-center gap-2.5 text-emerald-950">
               <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
               <div>
-                <p className="font-bold">Ready to publish</p>
+                <p className="font-bold">Publish করার জন্য প্রস্তুত</p>
                 <p className="text-xs text-emerald-800">
-                  {qList.length} questions • {totalMarks} total marks • {exam.duration_minutes}{" "}
-                  minutes
+                  {qList.length}টি প্রশ্ন • মোট {totalMarks} নম্বর • {exam.duration_minutes} মিনিট
                 </p>
               </div>
             </div>
@@ -132,13 +131,13 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
             <div>
               <h2 className="text-base sm:text-lg font-bold text-slate-900">{exam.name}</h2>
               <p className="text-xs text-slate-500">
-                {exam.subject || "General"} • {exam.medium === "bn" ? "Bangla" : "English"} •{" "}
-                {exam.duration_minutes} minutes
-                {exam.negative_marking ? ` • -${exam.negative_value} per wrong answer` : ""}
+                {exam.subject || "General"} • {exam.medium === "bn" ? "বাংলা" : "English"} •{" "}
+                {exam.duration_minutes} মিনিট
+                {exam.negative_marking ? ` • প্রতি ভুল উত্তরে -${exam.negative_value}` : ""}
               </p>
             </div>
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-              Preview Only
+              শুধু Preview
             </span>
           </div>
 

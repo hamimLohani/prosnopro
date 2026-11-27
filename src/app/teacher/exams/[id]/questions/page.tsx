@@ -68,13 +68,13 @@ export default async function ExamQuestionsPage({ params }: QuestionsPageProps) 
               href={`/teacher/exams/${exam.id}`}
               className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              Exam Detail
+              Exam-এর বিস্তারিত
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}/review`}
               className="inline-flex min-h-[42px] items-center justify-center rounded-xl bg-navy px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-navy-strong"
             >
-              Review &amp; Publish →
+              Review ও Publish →
             </Link>
           </div>
         </div>

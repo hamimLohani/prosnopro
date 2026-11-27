@@ -42,11 +42,11 @@ export default async function TeacherBankPage() {
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-navy">Question Bank</h1>
             <p className="text-sm text-slate-600">
-              Manage your saved questions and browse questions shared by other teachers.
+              আপনার সংরক্ষিত প্রশ্ন পরিচালনা করুন এবং অন্যান্য Teacher-দের শেয়ার করা প্রশ্ন দেখুন।
             </p>
           </div>
           <Link href="/teacher" className="py-1 text-sm font-semibold text-navy hover:underline shrink-0">
-            ← Back to Dashboard
+            ← Dashboard-এ ফিরে যান
           </Link>
         </div>
 

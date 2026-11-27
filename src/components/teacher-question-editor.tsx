@@ -676,8 +676,8 @@ export function TeacherQuestionEditor({
       {hasAttempts && (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
           <span>
-            Students have already started this exam. Adding, deleting, or reordering questions is
-            locked, but you can fix typos or answer keys and re-grade.
+            Student-রা ইতিমধ্যে এই Exam শুরু করেছে। প্রশ্ন যোগ, মুছে ফেলা বা ক্রম পরিবর্তন লক করা
+            আছে, তবে বানান বা সঠিক উত্তর ঠিক করে Re-grade করতে পারবেন।
           </span>
           <button
             type="button"
@@ -690,7 +690,7 @@ export function TeacherQuestionEditor({
             ) : (
               <RefreshCw className="h-3.5 w-3.5" />
             )}
-            <span>Re-grade Submitted Attempts</span>
+            <span>Submit করা উত্তর Re-grade করুন</span>
           </button>
         </div>
       )}
@@ -711,7 +711,7 @@ export function TeacherQuestionEditor({
         <section className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm space-y-2.5">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Add More Questions
+              আরও প্রশ্ন যোগ করুন
             </span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -746,7 +746,7 @@ export function TeacherQuestionEditor({
               className="inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
             >
               <Sparkles className="h-3.5 w-3.5 text-amber" />
-              <span>With AI</span>
+              <span>AI দিয়ে</span>
             </button>
             <button
               type="button"
@@ -770,13 +770,13 @@ export function TeacherQuestionEditor({
             <div className="border-b border-slate-200 bg-slate-50 p-2 sm:px-4 sm:pt-3 sm:pb-0 space-y-2 sm:space-y-0">
               {questions.length > 0 && (
                 <div className="flex items-center justify-between px-1 sm:hidden">
-                  <span className="text-xs font-semibold text-slate-500">Add Questions</span>
+                  <span className="text-xs font-semibold text-slate-500">প্রশ্ন যোগ করুন</span>
                   <button
                     type="button"
                     onClick={() => setComposerOpen(false)}
                     className="text-xs font-semibold text-navy hover:underline cursor-pointer"
                   >
-                    Hide form
+                    Form লুকান
                   </button>
                 </div>
               )}
@@ -814,7 +814,7 @@ export function TeacherQuestionEditor({
                   }`}
                 >
                   <Sparkles className="h-3.5 w-3.5 text-amber shrink-0" />
-                  <span>With AI</span>
+                  <span>AI দিয়ে</span>
                 </button>
                 <button
                   type="button"
@@ -834,7 +834,7 @@ export function TeacherQuestionEditor({
                     onClick={() => setComposerOpen(false)}
                     className="hidden sm:inline-flex ml-auto px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 cursor-pointer"
                   >
-                    Hide form
+                    Form লুকান
                   </button>
                 )}
               </div>
@@ -847,15 +847,15 @@ export function TeacherQuestionEditor({
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <h2 className="text-base font-bold text-navy">Add from Question Bank</h2>
+                    <h2 className="text-base font-bold text-navy">Question Bank থেকে যোগ করুন</h2>
                     <p className="text-xs text-slate-500">
-                      Showing {exam.medium === "bn" ? "Bangla" : "English"} {optionCount}-option
-                      questions from your bank and shared teacher bank. Copies a snapshot into this
-                      exam.
+                      আপনার ও Shared Bank-এর {exam.medium === "bn" ? "বাংলা" : "English"}{" "}
+                      {optionCount}-option প্রশ্ন দেখানো হচ্ছে। নির্বাচিত প্রশ্নের কপি এই Exam-এ
+                      যুক্ত হবে।
                     </p>
                   </div>
                   <Link href="/teacher/bank" className="text-xs font-semibold text-navy hover:underline">
-                    Manage Question Bank →
+                    Question Bank পরিচালনা →
                   </Link>
                 </div>
 
@@ -866,7 +866,7 @@ export function TeacherQuestionEditor({
                       type="text"
                       value={bankKeyword}
                       onChange={(e) => setBankKeyword(e.target.value)}
-                      placeholder="Search keyword or tag..."
+                      placeholder="কীওয়ার্ড বা Tag দিয়ে খুঁজুন..."
                       className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-base sm:text-sm"
                     />
                   </div>
@@ -874,15 +874,15 @@ export function TeacherQuestionEditor({
                     type="text"
                     value={bankSubject}
                     onChange={(e) => setBankSubject(e.target.value)}
-                    placeholder="Filter by subject..."
+                    placeholder="Subject দিয়ে ফিল্টার..."
                     className="h-11 sm:h-[42px] rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
                   />
                 </div>
 
                 {filteredBank.length === 0 ? (
                   <p className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-xs text-slate-500">
-                    No matching {optionCount}-option {exam.medium === "bn" ? "Bangla" : "English"}{" "}
-                    questions found in your Question Bank.
+                    আপনার Question Bank-এ মিলে যায় এমন {optionCount}-option{" "}
+                    {exam.medium === "bn" ? "বাংলা" : "English"} প্রশ্ন পাওয়া যায়নি।
                   </p>
                 ) : (
                   <div className="max-h-80 overflow-y-auto space-y-2 pr-1">
@@ -934,7 +934,7 @@ export function TeacherQuestionEditor({
                     ) : (
                       <Plus className="h-4 w-4" />
                     )}
-                    <span>Add Selected ({selectedBankIds.length})</span>
+                    <span>নির্বাচিত ({selectedBankIds.length}টি) যোগ করুন</span>
                   </button>
                 </div>
               </div>
@@ -944,7 +944,7 @@ export function TeacherQuestionEditor({
               <form onSubmit={handleSaveQuestion} className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-base font-bold text-navy">
-                    {editingId ? "Edit Question" : "Add Question Manually"}
+                    {editingId ? "প্রশ্ন Edit করুন" : "Manual প্রশ্ন যোগ করুন"}
                   </h2>
                   {editingId && (
                     <button
@@ -952,16 +952,16 @@ export function TeacherQuestionEditor({
                       onClick={resetForm}
                       className="min-h-[36px] px-2 text-xs font-semibold text-slate-500 hover:text-slate-800 cursor-pointer"
                     >
-                      Cancel edit
+                      Edit বাতিল
                     </button>
                   )}
                 </div>
 
                 <div className="space-y-1.5">
                   <label htmlFor="q-text" className="block text-sm font-medium text-slate-700">
-                    Question text{" "}
+                    প্রশ্নের লেখা{" "}
                     <span className="text-xs font-normal text-slate-400">
-                      (inline math supported via $x^2 + y^2$)
+                      ($x^2 + y^2$ দিয়ে গণিতের সূত্র লেখা যাবে)
                     </span>
                   </label>
                   <textarea
@@ -973,7 +973,7 @@ export function TeacherQuestionEditor({
                     placeholder={
                       exam.medium === "bn"
                         ? "এখানে বাংলা বা ইংরেজিতে প্রশ্ন লিখুন..."
-                        : "Enter question text..."
+                        : "এখানে প্রশ্ন লিখুন..."
                     }
                     className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
                   />
@@ -989,7 +989,7 @@ export function TeacherQuestionEditor({
 
                 <div className="space-y-2.5">
                   <span className="block text-sm font-medium text-slate-700">
-                    Options (select the correct answer)
+                    Options (সঠিক উত্তরটি সিলেক্ট করুন)
                   </span>
                   <div className="grid gap-2.5 sm:grid-cols-2">
                     {options.map((opt, idx) => (
@@ -1004,7 +1004,7 @@ export function TeacherQuestionEditor({
                         <input
                           type="radio"
                           name="correct-option"
-                          aria-label={`Mark option ${optionLabel(idx, exam.medium)} correct`}
+                          aria-label={`Option ${optionLabel(idx, exam.medium)} সঠিক`}
                           checked={correctIndex === idx}
                           onChange={() => setCorrectIndex(idx)}
                           className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 text-emerald-600 cursor-pointer"
@@ -1032,22 +1032,22 @@ export function TeacherQuestionEditor({
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div className="space-y-1.5 sm:col-span-2">
                     <label htmlFor="q-expl" className="block text-sm font-medium text-slate-700">
-                      Explanation{" "}
-                      <span className="text-xs font-normal text-slate-400">(optional)</span>
+                      ব্যাখ্যা / Explanation{" "}
+                      <span className="text-xs font-normal text-slate-400">(ঐচ্ছিক)</span>
                     </label>
                     <input
                       id="q-expl"
                       type="text"
                       value={explanation}
                       onChange={(e) => setExplanation(e.target.value)}
-                      placeholder="Shown after results release if Show Answers is enabled"
+                      placeholder="Result প্রকাশের পর সঠিক উত্তরের নিচে দেখা যাবে"
                       className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
                     />
                   </div>
 
                   <div className="space-y-1.5">
                     <label htmlFor="q-marks" className="block text-sm font-medium text-slate-700">
-                      Marks
+                      নম্বর (Marks)
                     </label>
                     <input
                       id="q-marks"
@@ -1069,7 +1069,7 @@ export function TeacherQuestionEditor({
                       onChange={(e) => setSaveToBank(e.target.checked)}
                       className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 rounded border-slate-300 text-navy"
                     />
-                    <span>Also save a copy to my Question Bank</span>
+                    <span>আমার Question Bank-এও একটি কপি Save করুন</span>
                   </label>
                 )}
 
@@ -1084,7 +1084,7 @@ export function TeacherQuestionEditor({
                     ) : (
                       <Plus className="h-4 w-4" />
                     )}
-                    <span>{editingId ? "Update Question" : "Add Question"}</span>
+                    <span>{editingId ? "প্রশ্ন Update করুন" : "প্রশ্ন যোগ করুন"}</span>
                   </button>
                 </div>
               </form>
@@ -1098,10 +1098,10 @@ export function TeacherQuestionEditor({
                     <div className="flex items-start gap-2.5 text-sm text-amber-950">
                       <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-semibold">Add your own AI API key first</p>
+                        <p className="font-semibold">প্রথমে আপনার নিজস্ব AI API Key যোগ করুন</p>
                         <p className="text-xs text-amber-900">
-                          Each teacher uses their own Gemini (free tier), Groq (free tier), OpenAI,
-                          or Anthropic key saved encrypted in Settings.
+                          প্রতিটি Teacher Settings-এ গিয়ে নিজস্ব Gemini (Free tier), Groq (Free
+                          tier), OpenAI বা Anthropic Key সংরক্ষণ করতে পারেন।
                         </p>
                       </div>
                     </div>
@@ -1110,7 +1110,7 @@ export function TeacherQuestionEditor({
                       className="inline-flex min-h-[40px] w-full sm:w-auto shrink-0 items-center justify-center gap-1.5 rounded-lg bg-navy px-3.5 py-2 text-xs font-semibold text-white hover:bg-navy-strong"
                     >
                       <KeyRound className="h-3.5 w-3.5" />
-                      <span>Add API Key in Settings</span>
+                      <span>Settings-এ API Key যোগ করুন</span>
                     </Link>
                   </div>
                 ) : (
@@ -1118,53 +1118,53 @@ export function TeacherQuestionEditor({
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
                         <h2 className="text-base font-bold text-navy">
-                          Generate MCQ Drafts Using Your {aiProvider?.toUpperCase()} Key
+                          আপনার {aiProvider?.toUpperCase()} Key দিয়ে MCQ Draft তৈরি করুন
                         </h2>
                         <p className="text-xs text-slate-500">
-                          Auto-configured for {exam.medium === "bn" ? "Bangla" : "English"} •{" "}
-                          {exam.options_per_question} options • {exam.default_marks} mark(s) each
+                          সেটিংস: {exam.medium === "bn" ? "বাংলা" : "English"} •{" "}
+                          {exam.options_per_question}টি Option • প্রতিটি {exam.default_marks} নম্বর
                         </p>
                       </div>
                       <Link
                         href="/teacher/settings#ai-key"
                         className="text-xs font-semibold text-navy hover:underline"
                       >
-                        Change API key
+                        API Key পরিবর্তন করুন
                       </Link>
                     </div>
 
                     <div className="grid gap-4 sm:grid-cols-3">
                       <div className="space-y-1.5">
                         <label htmlFor="ai-class" className="block text-sm font-medium text-slate-700">
-                          Class / Level
+                          Class / শ্রেণি
                         </label>
                         <input
                           id="ai-class"
                           type="text"
                           value={aiClassLevel}
                           onChange={(e) => setAiClassLevel(e.target.value)}
-                          placeholder="e.g. Class 9–10 / HSC"
+                          placeholder="যেমন: Class 9–10 / HSC"
                           className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
                         />
                       </div>
 
                       <div className="space-y-1.5">
                         <label htmlFor="ai-subj" className="block text-sm font-medium text-slate-700">
-                          Subject
+                          Subject (বিষয়)
                         </label>
                         <input
                           id="ai-subj"
                           type="text"
                           value={aiSubject}
                           onChange={(e) => setAiSubject(e.target.value)}
-                          placeholder="e.g. পদার্থবিজ্ঞান"
+                          placeholder="যেমন: পদার্থবিজ্ঞান"
                           className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
                         />
                       </div>
 
                       <div className="space-y-1.5">
                         <label htmlFor="ai-count" className="block text-sm font-medium text-slate-700">
-                          Questions to generate (max 100)
+                          কতটি প্রশ্ন তৈরি হবে (সর্বোচ্চ ১০০)
                         </label>
                         <input
                           id="ai-count"
@@ -1181,7 +1181,7 @@ export function TeacherQuestionEditor({
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <label htmlFor="ai-notes" className="block text-sm font-medium text-slate-700">
-                          Chapter, syllabus, or extra notes
+                          অধ্যায়, সিলেবাস বা নির্দেশনা (Prompt)
                         </label>
                         <button
                           type="button"
@@ -1192,7 +1192,7 @@ export function TeacherQuestionEditor({
                           }
                           className="inline-flex min-h-[30px] items-center rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-navy hover:bg-navy/5 active:scale-95 transition cursor-pointer"
                         >
-                          Use sample prompt
+                          Sample Prompt ব্যবহার করুন
                         </button>
                       </div>
 
@@ -1218,7 +1218,7 @@ export function TeacherQuestionEditor({
                         ) : (
                           <Sparkles className="h-4 w-4 text-amber" />
                         )}
-                        <span>{aiGenerating ? (aiProgress ?? "Generating drafts...") : "Generate Drafts"}</span>
+                        <span>{aiGenerating ? (aiProgress ?? "Draft তৈরি হচ্ছে...") : "Draft তৈরি করুন"}</span>
                       </button>
                     </div>
                   </form>
@@ -1234,11 +1234,10 @@ export function TeacherQuestionEditor({
                     <div className="flex items-start gap-2.5 text-sm text-amber-950">
                       <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-semibold">Add your own AI API key to import PDFs</p>
+                        <p className="font-semibold">PDF Import করতে আপনার AI API Key যোগ করুন</p>
                         <p className="text-xs text-amber-900">
-                          PDF pages are parsed in your browser and sent directly using your own
-                          saved key (Gemini free tier supports both Bangla text and scanned/Bijoy
-                          page images).
+                          PDF-এর পৃষ্ঠা আপনার Browser-এ প্রক্রিয়াজাত হয়ে সরাসরি আপনার Key দিয়ে স্ক্যান
+                          হয় (Gemini Free tier বাংলা লেখা ও Scanned/Bijoy PDF সাপোর্ট করে)।
                         </p>
                       </div>
                     </div>
@@ -1247,19 +1246,19 @@ export function TeacherQuestionEditor({
                       className="inline-flex min-h-[40px] w-full sm:w-auto shrink-0 items-center justify-center gap-1.5 rounded-lg bg-navy px-3.5 py-2 text-xs font-semibold text-white hover:bg-navy-strong"
                     >
                       <KeyRound className="h-3.5 w-3.5" />
-                      <span>Add API Key</span>
+                      <span>API Key যোগ করুন</span>
                     </Link>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     <div>
                       <h2 className="text-base font-bold text-navy">
-                        Zero-Storage PDF Import (Up to 10 Pages / 10 MB)
+                        Zero-Storage PDF Import (সর্বোচ্চ ১০ পৃষ্ঠা / ১০ MB)
                       </h2>
                       <p className="text-xs text-slate-600">
-                        Unicode Bangla/English PDFs extract locally as text; scanned or legacy
-                        Bijoy PDFs are rendered to browser images and scanned via your{" "}
-                        {aiProvider?.toUpperCase()} key. Nothing is saved to Supabase Storage.
+                        Unicode বাংলা/English PDF সরাসরি Text হিসেবে এবং Scanned বা Bijoy PDF
+                        Image হিসেবে আপনার {aiProvider?.toUpperCase()} Key দিয়ে পড়া হয়। কোনো PDF
+                        Server-এ Save থাকে না।
                       </p>
                     </div>
 
@@ -1267,11 +1266,11 @@ export function TeacherQuestionEditor({
                       <FileUp className="h-6 w-6 text-navy" />
                       <span className="text-sm font-semibold text-slate-800">
                         {pdfImporting
-                          ? pdfProgress ?? "Processing PDF..."
-                          : "Choose a question PDF to extract into drafts"}
+                          ? pdfProgress ?? "PDF প্রসেস হচ্ছে..."
+                          : "প্রশ্নের PDF ফাইল বাছাই করুন"}
                       </span>
                       <span className="text-xs text-slate-500">
-                        All drafts require your review before saving to the exam
+                        Exam-এ Save করার আগে সব Draft আপনি যাচাই করতে পারবেন
                       </span>
                       <input
                         type="file"
@@ -1295,10 +1294,10 @@ export function TeacherQuestionEditor({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold text-navy">
-                Review Draft Questions ({drafts.length})
+                Draft প্রশ্ন যাচাই করুন ({drafts.length}টি)
               </h2>
               <p className="text-xs text-slate-600">
-                Verify every question and confirm the correct answer radio button before saving.
+                Save করার আগে প্রতিটি প্রশ্ন ও সঠিক উত্তর যাচাই করে নিন।
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -1310,7 +1309,7 @@ export function TeacherQuestionEditor({
                 }}
                 className="min-h-[36px] text-xs font-semibold text-rose-700 hover:underline cursor-pointer"
               >
-                Discard all drafts
+                সব Draft বাতিল করুন
               </button>
             </div>
           </div>
@@ -1332,7 +1331,7 @@ export function TeacherQuestionEditor({
                         className="inline-flex min-h-[32px] items-center gap-1 rounded-lg px-2.5 text-xs font-semibold text-navy hover:bg-slate-100 cursor-pointer"
                       >
                         <Pencil className="h-3 w-3" />
-                        <span>{isEditingDraft ? "Done" : "Edit"}</span>
+                        <span>{isEditingDraft ? "সম্পন্ন" : "Edit"}</span>
                       </button>
                       <button
                         type="button"
@@ -1344,7 +1343,7 @@ export function TeacherQuestionEditor({
                         }}
                         className="min-h-[32px] px-2 text-xs text-rose-600 hover:underline cursor-pointer"
                       >
-                        Remove
+                        মুছুন
                       </button>
                     </div>
                   </div>
@@ -1456,7 +1455,7 @@ export function TeacherQuestionEditor({
                 onChange={(e) => setSaveDraftsToBank(e.target.checked)}
                 className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 rounded border-slate-300 text-navy"
               />
-              <span>Also save approved drafts to my Question Bank</span>
+              <span>অনুমোদিত Draft-গুলো Question Bank-এও Save করুন</span>
             </label>
 
             <button
@@ -1470,7 +1469,7 @@ export function TeacherQuestionEditor({
               ) : (
                 <CheckCircle2 className="h-4 w-4" />
               )}
-              <span>Confirm &amp; Save {drafts.length} Draft(s)</span>
+              <span>নিশ্চিত করে {drafts.length}টি Draft Save করুন</span>
             </button>
           </div>
         </section>
@@ -1479,12 +1478,12 @@ export function TeacherQuestionEditor({
       {/* Existing Question List */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-slate-900">Questions ({questions.length})</h2>
+          <h2 className="text-base font-bold text-slate-900">প্রশ্নসমূহ ({questions.length}টি)</h2>
         </div>
 
         {questions.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-            No questions added yet. Add manually, generate with your AI key, or import from PDF.
+            এখনো কোনো প্রশ্ন যোগ করা হয়নি। Manual, AI Key অথবা PDF Import দিয়ে প্রশ্ন যোগ করুন।
           </div>
         ) : (
           <div className="space-y-3">
@@ -1496,7 +1495,7 @@ export function TeacherQuestionEditor({
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-semibold text-slate-500">
-                      Q{idx + 1} • {q.marks} mark{Number(q.marks) === 1 ? "" : "s"}
+                      প্রশ্ন {idx + 1} • {q.marks} নম্বর
                     </span>
 
                     <div className="flex items-center gap-1 shrink-0">
@@ -1587,9 +1586,9 @@ export function TeacherQuestionEditor({
 
       <ConfirmModal
         open={pendingDeleteQuestion !== null}
-        title="Remove Question?"
-        message="Remove this question from the exam?"
-        confirmLabel="Remove"
+        title="প্রশ্নটি সরিয়ে ফেলবেন?"
+        message="এই Exam থেকে প্রশ্নটি সরিয়ে ফেলতে চান?"
+        confirmLabel="সরিয়ে ফেলুন"
         busy={busy}
         onCancel={() => setPendingDeleteQuestion(null)}
         onConfirm={() => {

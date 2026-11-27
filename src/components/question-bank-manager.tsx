@@ -219,8 +219,8 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
     <div className="space-y-5 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <p className="text-sm text-slate-600">
-          {items.length} question(s) accessible ({items.filter((i) => i.teacher_id === teacherId).length}{" "}
-          yours)
+          মোট {items.length}টি প্রশ্ন ({items.filter((i) => i.teacher_id === teacherId).length}টি
+          আপনার)
         </p>
         <button
           type="button"
@@ -234,7 +234,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
           className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong cursor-pointer"
         >
           <Plus className="h-4 w-4" />
-          <span>{showForm ? "Close Form" : "Add Bank Question"}</span>
+          <span>{showForm ? "Form বন্ধ করুন" : "নতুন প্রশ্ন যোগ করুন"}</span>
         </button>
       </div>
 
@@ -255,7 +255,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
           className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm space-y-4"
         >
           <h2 className="text-base font-bold text-navy">
-            {editingId ? "Edit Bank Question" : "New Question Bank Item"}
+            {editingId ? "Bank-এর প্রশ্ন Edit করুন" : "Question Bank-এ নতুন প্রশ্ন"}
           </h2>
 
           <textarea
@@ -263,7 +263,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
             required
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Question text (Bangla or English, inline $...$ math supported)"
+            placeholder="প্রশ্নের লেখা (বাংলা বা English, $...$ দিয়ে গণিতের সূত্র লেখা যাবে)"
             className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm"
           />
 
@@ -291,7 +291,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
                     next[idx] = e.target.value;
                     setOptions(next);
                   }}
-                  placeholder={`Option ${idx + 1}`}
+                  placeholder={`অপশন ${idx + 1}`}
                   className="w-full bg-transparent text-base sm:text-sm focus:outline-none"
                 />
               </div>
@@ -303,14 +303,14 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
               type="text"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              placeholder="Subject"
+              placeholder="Subject (বিষয়)"
               className="h-11 sm:h-[42px] rounded-lg border border-slate-300 px-3 text-base sm:text-sm"
             />
             <input
               type="text"
               value={classLevel}
               onChange={(e) => setClassLevel(e.target.value)}
-              placeholder="Class (e.g. HSC)"
+              placeholder="Class (যেমন: HSC)"
               className="h-11 sm:h-[42px] rounded-lg border border-slate-300 px-3 text-base sm:text-sm"
             />
             <select
@@ -318,7 +318,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
               onChange={(e) => setMedium(e.target.value as ExamMedium)}
               className="h-11 sm:h-[42px] rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm"
             >
-              <option value="bn">Bangla</option>
+              <option value="bn">বাংলা</option>
               <option value="en">English</option>
             </select>
             <select
@@ -326,8 +326,8 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
               onChange={(e) => setVisibility(e.target.value as "private" | "shared")}
               className="h-11 sm:h-[42px] rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm"
             >
-              <option value="private">Private (only me)</option>
-              <option value="shared">Shared (teachers &amp; practice)</option>
+              <option value="private">Private (শুধু আমি)</option>
+              <option value="shared">Shared (সবার জন্য)</option>
             </select>
           </div>
 
@@ -336,14 +336,14 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
               type="text"
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
-              placeholder="Tags (comma-separated, e.g. mechanics, chapter-4)"
+              placeholder="Tag (কমা দিয়ে, যেমন: mechanics, chapter-4)"
               className="h-11 sm:h-[42px] rounded-lg border border-slate-300 px-3 text-base sm:text-sm"
             />
             <input
               type="text"
               value={explanation}
               onChange={(e) => setExplanation(e.target.value)}
-              placeholder="Explanation (optional)"
+              placeholder="ব্যাখ্যা / Explanation (ঐচ্ছিক)"
               className="h-11 sm:h-[42px] rounded-lg border border-slate-300 px-3 text-base sm:text-sm"
             />
           </div>
@@ -354,7 +354,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
               onClick={resetForm}
               className="min-h-[44px] w-full sm:w-auto rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 cursor-pointer"
             >
-              Cancel
+              বাতিল
             </button>
             <button
               type="submit"
@@ -362,7 +362,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
               className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong cursor-pointer"
             >
               {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-              <span>{editingId ? "Update" : "Save Question"}</span>
+              <span>{editingId ? "Update করুন" : "প্রশ্ন Save করুন"}</span>
             </button>
           </div>
         </form>
@@ -376,7 +376,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Search Bangla or English keyword..."
+            placeholder="বাংলা বা English কীওয়ার্ড দিয়ে খুঁজুন..."
             className="h-11 w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-base sm:text-sm"
           />
         </div>
@@ -384,14 +384,14 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
           type="text"
           value={subjectFilter}
           onChange={(e) => setSubjectFilter(e.target.value)}
-          placeholder="Filter subject"
+          placeholder="Subject ফিল্টার"
           className="h-11 rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
         />
         <input
           type="text"
           value={classFilter}
           onChange={(e) => setClassFilter(e.target.value)}
-          placeholder="Filter class"
+          placeholder="Class ফিল্টার"
           className="h-11 rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
         />
         <div className="grid grid-cols-2 gap-2">
@@ -400,8 +400,8 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
             onChange={(e) => setMediumFilter(e.target.value as "all" | ExamMedium)}
             className="h-11 rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm sm:text-xs"
           >
-            <option value="all">All Media</option>
-            <option value="bn">Bangla</option>
+            <option value="all">সব মাধ্যম</option>
+            <option value="bn">বাংলা</option>
             <option value="en">English</option>
           </select>
           <select
@@ -409,8 +409,8 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
             onChange={(e) => setScope(e.target.value as "all" | "mine" | "shared")}
             className="h-11 rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm sm:text-xs"
           >
-            <option value="all">All</option>
-            <option value="mine">Mine</option>
+            <option value="all">সব</option>
+            <option value="mine">আমারগুলো</option>
             <option value="shared">Shared</option>
           </select>
         </div>
@@ -420,7 +420,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
       <div className="space-y-3">
         {filtered.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-            No matching questions found in the bank.
+            Question Bank-এ মিলে যায় এমন কোনো প্রশ্ন পাওয়া যায়নি।
           </div>
         ) : (
           filtered.map((item) => {
@@ -434,7 +434,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
                       <span className="rounded bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">
-                        {item.medium === "bn" ? "Bangla" : "English"}
+                        {item.medium === "bn" ? "বাংলা" : "English"}
                       </span>
                       {item.subject && (
                         <span className="rounded bg-navy/10 px-2 py-0.5 font-medium text-navy">
@@ -458,7 +458,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
                         ) : (
                           <Lock className="h-3 w-3" />
                         )}
-                        {item.visibility}
+                        {item.visibility === "shared" ? "Shared" : "Private"}
                       </span>
                     </div>
 
@@ -467,10 +467,10 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
                         <button
                           type="button"
                           onClick={() => handleToggleVisibility(item)}
-                          title="Toggle private / shared"
+                          title="Private / Shared পরিবর্তন করুন"
                           className="min-h-[34px] rounded-lg px-2.5 py-1 text-xs font-medium text-navy hover:bg-slate-100 cursor-pointer"
                         >
-                          {item.visibility === "shared" ? "Make Private" : "Share"}
+                          {item.visibility === "shared" ? "Private করুন" : "Share করুন"}
                         </button>
                         <button
                           type="button"
@@ -525,9 +525,9 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
 
       <ConfirmModal
         open={pendingDeleteItem !== null}
-        title="Delete Question?"
-        message="Delete this question from your bank?"
-        confirmLabel="Delete"
+        title="প্রশ্ন মুছে ফেলবেন?"
+        message="আপনার Question Bank থেকে এই প্রশ্নটি স্থায়ীভাবে মুছে ফেলতে চান?"
+        confirmLabel="মুছে ফেলুন"
         busy={busy}
         onCancel={() => setPendingDeleteItem(null)}
         onConfirm={() => {

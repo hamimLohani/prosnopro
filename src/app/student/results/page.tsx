@@ -51,22 +51,22 @@ export default async function StudentResultsPage() {
       <main className="mx-auto w-full max-w-4xl flex-1 space-y-5 sm:space-y-6 px-3 py-5 sm:px-4 sm:py-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-navy">My Results</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-navy">আমার Result</h1>
             <p className="text-sm text-slate-600">
-              Attempt history with released scores and answer explanations.
+              আপনার আগের Exam-গুলোর Score এবং সঠিক উত্তরের ব্যাখ্যা।
             </p>
           </div>
           <Link href="/student" className="py-1 text-sm font-semibold text-navy hover:underline">
-            ← Back to Student Home
+            ← Student Home-এ ফিরে যান
           </Link>
         </div>
 
         {items.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 sm:p-10 text-center space-y-3">
             <ClipboardList className="mx-auto h-8 w-8 text-slate-400" />
-            <p className="text-base font-semibold text-slate-800">No exam attempts yet</p>
+            <p className="text-base font-semibold text-slate-800">এখনো কোনো Exam দেওয়া হয়নি</p>
             <p className="text-sm text-slate-500">
-              Join an exam from your dashboard using a Teacher Code and Exam Code.
+              Dashboard থেকে Teacher Code এবং Exam Code দিয়ে একটি Exam-এ জয়েন করুন।
             </p>
           </div>
         ) : (
@@ -93,10 +93,10 @@ export default async function StudentResultsPage() {
                       </span>
                     </div>
                     <p className="text-xs text-slate-500">
-                      {item.subject || "General"} • {item.medium === "bn" ? "Bangla" : "English"} •{" "}
+                      {item.subject || "General"} • {item.medium === "bn" ? "বাংলা" : "English"} •{" "}
                       {item.submitted_at
-                        ? `Submitted ${new Date(item.submitted_at).toLocaleString()}`
-                        : `Started ${new Date(item.started_at).toLocaleString()}`}
+                        ? `Submit: ${new Date(item.submitted_at).toLocaleString()}`
+                        : `শুরু: ${new Date(item.started_at).toLocaleString()}`}
                     </p>
                   </div>
 
@@ -106,7 +106,7 @@ export default async function StudentResultsPage() {
                         href={`/student/exams/${item.exam_id}/take`}
                         className="inline-flex min-h-[40px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-xs font-semibold text-white hover:bg-navy-strong"
                       >
-                        <span>Resume Exam</span>
+                        <span>Exam চালিয়ে যান</span>
                         <ArrowRight className="h-3.5 w-3.5" />
                       </Link>
                     ) : (
@@ -125,8 +125,8 @@ export default async function StudentResultsPage() {
                             <Clock className="h-3.5 w-3.5" />
                             <span>
                               {item.result_release === "teacher_only"
-                                ? "Private to teacher"
-                                : "Pending release"}
+                                ? "শুধু Teacher-এর জন্য"
+                                : "প্রকাশের অপেক্ষায়"}
                             </span>
                           </span>
                         )}
@@ -135,7 +135,7 @@ export default async function StudentResultsPage() {
                           href={`/student/results/${item.attempt_id}`}
                           className="inline-flex min-h-[40px] items-center gap-1 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-navy hover:bg-slate-50"
                         >
-                          <span>Details</span>
+                          <span>বিস্তারিত</span>
                           <ArrowRight className="h-3.5 w-3.5" />
                         </Link>
                       </>

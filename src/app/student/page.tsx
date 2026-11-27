@@ -57,7 +57,7 @@ export default async function StudentDashboardPage() {
       <main className="mx-auto w-full max-w-4xl flex-1 space-y-4 sm:space-y-6 px-3 py-4 sm:px-4 sm:py-8">
         <section className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-navy px-4 py-3.5 text-white shadow-sm sm:p-6">
           <div className="min-w-0">
-            <h1 className="truncate text-lg font-bold sm:text-2xl">Hi, {ctx.profile.name}</h1>
+            <h1 className="truncate text-lg font-bold sm:text-2xl">স্বাগতম, {ctx.profile.name}</h1>
             <p className="text-xs text-slate-300">
               {ctx.profile.roll ? `Roll/ID: ${ctx.profile.roll}` : "Student Portal"}
               {ctx.profile.institution ? ` • ${ctx.profile.institution}` : ""}
@@ -69,7 +69,7 @@ export default async function StudentDashboardPage() {
 
         {attemptList.length > 0 && (
           <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-3">
-            <h2 className="text-base font-bold text-navy">Recent Exams</h2>
+            <h2 className="text-base font-bold text-navy">সাম্প্রতিক Exam</h2>
             <div className="divide-y divide-slate-100">
               {attemptList.map((a) => (
                 <div
@@ -96,7 +96,7 @@ export default async function StudentDashboardPage() {
                         : "border border-slate-300 text-navy hover:bg-slate-50"
                     }`}
                   >
-                    <span>{a.status === "in_progress" ? "Resume Exam" : "View Status"}</span>
+                    <span>{a.status === "in_progress" ? "Exam চালিয়ে যান" : "অবস্থা দেখুন"}</span>
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>
@@ -114,8 +114,8 @@ export default async function StudentDashboardPage() {
               <ClipboardList className="h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <h2 className="font-bold text-sm sm:text-base text-slate-900">My Results</h2>
-              <p className="hidden sm:block text-xs text-slate-500">Scores &amp; explanations</p>
+              <h2 className="font-bold text-sm sm:text-base text-slate-900">আমার Result</h2>
+              <p className="hidden sm:block text-xs text-slate-500">Score ও ব্যাখ্যা</p>
             </div>
           </Link>
 
@@ -128,7 +128,7 @@ export default async function StudentDashboardPage() {
             </div>
             <div className="min-w-0">
               <h2 className="font-bold text-sm sm:text-base text-slate-900">Practice</h2>
-              <p className="hidden sm:block text-xs text-slate-500">Past &amp; shared questions</p>
+              <p className="hidden sm:block text-xs text-slate-500">আগের ও Shared প্রশ্ন</p>
             </div>
           </Link>
         </section>

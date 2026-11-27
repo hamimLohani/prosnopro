@@ -96,7 +96,7 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
             href={`/teacher/exams/${exam.id}/results`}
             className="ml-2 font-semibold text-navy hover:underline"
           >
-            ← Back to Results
+            ← Result-এ ফিরে যান
           </Link>
         </div>
 

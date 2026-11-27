@@ -8,9 +8,9 @@ export default function SignupChooserPage() {
       <Navbar />
       <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center px-4 py-12">
         <div className="mb-8 text-center space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">Choose your account type</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-navy">আপনার Account-এর ধরন বাছাই করুন</h1>
           <p className="text-sm text-slate-600">
-            Free forever for teachers and students. Sign in with Google in seconds.
+            শিক্ষক ও শিক্ষার্থীদের জন্য সম্পূর্ণ ফ্রি। Google দিয়ে কয়েক সেকেন্ডেই Sign in করুন।
           </p>
         </div>
 
@@ -22,13 +22,13 @@ export default function SignupChooserPage() {
             <div className="mb-4 inline-flex rounded-xl bg-navy/10 p-3 text-navy">
               <ShieldCheck className="h-6 w-6" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900">Teacher account</h2>
+            <h2 className="text-xl font-bold text-slate-900">Teacher Account</h2>
             <p className="mt-1.5 text-sm text-slate-600">
-              Choose your unique Teacher Code, build timed Bangla or English MCQ exams, monitor entries,
-              and export results.
+              আপনার ইউনিক Teacher Code সেট করুন, বাংলা বা English-এ টাইমড MCQ Exam তৈরি করুন,
+              Live Monitor করুন এবং Result Export করুন।
             </p>
             <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-navy group-hover:translate-x-0.5 transition">
-              Sign up as Teacher <ArrowRight className="h-4 w-4" />
+              Teacher হিসেবে Sign up <ArrowRight className="h-4 w-4" />
             </span>
           </Link>
 
@@ -39,21 +39,21 @@ export default function SignupChooserPage() {
             <div className="mb-4 inline-flex rounded-xl bg-amber-100 p-3 text-amber-700">
               <GraduationCap className="h-6 w-6" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900">Student account</h2>
+            <h2 className="text-xl font-bold text-slate-900">Student Account</h2>
             <p className="mt-1.5 text-sm text-slate-600">
-              Join exams using a Teacher Code and Exam Code, view your scores and explanations, and
-              practice past questions.
+              Teacher Code ও Exam Code দিয়ে Exam-এ জয়েন করুন, Score ও ব্যাখ্যা দেখুন এবং আগের প্রশ্ন
+              Practice করুন।
             </p>
             <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-navy group-hover:translate-x-0.5 transition">
-              Sign up as Student <ArrowRight className="h-4 w-4" />
+              Student হিসেবে Sign up <ArrowRight className="h-4 w-4" />
             </span>
           </Link>
         </div>
 
         <p className="mt-6 text-sm text-slate-600">
-          Already have an account?{" "}
+          আগে থেকেই Account আছে?{" "}
           <Link href="/login" className="font-semibold text-navy hover:underline">
-            Sign in
+            Sign in করুন
           </Link>
         </p>
       </main>

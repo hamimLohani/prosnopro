@@ -70,27 +70,27 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
     const parsedNeg = negativeMarking ? Number(negativeValue) : 0;
 
     if (!cleanName) {
-      setError("Exam name is required.");
+      setError("Exam-এর নাম দেওয়া আবশ্যক।");
       return;
     }
     if (!isValidExamCode(cleanCode)) {
-      setError("Exam Code must be 3–16 English letters or digits.");
+      setError("Exam Code অবশ্যই ৩–১৬টি English অক্ষর বা সংখ্যা হতে হবে।");
       return;
     }
     if (!Number.isInteger(parsedDuration) || parsedDuration < 1 || parsedDuration > 600) {
-      setError("Duration must be between 1 and 600 minutes.");
+      setError("সময়সীমা ১ থেকে ৬০০ মিনিটের মধ্যে হতে হবে।");
       return;
     }
     if (!Number.isInteger(parsedOptions) || parsedOptions < 2 || parsedOptions > 6) {
-      setError("Options per question must be between 2 and 6.");
+      setError("প্রতি প্রশ্নে Option ২ থেকে ৬টির মধ্যে হতে হবে।");
       return;
     }
     if (!Number.isFinite(parsedMarks) || parsedMarks <= 0) {
-      setError("Default marks must be greater than 0.");
+      setError("প্রতি প্রশ্নের নম্বর ০-এর বেশি হতে হবে।");
       return;
     }
     if (negativeMarking && (!Number.isFinite(parsedNeg) || parsedNeg < 0)) {
-      setError("Negative deduction must be 0 or greater.");
+      setError("Negative marking ০ বা তার বেশি হতে হবে।");
       return;
     }
 
@@ -98,13 +98,13 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
     let closesIso: string | null = null;
     if (scheduleEnabled) {
       if (!opensAt || !closesAt) {
-        setError("Provide both opens-at and closes-at times when scheduling is enabled.");
+        setError("Schedule চালু করলে শুরুর এবং শেষের সময় দিন।");
         return;
       }
       const o = new Date(opensAt);
       const c = new Date(closesAt);
       if (Number.isNaN(o.getTime()) || Number.isNaN(c.getTime()) || c <= o) {
-        setError("Closes-at must be after opens-at.");
+        setError("শেষের সময় অবশ্যই শুরুর সময়ের পরে হতে হবে।");
         return;
       }
       opensIso = o.toISOString();
@@ -116,7 +116,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
-      setError("Session expired. Please sign in again.");
+      setError("Session শেষ হয়ে গেছে। আবার Sign in করুন।");
       setSaving(false);
       return;
     }
@@ -189,8 +189,8 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
         <div className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
           <Lock className="h-4 w-4 shrink-0 text-amber-600 mt-0.5" />
           <span>
-            Students have already started this exam, so structural settings (duration, option count,
-            negative marking, and shuffle flags) are locked.
+            Student-রা ইতিমধ্যে এই Exam শুরু করেছে, তাই সময়সীমা, Option সংখ্যা, Negative marking ও
+            Shuffle সেটিংস লক করা আছে।
           </span>
         </div>
       )}
@@ -203,12 +203,12 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
 
       {/* Basic Details */}
       <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-4">
-        <h2 className="text-base font-bold text-navy">Exam Details</h2>
+        <h2 className="text-base font-bold text-navy">Exam-এর তথ্য</h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5 sm:col-span-2">
             <label htmlFor="exam-name" className="block text-sm font-medium text-slate-700">
-              Exam title
+              Exam-এর নাম (Title)
             </label>
             <input
               id="exam-name"
@@ -217,14 +217,14 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
               maxLength={200}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. HSC Physics 1st Paper — Chapter 4 Quiz"
+              placeholder="যেমন: HSC Physics 1st Paper — Chapter 4 Quiz"
               className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
           </div>
 
           <div className="space-y-1.5">
             <label htmlFor="exam-subject" className="block text-sm font-medium text-slate-700">
-              Subject
+              Subject (বিষয়)
             </label>
             <input
               id="exam-subject"
@@ -232,14 +232,14 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
               maxLength={100}
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              placeholder="e.g. পদার্থবিজ্ঞান / Physics"
+              placeholder="যেমন: পদার্থবিজ্ঞান / Physics"
               className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
           </div>
 
           <div className="space-y-1.5">
             <label htmlFor="exam-medium" className="block text-sm font-medium text-slate-700">
-              Medium
+              Medium (মাধ্যম)
             </label>
             <select
               id="exam-medium"
@@ -247,14 +247,14 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
               onChange={(e) => setMedium(e.target.value as ExamMedium)}
               className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             >
-              <option value="bn">Bangla (বাংলা)</option>
+              <option value="bn">বাংলা (Bangla)</option>
               <option value="en">English</option>
             </select>
           </div>
 
           <div className="space-y-1.5">
             <label htmlFor="exam-code" className="block text-sm font-medium text-slate-700">
-              Exam Code <span className="text-xs font-normal text-slate-500">(3–16 chars)</span>
+              Exam Code <span className="text-xs font-normal text-slate-500">(৩–১৬ অক্ষর)</span>
             </label>
             <div className="flex gap-2">
               <input
@@ -272,7 +272,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
               <button
                 type="button"
                 onClick={() => setCode(generateExamCode())}
-                title="Generate random code"
+                title="Random Code তৈরি করুন"
                 className="inline-flex h-11 sm:h-[42px] shrink-0 items-center gap-1 rounded-lg border border-slate-300 bg-white px-3.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
               >
                 <RefreshCw className="h-3.5 w-3.5" />
@@ -283,7 +283,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
 
           <div className="space-y-1.5">
             <label htmlFor="exam-duration" className="block text-sm font-medium text-slate-700">
-              Total time (minutes)
+              মোট সময় (মিনিট)
             </label>
             <input
               id="exam-duration"
@@ -301,12 +301,12 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
 
       {/* Marking & Shuffle */}
       <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-4">
-        <h2 className="text-base font-bold text-navy">Marking &amp; Randomization</h2>
+        <h2 className="text-base font-bold text-navy">Marking ও Randomization</h2>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="space-y-1.5">
             <label htmlFor="exam-options" className="block text-sm font-medium text-slate-700">
-              Options per question
+              প্রতি প্রশ্নে Option সংখ্যা
             </label>
             <select
               id="exam-options"
@@ -315,16 +315,16 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
               onChange={(e) => setOptionsPerQuestion(e.target.value)}
               className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15 disabled:bg-slate-100"
             >
-              <option value="2">2 options</option>
-              <option value="3">3 options</option>
-              <option value="4">4 options (Standard)</option>
-              <option value="5">5 options</option>
+              <option value="2">২টি Option</option>
+              <option value="3">৩টি Option</option>
+              <option value="4">৪টি Option (Standard)</option>
+              <option value="5">৫টি Option</option>
             </select>
           </div>
 
           <div className="space-y-1.5">
             <label htmlFor="exam-marks" className="block text-sm font-medium text-slate-700">
-              Default marks / question
+              প্রতি প্রশ্নের Default নম্বর
             </label>
             <input
               id="exam-marks"
@@ -339,7 +339,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
 
           <div className="space-y-1.5">
             <label htmlFor="exam-neg-val" className="block text-sm font-medium text-slate-700">
-              Negative deduction
+              Negative কাটা নম্বর
             </label>
             <input
               id="exam-neg-val"
@@ -363,7 +363,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
               onChange={(e) => setNegativeMarking(e.target.checked)}
               className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 rounded border-slate-300 text-navy"
             />
-            <span>Enable negative marking</span>
+            <span>Negative marking চালু করুন</span>
           </label>
 
           <label className="flex min-h-[40px] items-center gap-2.5 text-sm text-slate-700 cursor-pointer">
@@ -374,7 +374,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
               onChange={(e) => setShuffleQuestions(e.target.checked)}
               className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 rounded border-slate-300 text-navy"
             />
-            <span>Shuffle questions per student</span>
+            <span>প্রশ্ন এলোমেলো (Shuffle) করুন</span>
           </label>
 
           <label className="flex min-h-[40px] items-center gap-2.5 text-sm text-slate-700 cursor-pointer">
@@ -385,14 +385,14 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
               onChange={(e) => setShuffleOptions(e.target.checked)}
               className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 rounded border-slate-300 text-navy"
             />
-            <span>Shuffle options per student</span>
+            <span>Option এলোমেলো (Shuffle) করুন</span>
           </label>
         </div>
       </section>
 
       {/* Schedule, Instructions & Results */}
       <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-4">
-        <h2 className="text-base font-bold text-navy">Schedule, Instructions &amp; Result Release</h2>
+        <h2 className="text-base font-bold text-navy">Schedule, নির্দেশনা ও Result প্রকাশ</h2>
 
         <label className="flex min-h-[40px] items-center gap-2.5 text-sm font-medium text-slate-800 cursor-pointer">
           <input
@@ -401,14 +401,14 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
             onChange={(e) => setScheduleEnabled(e.target.checked)}
             className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 rounded border-slate-300 text-navy"
           />
-          <span>Restrict exam to a scheduled opens-at / closes-at window</span>
+          <span>নির্দিষ্ট শুরুর ও শেষের সময় (Schedule) নির্ধারণ করুন</span>
         </label>
 
         {scheduleEnabled && (
           <div className="grid gap-4 rounded-xl bg-slate-50 p-3.5 sm:p-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <label htmlFor="opens-at" className="block text-xs font-semibold text-slate-700">
-                Opens at (local time)
+                শুরুর সময় (Local time)
               </label>
               <input
                 id="opens-at"
@@ -420,7 +420,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
             </div>
             <div className="space-y-1.5">
               <label htmlFor="closes-at" className="block text-xs font-semibold text-slate-700">
-                Closes at (local time)
+                শেষের সময় (Local time)
               </label>
               <input
                 id="closes-at"
@@ -435,14 +435,14 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
 
         <div className="space-y-1.5">
           <label htmlFor="exam-instructions" className="block text-sm font-medium text-slate-700">
-            Custom instructions for students <span className="text-xs font-normal text-slate-400">(optional)</span>
+            Student-দের জন্য নির্দেশনা <span className="text-xs font-normal text-slate-400">(ঐচ্ছিক)</span>
           </label>
           <textarea
             id="exam-instructions"
             rows={3}
             value={instructions}
             onChange={(e) => setInstructions(e.target.value)}
-            placeholder="e.g. Do not use calculators. Read every question carefully before submitting."
+            placeholder="যেমন: ক্যালকুলেটর ব্যবহার করা যাবে না। Submit করার আগে সব প্রশ্ন ভালোভাবে দেখে নিন।"
             className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
           />
         </div>
@@ -450,7 +450,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <label htmlFor="result-release" className="block text-sm font-medium text-slate-700">
-              Result release
+              Result প্রকাশের নিয়ম
             </label>
             <select
               id="result-release"
@@ -458,10 +458,10 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
               onChange={(e) => setResultRelease(e.target.value as ResultReleaseMode)}
               className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             >
-              <option value="after_submit">Immediately after student submits</option>
-              <option value="after_close">After the exam closes</option>
-              <option value="manual">Manual release by teacher</option>
-              <option value="teacher_only">Teacher only (never shown to students)</option>
+              <option value="after_submit">Student Submit করার সাথে সাথেই</option>
+              <option value="after_close">Exam শেষ (Close) হওয়ার পর</option>
+              <option value="manual">Teacher ম্যানুয়ালি প্রকাশ করবেন</option>
+              <option value="teacher_only">শুধু Teacher দেখবেন (Student-দের নয়)</option>
             </select>
           </div>
 
@@ -473,7 +473,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
                 onChange={(e) => setShowAnswers(e.target.checked)}
                 className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 rounded border-slate-300 text-navy"
               />
-              <span>Show correct answers &amp; explanations in released results</span>
+              <span>প্রকাশিত Result-এ সঠিক উত্তর ও ব্যাখ্যা দেখান</span>
             </label>
 
             <label className="flex min-h-[38px] items-center gap-2.5 text-sm text-slate-700 cursor-pointer">
@@ -483,7 +483,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
                 onChange={(e) => setPracticeSharing(e.target.checked)}
                 className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 rounded border-slate-300 text-navy"
               />
-              <span>Allow questions in student practice search after close</span>
+              <span>Exam শেষ হলে Student Practice-এ প্রশ্ন দেখান</span>
             </label>
 
             <label className="flex min-h-[38px] items-center gap-2.5 text-sm text-slate-700 cursor-pointer">
@@ -493,7 +493,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
                 onChange={(e) => setForceCloseActive(e.target.checked)}
                 className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 rounded border-slate-300 text-navy"
               />
-              <span>Force-close active attempts immediately if closed manually</span>
+              <span>ম্যানুয়ালি Close করলে চলমান Exam সাথে সাথে শেষ করুন</span>
             </label>
           </div>
         </div>
@@ -505,7 +505,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
           onClick={() => router.back()}
           className="min-h-[44px] w-full sm:w-auto rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
         >
-          Cancel
+          বাতিল
         </button>
         <button
           type="submit"
@@ -513,7 +513,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
           className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-navy px-5 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
         >
           {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-          <span>{isEdit ? "Save settings" : "Save & Add Questions"}</span>
+          <span>{isEdit ? "Settings Save করুন" : "Save করে প্রশ্ন যোগ করুন"}</span>
         </button>
       </div>
     </form>

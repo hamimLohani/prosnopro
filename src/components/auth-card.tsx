@@ -101,26 +101,26 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
 
     const cleanName = name.trim();
     if (!cleanName) {
-      setError("Please enter your full name.");
+      setError("আপনার পূর্ণ নাম লিখুন।");
       return;
     }
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError("Password কমপক্ষে ৮ অক্ষরের হতে হবে।");
       return;
     }
     if (!agreedPrivacy) {
-      setError("Please acknowledge the privacy notice before creating an account.");
+      setError("Account খোলার আগে Privacy Notice-এ সম্মতি দিন।");
       return;
     }
 
     const normalizedCode = normalizeTeacherCode(teacherCode);
     if (role === "teacher") {
       if (!isValidTeacherCode(normalizedCode)) {
-        setError("Teacher Code must be 4–12 English letters or digits.");
+        setError("Teacher Code অবশ্যই ৪–১২টি English অক্ষর বা সংখ্যা হতে হবে।");
         return;
       }
       if (codeAvailable === false) {
-        setError("That Teacher Code is already taken. Please pick another.");
+        setError("এই Teacher Code-টি আগেই নেওয়া হয়েছে। অন্য একটি বেছে নিন।");
         return;
       }
     }
@@ -178,17 +178,17 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
       <div className="mb-5 sm:mb-6 space-y-1">
         <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-navy">
           {isLogin
-            ? "Welcome back"
+            ? "স্বাগতম"
             : role === "teacher"
-              ? "Create teacher account"
-              : "Create student account"}
+              ? "Teacher Account খুলুন"
+              : "Student Account খুলুন"}
         </h1>
         <p className="text-sm text-slate-600">
           {isLogin
-            ? "Sign in with Google (instant, free) or your email and password."
+            ? "Google দিয়ে সহজেই অথবা Email ও Password দিয়ে Sign in করুন।"
             : role === "teacher"
-              ? "Set up your exam room and pick a unique Teacher Code."
-              : "Use your real account name — it appears on your exam records."}
+              ? "আপনার Exam room সেট করুন এবং একটি ইউনিক Teacher Code বাছাই করুন।"
+              : "আপনার আসল নাম ব্যবহার করুন — এটি Exam রেকর্ডে দেখা যাবে।"}
         </p>
       </div>
 
@@ -226,12 +226,12 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
             />
           </svg>
         )}
-        <span>Continue with Google</span>
+        <span>Google দিয়ে চালিয়ে যান</span>
       </button>
 
       <div className="my-5 flex items-center gap-3 text-xs text-slate-400">
         <div className="h-px flex-1 bg-slate-200" />
-        <span>or use email &amp; password</span>
+        <span>অথবা Email ও Password ব্যবহার করুন</span>
         <div className="h-px flex-1 bg-slate-200" />
       </div>
 
@@ -239,7 +239,7 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
         {!isLogin && (
           <div className="space-y-1.5">
             <label htmlFor="full-name" className="block text-sm font-medium text-slate-700">
-              Full name
+              পূর্ণ নাম
             </label>
             <input
               id="full-name"
@@ -250,7 +250,7 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
               maxLength={120}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={role === "teacher" ? "e.g. Md. Abdur Rahim" : "e.g. Tasnim Akter"}
+              placeholder={role === "teacher" ? "যেমন: মোঃ আবদুর রহিম" : "যেমন: তাসনিম আক্তার"}
               className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
           </div>
@@ -258,7 +258,7 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
 
         <div className="space-y-1.5">
           <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-            Email address
+            Email ঠিকানা
           </label>
           <input
             id="email"
@@ -280,7 +280,7 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
             </label>
             {isLogin && (
               <Link href="/reset-password" className="py-0.5 text-xs font-medium text-navy hover:underline">
-                Forgot password?
+                Password ভুলে গেছেন?
               </Link>
             )}
           </div>
@@ -293,7 +293,7 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
             enterKeyHint={isLogin ? "go" : "next"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder={isLogin ? "Your password" : "At least 8 characters"}
+            placeholder={isLogin ? "আপনার Password" : "কমপক্ষে ৮ অক্ষর"}
             className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
           />
         </div>
@@ -311,7 +311,7 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <label htmlFor="roll" className="block text-sm font-medium text-slate-700">
-                Roll / ID <span className="text-xs font-normal text-slate-400">(optional)</span>
+                Roll / ID <span className="text-xs font-normal text-slate-400">(ঐচ্ছিক)</span>
               </label>
               <input
                 id="roll"
@@ -320,13 +320,13 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
                 maxLength={60}
                 value={roll}
                 onChange={(e) => setRoll(e.target.value)}
-                placeholder="e.g. 1042"
+                placeholder="যেমন: 1042"
                 className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
               />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="institution" className="block text-sm font-medium text-slate-700">
-                Institution <span className="text-xs font-normal text-slate-400">(optional)</span>
+                Institution <span className="text-xs font-normal text-slate-400">(ঐচ্ছিক)</span>
               </label>
               <input
                 id="institution"
@@ -335,7 +335,7 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
                 maxLength={160}
                 value={institution}
                 onChange={(e) => setInstitution(e.target.value)}
-                placeholder="School / College"
+                placeholder="স্কুল / কলেজ"
                 className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
               />
             </div>
@@ -351,12 +351,11 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
               className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 text-navy focus:ring-navy"
             />
             <span>
-              I understand that ProsnoPro records account name, email, and exam session/device
-              activity as described in the{" "}
+              আমি{" "}
               <Link href="/privacy" className="font-semibold text-navy underline">
                 Privacy Notice
-              </Link>
-              .
+              </Link>{" "}
+              অনুযায়ী Account নাম, Email ও Exam Session তথ্য সংরক্ষণে সম্মত আছি।
             </span>
           </label>
         )}
@@ -371,8 +370,8 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
             {isLogin
               ? "Sign in"
               : role === "teacher"
-                ? "Create teacher account"
-                : "Create student account"}
+                ? "Teacher Account খুলুন"
+                : "Student Account খুলুন"}
           </span>
         </button>
       </form>
@@ -380,16 +379,16 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
       <div className="mt-6 border-t border-slate-100 pt-4 text-center text-sm text-slate-600">
         {isLogin ? (
           <p>
-            New to ProsnoPro?{" "}
+            ProsnoPro-তে নতুন?{" "}
             <Link href="/signup" className="font-semibold text-navy hover:underline">
-              Create an account
+              Account খুলুন
             </Link>
           </p>
         ) : (
           <p>
-            Already have an account?{" "}
+            আগে থেকেই Account আছে?{" "}
             <Link href="/login" className="font-semibold text-navy hover:underline">
-              Sign in
+              Sign in করুন
             </Link>
           </p>
         )}

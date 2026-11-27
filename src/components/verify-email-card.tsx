@@ -27,7 +27,7 @@ export function VerifyEmailCard({ initialEmail }: VerifyEmailCardProps) {
     }
 
     if (!email.trim()) {
-      setError("Enter the email address you signed up with.");
+      setError("যে Email দিয়ে Sign up করেছেন সেটি লিখুন।");
       return;
     }
 
@@ -46,7 +46,7 @@ export function VerifyEmailCard({ initialEmail }: VerifyEmailCardProps) {
       return;
     }
 
-    setStatus("Verification link sent! Check your inbox and spam folder.");
+    setStatus("Verification link পাঠানো হয়েছে! আপনার Inbox এবং Spam folder চেক করুন।");
   }
 
   return (
@@ -54,10 +54,10 @@ export function VerifyEmailCard({ initialEmail }: VerifyEmailCardProps) {
       <div className="mb-4 inline-flex rounded-xl bg-navy/10 p-3 text-navy">
         <MailCheck className="h-6 w-6" />
       </div>
-      <h1 className="text-2xl font-bold text-navy">Check your email</h1>
+      <h1 className="text-2xl font-bold text-navy">আপনার Email চেক করুন</h1>
       <p className="mt-2 text-sm text-slate-600">
-        We sent a verification link{email ? ` to ${email}` : ""}. Click the link in your email to
-        activate your ProsnoPro account and finish onboarding.
+        {email ? `${email} ঠিকানায়` : "আপনার ঠিকানায়"} একটি verification link পাঠানো হয়েছে।
+        ProsnoPro Account চালু করতে Email-এর লিংকে ক্লিক করুন।
       </p>
 
       {status && (
@@ -85,13 +85,13 @@ export function VerifyEmailCard({ initialEmail }: VerifyEmailCardProps) {
           className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
         >
           {sending && <Loader2 className="h-4 w-4 animate-spin" />}
-          <span>Resend verification email</span>
+          <span>আবার Verification Email পাঠান</span>
         </button>
       </form>
 
       <div className="mt-5 border-t border-slate-100 pt-4 text-center text-sm text-slate-600">
         <Link href="/login" className="font-semibold text-navy hover:underline">
-          Back to Sign in
+          Sign in পেজে ফিরে যান
         </Link>
       </div>
     </div>

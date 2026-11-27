@@ -49,23 +49,23 @@ export function OnboardingForm({
 
     const cleanName = name.trim();
     if (!cleanName) {
-      setError("Please enter your full name.");
+      setError("আপনার পূর্ণ নাম লিখুন।");
       return;
     }
 
     if (!agreedPrivacy) {
-      setError("Please acknowledge the privacy notice to finish setup.");
+      setError("Setup সম্পন্ন করতে Privacy Notice-এ সম্মতি দিন।");
       return;
     }
 
     const cleanCode = normalizeTeacherCode(teacherCode);
     if (role === "teacher") {
       if (!isValidTeacherCode(cleanCode)) {
-        setError("Teacher Code must be 4–12 letters or digits.");
+        setError("Teacher Code অবশ্যই ৪–১২টি English অক্ষর বা সংখ্যা হতে হবে।");
         return;
       }
       if (codeAvailable === false) {
-        setError("That Teacher Code is already taken. Please pick another.");
+        setError("এই Teacher Code-টি আগেই নেওয়া হয়েছে। অন্য একটি বেছে নিন।");
         return;
       }
     }
@@ -92,14 +92,14 @@ export function OnboardingForm({
   return (
     <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
       <div className="mb-5 sm:mb-6 space-y-1">
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-navy">Finish setting up your account</h1>
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-navy">আপনার Account Setup সম্পন্ন করুন</h1>
         <p className="text-sm text-slate-600">
           {email ? (
             <>
-              Signed in as <span className="font-medium text-slate-800">{email}</span>.{" "}
+              Signed in: <span className="font-medium text-slate-800">{email}</span>।{" "}
             </>
           ) : null}
-          Choose your role once — it cannot be switched later for exam integrity.
+          আপনার Role একবারই বাছাই করুন — Exam-এর স্বচ্ছতার জন্য পরে আর পরিবর্তন করা যাবে না।
         </p>
       </div>
 
@@ -121,8 +121,8 @@ export function OnboardingForm({
             }`}
           >
             <GraduationCap className={`h-5 w-5 ${role === "student" ? "text-navy" : "text-slate-500"}`} />
-            <span className="text-sm font-semibold text-slate-900">I&apos;m a Student</span>
-            <span className="text-xs text-slate-500">Join exams &amp; practice</span>
+            <span className="text-sm font-semibold text-slate-900">আমি Student</span>
+            <span className="text-xs text-slate-500">Exam দিন ও Practice করুন</span>
           </button>
 
           <button
@@ -135,16 +135,16 @@ export function OnboardingForm({
             }`}
           >
             <ShieldCheck className={`h-5 w-5 ${role === "teacher" ? "text-navy" : "text-slate-500"}`} />
-            <span className="text-sm font-semibold text-slate-900">I&apos;m a Teacher</span>
-            <span className="text-xs text-slate-500">Create &amp; monitor exams</span>
+            <span className="text-sm font-semibold text-slate-900">আমি Teacher</span>
+            <span className="text-xs text-slate-500">Exam তৈরি ও Monitor করুন</span>
           </button>
         </div>
 
         <div className="space-y-1.5">
           <label htmlFor="onboarding-name" className="block text-sm font-medium text-slate-700">
-            Full name{" "}
+            পূর্ণ নাম{" "}
             {role === "student" && (
-              <span className="text-xs font-normal text-slate-500">(used on exam sheets &amp; watermarks)</span>
+              <span className="text-xs font-normal text-slate-500">(Exam sheet ও Watermark-এ দেখা যাবে)</span>
             )}
           </label>
           <input
@@ -156,7 +156,7 @@ export function OnboardingForm({
             maxLength={120}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Your full name"
+            placeholder="আপনার পূর্ণ নাম লিখুন"
             className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
           />
         </div>
@@ -172,7 +172,7 @@ export function OnboardingForm({
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <label htmlFor="onboarding-roll" className="block text-sm font-medium text-slate-700">
-                Roll / ID <span className="text-xs font-normal text-slate-400">(optional)</span>
+                Roll / ID <span className="text-xs font-normal text-slate-400">(ঐচ্ছিক)</span>
               </label>
               <input
                 id="onboarding-roll"
@@ -181,14 +181,14 @@ export function OnboardingForm({
                 maxLength={60}
                 value={roll}
                 onChange={(e) => setRoll(e.target.value)}
-                placeholder="e.g. 1042"
+                placeholder="যেমন: 1042"
                 className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
               />
             </div>
 
             <div className="space-y-1.5">
               <label htmlFor="onboarding-inst" className="block text-sm font-medium text-slate-700">
-                Institution <span className="text-xs font-normal text-slate-400">(optional)</span>
+                Institution <span className="text-xs font-normal text-slate-400">(ঐচ্ছিক)</span>
               </label>
               <input
                 id="onboarding-inst"
@@ -197,7 +197,7 @@ export function OnboardingForm({
                 maxLength={160}
                 value={institution}
                 onChange={(e) => setInstitution(e.target.value)}
-                placeholder="School / College"
+                placeholder="স্কুল / কলেজ"
                 className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
               />
             </div>
@@ -212,11 +212,12 @@ export function OnboardingForm({
             className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 text-navy focus:ring-navy"
           />
           <span>
-            I acknowledge the{" "}
+            আমি{" "}
             <Link href="/privacy" target="_blank" className="font-semibold text-navy underline">
               Privacy Notice
             </Link>{" "}
-            (ProsnoPro stores account details and exam session activity for exam integrity and grading).
+            বুঝেছি ও সম্মত আছি (ProsnoPro পরীক্ষার স্বচ্ছতা ও Grading-এর জন্য Account তথ্য ও Exam
+            Session সংরক্ষণ করে)।
           </span>
         </label>
 
@@ -226,7 +227,7 @@ export function OnboardingForm({
           className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          <span>Complete setup &amp; continue</span>
+          <span>Setup সম্পন্ন করে এগিয়ে যান</span>
         </button>
       </form>
     </div>

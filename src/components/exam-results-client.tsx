@@ -56,7 +56,7 @@ export function ExamResultsClient({
       .eq("id", exam.id);
     setReleasing(false);
     if (!error) {
-      setStatusMessage("Results released to students.");
+      setStatusMessage("Student-দের জন্য Result প্রকাশ করা হয়েছে।");
       router.refresh();
     }
   }
@@ -94,11 +94,11 @@ export function ExamResultsClient({
             {exam.results_released_at ? (
               <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-800">
                 <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                Results released to students on{" "}
-                {new Date(exam.results_released_at).toLocaleString()}.
+                Student-দের জন্য Result প্রকাশিত হয়েছে (
+                {new Date(exam.results_released_at).toLocaleString()})।
               </span>
             ) : (
-              <span>Results are set to manual release and currently hidden from students.</span>
+              <span>Result বর্তমানে Manual release মোডে আছে এবং Student-দের থেকে লুকানো আছে।</span>
             )}
           </div>
           {!exam.results_released_at && (
@@ -113,7 +113,7 @@ export function ExamResultsClient({
               ) : (
                 <Send className="h-3.5 w-3.5" />
               )}
-              <span>Release Results Now</span>
+              <span>এখনই Result প্রকাশ করুন</span>
             </button>
           )}
         </div>
@@ -122,31 +122,31 @@ export function ExamResultsClient({
       {/* Summary Stats */}
       <section className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-4">
         <div className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4">
-          <p className="text-xs text-slate-500">Submitted Attempts</p>
+          <p className="text-xs text-slate-500">Submit হয়েছে</p>
           <p className="mt-1 text-2xl font-bold text-navy">{analytics.submittedCount}</p>
           {analytics.inProgressCount > 0 && (
-            <p className="text-xs text-slate-500">{analytics.inProgressCount} in progress</p>
+            <p className="text-xs text-slate-500">{analytics.inProgressCount}টি চলমান</p>
           )}
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4">
-          <p className="text-xs text-slate-500">Average Score</p>
+          <p className="text-xs text-slate-500">গড় Score</p>
           <p className="mt-1 text-2xl font-bold text-slate-900">
             {analytics.averageScore !== null ? analytics.averageScore : "—"}
           </p>
           <p className="text-xs text-slate-500">
             {analytics.averagePercentage !== null
-              ? `${analytics.averagePercentage}% of ${analytics.totalMarks}`
-              : `Out of ${analytics.totalMarks}`}
+              ? `${analytics.averagePercentage}% (মোট ${analytics.totalMarks})`
+              : `মোট ${analytics.totalMarks}`}
           </p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4">
-          <p className="text-xs text-slate-500">Highest Score</p>
+          <p className="text-xs text-slate-500">সর্বোচ্চ Score</p>
           <p className="mt-1 text-2xl font-bold text-emerald-700">
             {analytics.highestScore !== null ? analytics.highestScore : "—"}
           </p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4">
-          <p className="text-xs text-slate-500">Lowest Score</p>
+          <p className="text-xs text-slate-500">সর্বনিম্ন Score</p>
           <p className="mt-1 text-2xl font-bold text-rose-700">
             {analytics.lowestScore !== null ? analytics.lowestScore : "—"}
           </p>
@@ -155,12 +155,12 @@ export function ExamResultsClient({
 
       {/* Client-Side Exports */}
       <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 space-y-4">
-        <h2 className="text-base font-bold text-navy">Export Results &amp; Question Paper</h2>
+        <h2 className="text-base font-bold text-navy">Result ও প্রশ্নপত্র Export করুন</h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Results Exports
+              Result Export
             </p>
             <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
               <button
@@ -196,7 +196,7 @@ export function ExamResultsClient({
 
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Question Paper &amp; Answer Key
+              প্রশ্নপত্র ও Answer Key
             </p>
             <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
               <Link
@@ -246,10 +246,10 @@ export function ExamResultsClient({
 
       {/* Student Scores Table / Mobile Cards */}
       <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-4">
-        <h2 className="text-base font-bold text-navy">Student Results ({attempts.length})</h2>
+        <h2 className="text-base font-bold text-navy">Student-দের Result ({attempts.length})</h2>
 
         {attempts.length === 0 ? (
-          <p className="text-sm text-slate-500">No attempts recorded yet.</p>
+          <p className="text-sm text-slate-500">এখনো কোনো Attempt রেকর্ড হয়নি।</p>
         ) : (
           <>
             {/* Mobile Results Cards */}
@@ -268,7 +268,7 @@ export function ExamResultsClient({
                       <div className="min-w-0">
                         <p className="truncate font-semibold text-slate-900">{a.student_name}</p>
                         <p className="text-xs text-slate-500">
-                          {a.student_roll ? `Roll: ${a.student_roll}` : "No Roll"} •{" "}
+                          {a.student_roll ? `Roll: ${a.student_roll}` : "Roll নেই"} •{" "}
                           {formatTimeTaken(a.started_at, a.submitted_at)} •{" "}
                           <span className="capitalize">{a.status.replace("_", " ")}</span>
                         </p>
@@ -285,14 +285,14 @@ export function ExamResultsClient({
 
                     <div className="flex items-center justify-between gap-2 text-xs">
                       <span className="text-slate-500">
-                        Switches: {a.violation_counts?.tab_switches ?? 0}
+                        Switch: {a.violation_counts?.tab_switches ?? 0}
                       </span>
                       <button
                         type="button"
                         onClick={() => setExpandedAttemptId(isOpen ? null : a.id)}
                         className="inline-flex min-h-[36px] items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 font-semibold text-navy hover:bg-slate-50 cursor-pointer"
                       >
-                        <span>{isOpen ? "Hide Answers" : "Inspect Answers"}</span>
+                        <span>{isOpen ? "উত্তর লুকান" : "উত্তর দেখুন"}</span>
                         {isOpen ? (
                           <ChevronUp className="h-3.5 w-3.5" />
                         ) : (
@@ -304,10 +304,10 @@ export function ExamResultsClient({
                     {isOpen && (
                       <div className="rounded-xl bg-slate-50 p-3 space-y-2 text-xs">
                         <p className="font-semibold text-slate-700">
-                          Submitted:{" "}
-                          {a.submitted_at ? new Date(a.submitted_at).toLocaleString() : "In progress"}{" "}
-                          • Blurs: {a.violation_counts?.blurs ?? 0} • Copy:{" "}
-                          {a.violation_counts?.copy_attempts ?? 0} • Away:{" "}
+                          Submit:{" "}
+                          {a.submitted_at ? new Date(a.submitted_at).toLocaleString() : "চলমান"}{" "}
+                          • Blur: {a.violation_counts?.blurs ?? 0} • Copy:{" "}
+                          {a.violation_counts?.copy_attempts ?? 0} • বাইরে:{" "}
                           {a.violation_counts?.away_seconds ?? 0}s
                         </p>
                         <div className="grid gap-2">
@@ -330,13 +330,13 @@ export function ExamResultsClient({
                                   Q{qIdx + 1}: <MathText text={q.text} />
                                 </p>
                                 <p className="mt-1 text-slate-600 break-words">
-                                  Chosen:{" "}
+                                  উত্তর দিয়েছে:{" "}
                                   <span className="font-semibold">
                                     {isAnswered
                                       ? `${optionLabel(chosen, exam.medium)}) ${q.options[chosen] ?? ""}`
-                                      : "Unanswered"}
+                                      : "উত্তর দেয়নি"}
                                   </span>{" "}
-                                  • Correct:{" "}
+                                  • সঠিক:{" "}
                                   <span className="font-semibold text-emerald-700">
                                     {optionLabel(q.correct_index, exam.medium)}
                                   </span>
@@ -361,10 +361,10 @@ export function ExamResultsClient({
                     <th className="py-2 pr-4">Roll</th>
                     <th className="py-2 pr-4">Score</th>
                     <th className="py-2 pr-4">%</th>
-                    <th className="py-2 pr-4">Time Taken</th>
+                    <th className="py-2 pr-4">সময় লেগেছে</th>
                     <th className="py-2 pr-4">Status</th>
-                    <th className="py-2 pr-4">Tab Switches</th>
-                    <th className="py-2">Detail</th>
+                    <th className="py-2 pr-4">Tab Switch</th>
+                    <th className="py-2">বিস্তারিত</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -404,7 +404,7 @@ export function ExamResultsClient({
                               onClick={() => setExpandedAttemptId(isOpen ? null : a.id)}
                               className="inline-flex items-center gap-1 text-xs font-semibold text-navy hover:underline cursor-pointer"
                             >
-                              <span>{isOpen ? "Hide" : "Inspect"}</span>
+                              <span>{isOpen ? "লুকান" : "দেখুন"}</span>
                               {isOpen ? (
                                 <ChevronUp className="h-3.5 w-3.5" />
                               ) : (
@@ -419,12 +419,12 @@ export function ExamResultsClient({
                             <td colSpan={8} className="bg-slate-50 p-4">
                               <div className="space-y-2 text-xs">
                                 <p className="font-semibold text-slate-700">
-                                  Submitted:{" "}
+                                  Submit:{" "}
                                   {a.submitted_at
                                     ? new Date(a.submitted_at).toLocaleString()
-                                    : "In progress"}{" "}
-                                  • Blurs: {a.violation_counts?.blurs ?? 0} • Copy attempts:{" "}
-                                  {a.violation_counts?.copy_attempts ?? 0} • Away:{" "}
+                                    : "চলমান"}{" "}
+                                  • Blur: {a.violation_counts?.blurs ?? 0} • Copy:{" "}
+                                  {a.violation_counts?.copy_attempts ?? 0} • বাইরে:{" "}
                                   {a.violation_counts?.away_seconds ?? 0}s
                                 </p>
                                 <div className="grid gap-2 sm:grid-cols-2">
@@ -447,13 +447,13 @@ export function ExamResultsClient({
                                           Q{qIdx + 1}: <MathText text={q.text} />
                                         </p>
                                         <p className="mt-1 text-slate-600">
-                                          Chosen:{" "}
+                                          উত্তর:{" "}
                                           <span className="font-semibold">
                                             {isAnswered
                                               ? `${optionLabel(chosen, exam.medium)}) ${q.options[chosen] ?? ""}`
-                                              : "Unanswered"}
+                                              : "উত্তর দেয়নি"}
                                           </span>{" "}
-                                          • Correct:{" "}
+                                          • সঠিক:{" "}
                                           <span className="font-semibold text-emerald-700">
                                             {optionLabel(q.correct_index, exam.medium)}
                                           </span>
@@ -478,10 +478,10 @@ export function ExamResultsClient({
 
       {/* Per-Question Analytics */}
       <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-4">
-        <h2 className="text-base font-bold text-navy">Per-Question Analytics</h2>
+        <h2 className="text-base font-bold text-navy">প্রতি প্রশ্নের Analytics</h2>
 
         {analytics.perQuestion.length === 0 ? (
-          <p className="text-sm text-slate-500">No questions in this exam.</p>
+          <p className="text-sm text-slate-500">এই Exam-এ কোনো প্রশ্ন নেই।</p>
         ) : (
           <div className="space-y-4">
             {analytics.perQuestion.map((qa, idx) => (
@@ -491,7 +491,7 @@ export function ExamResultsClient({
                     {idx + 1}. <MathText text={qa.text} />
                   </p>
                   <span className="shrink-0 rounded-full bg-navy/10 px-2.5 py-0.5 text-xs font-bold text-navy">
-                    {qa.percentCorrect}% correct ({qa.correctCount}/{analytics.submittedCount})
+                    {qa.percentCorrect}% সঠিক ({qa.correctCount}/{analytics.submittedCount})
                   </span>
                 </div>
 
@@ -515,7 +515,7 @@ export function ExamResultsClient({
                         </span>
                         <span className="shrink-0 font-semibold">
                           {qa.optionCounts[optIdx]}
-                          {isTopWrong && " (most wrong)"}
+                          {isTopWrong && " (সবচেয়ে বেশি ভুল)"}
                         </span>
                       </div>
                     );

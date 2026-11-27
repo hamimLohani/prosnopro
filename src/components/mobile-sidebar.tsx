@@ -71,13 +71,13 @@ export function MobileSidebar({
     links.push(
       {
         href: "/teacher",
-        label: "My Exams",
+        label: "আমার Exam",
         exact: true,
         icon: <LayoutDashboard className="h-4 w-4 shrink-0" />,
       },
       {
         href: "/teacher/exams/new",
-        label: "Create New Exam",
+        label: "নতুন Exam তৈরি",
         icon: <PlusCircle className="h-4 w-4 shrink-0" />,
       },
       {
@@ -87,7 +87,7 @@ export function MobileSidebar({
       },
       {
         href: "/teacher/settings",
-        label: "Settings & AI Key",
+        label: "Settings ও AI Key",
         icon: <Settings className="h-4 w-4 shrink-0" />,
       },
     );
@@ -95,32 +95,32 @@ export function MobileSidebar({
     links.push(
       {
         href: "/student",
-        label: "Join Exam",
+        label: "Exam-এ জয়েন",
         exact: true,
         icon: <LayoutDashboard className="h-4 w-4 shrink-0" />,
       },
       {
         href: "/student/results",
-        label: "My Results",
+        label: "আমার Result",
         icon: <ClipboardList className="h-4 w-4 shrink-0" />,
       },
       {
         href: "/student/practice",
-        label: "Practice Search",
+        label: "Practice খুঁজুন",
         icon: <Search className="h-4 w-4 shrink-0" />,
       },
     );
   } else if (userId) {
     links.push({
       href: "/onboarding",
-      label: "Finish Account Setup",
+      label: "Account Setup সম্পন্ন করুন",
       icon: <UserPlus className="h-4 w-4 shrink-0" />,
     });
   } else {
     links.push(
       {
         href: "/",
-        label: "Home",
+        label: "হোম",
         exact: true,
         icon: <Home className="h-4 w-4 shrink-0" />,
       },
@@ -131,12 +131,12 @@ export function MobileSidebar({
       },
       {
         href: "/signup/student",
-        label: "Join as Student",
+        label: "Student হিসেবে জয়েন",
         icon: <GraduationCap className="h-4 w-4 shrink-0" />,
       },
       {
         href: "/signup/teacher",
-        label: "Create Teacher Account",
+        label: "Teacher Account খুলুন",
         icon: <ShieldCheck className="h-4 w-4 shrink-0" />,
       },
     );

@@ -59,7 +59,7 @@ export default async function ExamResultsPage({ params }: ResultsPageProps) {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Results, Analytics &amp; Exports • {exam.code}
+              Result, Analytics ও Export • {exam.code}
             </p>
             <h1 className="text-xl sm:text-2xl font-bold text-navy break-words">{exam.name}</h1>
           </div>
@@ -74,7 +74,7 @@ export default async function ExamResultsPage({ params }: ResultsPageProps) {
               href={`/teacher/exams/${exam.id}`}
               className="py-1 text-sm font-semibold text-navy hover:underline"
             >
-              ← Back to Exam
+              ← Exam-এ ফিরে যান
             </Link>
           </div>
         </div>

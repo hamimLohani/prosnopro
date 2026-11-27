@@ -470,7 +470,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center gap-2 text-sm text-slate-600">
         <Loader2 className="h-5 w-5 animate-spin text-navy" />
-        <span>Loading exam questions...</span>
+        <span>Exam-এর প্রশ্ন লোড হচ্ছে...</span>
       </div>
     );
   }
@@ -478,13 +478,13 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
   if (fatalError && !examInfo) {
     return (
       <div className="mx-auto mt-16 max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-center space-y-4">
-        <h1 className="text-xl font-bold text-navy">Cannot open exam</h1>
+        <h1 className="text-xl font-bold text-navy">Exam খোলা যাচ্ছে না</h1>
         <p className="text-sm text-slate-600">{fatalError}</p>
         <Link
           href="/student"
           className="inline-block rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white"
         >
-          Back to Student Dashboard
+          Student Dashboard-এ ফিরে যান
         </Link>
       </div>
     );
@@ -506,7 +506,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
   return (
     <>
       <div className="hidden print:block p-10 text-center text-sm font-semibold text-slate-800">
-        Printing is disabled during an active ProsnoPro exam.
+        ProsnoPro Exam চলাকালে Print করা বন্ধ থাকে।
       </div>
 
       <div className="no-print relative min-h-screen select-none [-webkit-touch-callout:none] pb-32 sm:pb-12">
@@ -539,16 +539,16 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-4">
             <div className="w-full max-w-md rounded-2xl bg-white p-5 sm:p-6 shadow-xl space-y-4 text-center">
               <ShieldAlert className="mx-auto h-10 w-10 text-rose-600" />
-              <h2 className="text-xl font-bold text-slate-900">Session active elsewhere</h2>
+              <h2 className="text-xl font-bold text-slate-900">অন্য জায়গায় Session চালু হয়েছে</h2>
               <p className="text-sm text-slate-600">
-                This exam attempt was opened in another browser tab or device, so this window has
-                been locked.
+                এই Exam-টি অন্য একটি Browser tab বা ডিভাইসে খোলা হয়েছে, তাই এই উইন্ডোটি লক করা
+                হয়েছে।
               </p>
               <Link
                 href="/student"
                 className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl bg-navy px-5 py-2.5 text-sm font-semibold text-white"
               >
-                Return to Student Dashboard
+                Student Dashboard-এ ফিরে যান
               </Link>
             </div>
           </div>
@@ -558,23 +558,23 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
         {showConfirmModal && (
           <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-slate-900/60 p-0 sm:p-4">
             <div className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:p-6 shadow-xl space-y-4">
-              <h2 className="text-lg font-bold text-navy">Submit your exam?</h2>
+              <h2 className="text-lg font-bold text-navy">Exam Submit করবেন?</h2>
               <div className="rounded-xl bg-slate-50 p-4 text-sm space-y-1">
                 <p>
-                  Answered:{" "}
+                  উত্তর দিয়েছেন:{" "}
                   <span className="font-bold text-emerald-700">
                     {answeredCount} / {questions.length}
                   </span>
                 </p>
                 <p>
-                  Unanswered:{" "}
+                  উত্তর বাকি:{" "}
                   <span className="font-bold text-slate-800">
                     {questions.length - answeredCount}
                   </span>
                 </p>
               </div>
               <p className="text-xs text-slate-500">
-                Once submitted, answers cannot be changed.
+                একবার Submit করলে আর উত্তর পরিবর্তন করা যাবে না।
               </p>
               <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5">
                 <button
@@ -582,7 +582,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                   onClick={() => setShowConfirmModal(false)}
                   className="min-h-[44px] w-full sm:w-auto rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
                 >
-                  Review answers
+                  উত্তরগুলো দেখুন
                 </button>
                 <button
                   type="button"
@@ -591,7 +591,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                   className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong cursor-pointer"
                 >
                   {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                  <span>Confirm Submit</span>
+                  <span>Submit নিশ্চিত করুন</span>
                 </button>
               </div>
             </div>
@@ -607,7 +607,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
               </h1>
               <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] sm:text-xs text-slate-500">
                 <span>
-                  {answeredCount}/{questions.length} answered
+                  {answeredCount}/{questions.length}টি উত্তর
                 </span>
                 <span>•</span>
                 <span className="inline-flex items-center gap-1 whitespace-nowrap">
@@ -620,19 +620,19 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                   {syncState === "unsaved" && (
                     <>
                       <CloudUpload className="h-3.5 w-3.5 text-amber-600" />
-                      <span>Saved locally</span>
+                      <span>ফোনে Save আছে</span>
                     </>
                   )}
                   {syncState === "syncing" && (
                     <>
                       <Loader2 className="h-3.5 w-3.5 animate-spin text-navy" />
-                      <span>Backing up...</span>
+                      <span>ব্যাকআপ হচ্ছে...</span>
                     </>
                   )}
                   {syncState === "offline" && (
                     <>
                       <CloudOff className="h-3.5 w-3.5 text-rose-600" />
-                      <span>Offline — saved locally</span>
+                      <span>Offline — ফোনে Save আছে</span>
                     </>
                   )}
                 </span>
@@ -677,7 +677,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
             <div className="max-h-[55vh] overflow-y-auto overscroll-contain border-t border-slate-200 bg-slate-50 px-3 py-3 sm:px-4 lg:hidden">
               <div className="mb-2.5 flex items-center justify-between gap-2 text-xs">
                 <span className="font-semibold text-slate-700">
-                  Questions ({answeredCount}/{questions.length} answered)
+                  প্রশ্ন ({answeredCount}/{questions.length}টি উত্তর)
                 </span>
                 {nextUnansweredQuestion && (
                   <button
@@ -685,7 +685,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                     onClick={() => jumpToQuestion(nextUnansweredQuestion.id)}
                     className="rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 font-semibold text-amber-900 active:bg-amber-100 cursor-pointer"
                   >
-                    Next #{nextUnansweredIdx + 1} →
+                    পরবর্তী #{nextUnansweredIdx + 1} →
                   </button>
                 )}
               </div>
@@ -725,7 +725,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                 onClick={() => void submitExam()}
                 className="min-h-[38px] rounded-lg bg-rose-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-800 cursor-pointer"
               >
-                Retry Submit
+                আবার Submit চেষ্টা করুন
               </button>
             </div>
           </div>
@@ -751,7 +751,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                       <MathText text={q.text} />
                     </p>
                     <span className="shrink-0 text-xs font-medium text-slate-500">
-                      {q.marks}m
+                      {q.marks} নম্বর
                     </span>
                   </div>
 
@@ -793,7 +793,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                         onClick={() => clearOption(q.id)}
                         className="min-h-[36px] rounded-lg px-2.5 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 cursor-pointer"
                       >
-                        Clear answer
+                        উত্তর মুছুন
                       </button>
                     </div>
                   )}
@@ -807,7 +807,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
               <div>
                 <h2 className="text-sm font-bold text-navy">Question Navigator</h2>
                 <p className="text-xs text-slate-500">
-                  {answeredCount} of {questions.length} answered
+                  {questions.length}টির মধ্যে {answeredCount}টি উত্তর দেওয়া হয়েছে
                 </p>
               </div>
               <div className="grid grid-cols-5 gap-1.5">
@@ -836,7 +836,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong cursor-pointer"
               >
                 <Send className="h-4 w-4" />
-                <span>Submit Exam</span>
+                <span>Exam Submit করুন</span>
               </button>
             </div>
           </aside>
@@ -847,7 +847,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
               <span className="text-xs font-semibold text-slate-700 whitespace-nowrap">
-                {answeredCount}/{questions.length} answered
+                {answeredCount}/{questions.length}টি উত্তর
               </span>
               {nextUnansweredQuestion ? (
                 <button
@@ -855,11 +855,11 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                   onClick={() => jumpToQuestion(nextUnansweredQuestion.id)}
                   className="inline-flex min-h-[36px] items-center rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-900 active:bg-amber-100 cursor-pointer"
                 >
-                  Next #{nextUnansweredIdx + 1}
+                  পরবর্তী #{nextUnansweredIdx + 1}
                 </button>
               ) : (
                 <span className="inline-flex items-center rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700">
-                  All answered
+                  সব উত্তর সম্পন্ন
                 </span>
               )}
             </div>

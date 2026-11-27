@@ -127,7 +127,7 @@ export function ExamLifecycleActions({
             ) : (
               <Rocket className="h-4 w-4" />
             )}
-            <span>{status === "closed" ? "Re-open & Publish" : "Publish Exam"}</span>
+            <span>{status === "closed" ? "পুনরায় Publish করুন" : "Exam Publish করুন"}</span>
           </button>
         )}
 
@@ -143,7 +143,7 @@ export function ExamLifecycleActions({
             ) : (
               <Lock className="h-4 w-4" />
             )}
-            <span>Close Exam Manually</span>
+            <span>Exam বন্ধ (Close) করুন</span>
           </button>
         )}
 
@@ -172,15 +172,15 @@ export function ExamLifecycleActions({
           ) : (
             <Trash2 className="h-4 w-4" />
           )}
-          <span>Delete</span>
+          <span>মুছুন</span>
         </button>
       </div>
 
       <ConfirmModal
         open={confirmDeleteOpen}
-        title="Delete Exam?"
-        message="Delete this exam and all its questions and attempts? This cannot be undone."
-        confirmLabel="Delete Exam"
+        title="Exam মুছে ফেলবেন?"
+        message="এই Exam এবং এর সব প্রশ্ন ও Student-দের Attempt মুছে ফেলতে চান? এটি আর ফিরিয়ে আনা যাবে না।"
+        confirmLabel="Exam মুছুন"
         busy={busy === "delete"}
         onCancel={() => setConfirmDeleteOpen(false)}
         onConfirm={() => void handleDelete()}
