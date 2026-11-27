@@ -390,6 +390,18 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
       void syncDraftToServer(true);
     }
 
+    function handleOffline() {
+      setSyncState("offline");
+    }
+
+    function handleOnline() {
+      if (dirtyRef.current) {
+        void syncDraftToServer(false);
+      } else {
+        setSyncState("synced");
+      }
+    }
+
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("blur", handleBlur);
     document.addEventListener("copy", handleCopyOrCut);
@@ -397,6 +409,8 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
     document.addEventListener("contextmenu", handleContextMenu);
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("pagehide", handlePageHide);
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleOnline);
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
@@ -406,6 +420,8 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
       document.removeEventListener("contextmenu", handleContextMenu);
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("pagehide", handlePageHide);
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("online", handleOnline);
     };
   }, [attemptId, loading, syncDraftToServer, takenOver]);
 
@@ -483,7 +499,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
         Printing is disabled during an active ProsnoPro exam.
       </div>
 
-      <div className="no-print relative min-h-screen select-none pb-24">
+      <div className="no-print relative min-h-screen select-none [-webkit-touch-callout:none] pb-24">
         {/* Faint repeating watermark */}
         <div
           aria-hidden="true"
@@ -669,9 +685,19 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
 
         {fatalError && (
           <div className="mx-auto mt-4 max-w-5xl px-4">
-            <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-              <AlertTriangle className="h-4 w-4 shrink-0" />
-              <span>{fatalError}</span>
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+              <span className="inline-flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+                <span>{fatalError}</span>
+              </span>
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={() => void submitExam()}
+                className="rounded-lg bg-rose-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-800 cursor-pointer"
+              >
+                Retry Submit
+              </button>
             </div>
           </div>
         )}

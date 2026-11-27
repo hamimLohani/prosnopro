@@ -346,7 +346,11 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
             />
             <span>
               I understand that ProsnoPro records account name, email, and exam session/device
-              activity for exam fairness and results.
+              activity as described in the{" "}
+              <Link href="/privacy" className="font-semibold text-navy underline">
+                Privacy Notice
+              </Link>
+              .
             </span>
           </label>
         )}

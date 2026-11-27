@@ -163,6 +163,9 @@ export default async function HomePage() {
             ProsnoPro — Step 1 Foundation (Auth, Onboarding &amp; Bangla Spike)
           </span>
           <div className="flex items-center gap-4">
+            <Link href="/privacy" className="hover:text-slate-800">
+              Privacy Notice
+            </Link>
             <Link href="/api/health" className="hover:text-slate-800">
               Health Status
             </Link>

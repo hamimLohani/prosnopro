@@ -1,6 +1,7 @@
 "use client";
 
 import { GraduationCap, Loader2, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { TeacherCodeInput } from "@/components/teacher-code-input";
@@ -207,8 +208,11 @@ export function OnboardingForm({
             className="mt-0.5 h-4 w-4 rounded border-slate-300 text-navy focus:ring-navy"
           />
           <span>
-            I acknowledge that ProsnoPro stores my account details and exam session activity (such as
-            join events and tab-switch logs) for exam integrity and grading.
+            I acknowledge the{" "}
+            <Link href="/privacy" target="_blank" className="font-semibold text-navy underline">
+              Privacy Notice
+            </Link>{" "}
+            (ProsnoPro stores account details and exam session activity for exam integrity and grading).
           </span>
         </label>
 
