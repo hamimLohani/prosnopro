@@ -78,6 +78,7 @@ export function TeacherQuestionEditor({
   const [aiCount, setAiCount] = useState("5");
   const [aiNotes, setAiNotes] = useState("");
   const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiProgress, setAiProgress] = useState<string | null>(null);
 
   // Zero-storage PDF Import state
   const [pdfProgress, setPdfProgress] = useState<string | null>(null);
@@ -236,39 +237,81 @@ export function TeacherQuestionEditor({
     setError(null);
     setMessage(null);
     setAiGenerating(true);
+    setAiProgress(null);
+
+    const requestedTotal = Math.min(100, Math.max(1, Math.floor(Number(aiCount) || 5)));
+    const batchSize = 20;
+    const batches: number[] = [];
+    for (let left = requestedTotal; left > 0; left -= batchSize) {
+      batches.push(Math.min(batchSize, left));
+    }
+
+    let generatedTotal = 0;
+    const seenStems: string[] = [];
 
     try {
-      const res = await fetch("/api/teacher/ai/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          examId: exam.id,
-          classLevel: aiClassLevel.trim(),
-          subject: aiSubject.trim(),
-          count: Number(aiCount) || 5,
-          notes: aiNotes.trim(),
-        }),
-      });
+      for (let i = 0; i < batches.length; i += 1) {
+        const count = batches[i];
+        setAiProgress(
+          batches.length > 1
+            ? `Generating batch ${i + 1} of ${batches.length} (${generatedTotal}/${requestedTotal})...`
+            : "Generating drafts...",
+        );
 
-      const data = (await res.json()) as {
-        ok?: boolean;
-        drafts?: DraftMcqQuestion[];
-        message?: string;
-      };
+        const avoidNote =
+          seenStems.length > 0
+            ? `\n\nDo NOT repeat these already-generated questions:\n${seenStems
+                .slice(-25)
+                .map((s) => `- ${s}`)
+                .join("\n")}`
+            : "";
 
-      if (!res.ok || !data.ok || !data.drafts) {
-        setError(data.message ?? "AI generation failed.");
-        return;
+        const res = await fetch("/api/teacher/ai/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            examId: exam.id,
+            classLevel: aiClassLevel.trim(),
+            subject: aiSubject.trim(),
+            count,
+            notes: `${aiNotes.trim()}${avoidNote}`,
+          }),
+        });
+
+        const data = (await res.json()) as {
+          ok?: boolean;
+          drafts?: DraftMcqQuestion[];
+          message?: string;
+        };
+
+        if (!res.ok || !data.ok || !data.drafts) {
+          if (generatedTotal > 0) {
+            setError(
+              `Stopped after generating ${generatedTotal} drafts: ${data.message ?? "AI generation failed."}`,
+            );
+          } else {
+            setError(data.message ?? "AI generation failed.");
+          }
+          return;
+        }
+
+        generatedTotal += data.drafts.length;
+        seenStems.push(...data.drafts.map((d) => d.text.slice(0, 80)));
+        setDrafts((prev) => [...prev, ...data.drafts!]);
       }
 
-      setDrafts((prev) => [...prev, ...data.drafts!]);
       setMessage(
-        `Generated ${data.drafts.length} draft question(s) using your ${aiProvider ?? "AI"} key. Review and confirm answers below before saving.`,
+        `Generated ${generatedTotal} draft question(s) using your ${aiProvider ?? "AI"} key. Review and confirm answers below before saving.`,
       );
     } catch {
-      setError("Network error while calling your AI provider.");
+      setError(
+        generatedTotal > 0
+          ? `Network interrupted after generating ${generatedTotal} drafts.`
+          : "Network error while calling your AI provider.",
+      );
     } finally {
       setAiGenerating(false);
+      setAiProgress(null);
     }
   }
 
@@ -1014,7 +1057,7 @@ export function TeacherQuestionEditor({
                           value={aiClassLevel}
                           onChange={(e) => setAiClassLevel(e.target.value)}
                           placeholder="e.g. Class 9–10 / HSC"
-                          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                          className="h-[42px] w-full rounded-lg border border-slate-300 px-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
                         />
                       </div>
 
@@ -1028,22 +1071,22 @@ export function TeacherQuestionEditor({
                           value={aiSubject}
                           onChange={(e) => setAiSubject(e.target.value)}
                           placeholder="e.g. পদার্থবিজ্ঞান"
-                          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                          className="h-[42px] w-full rounded-lg border border-slate-300 px-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
                         />
                       </div>
 
                       <div className="space-y-1.5">
                         <label htmlFor="ai-count" className="block text-sm font-medium text-slate-700">
-                          Questions to generate
+                          Questions to generate (max 100)
                         </label>
                         <input
                           id="ai-count"
                           type="number"
                           min={1}
-                          max={25}
+                          max={100}
                           value={aiCount}
                           onChange={(e) => setAiCount(e.target.value)}
-                          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                          className="h-[42px] w-full rounded-lg border border-slate-300 px-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
                         />
                       </div>
                     </div>
@@ -1059,7 +1102,7 @@ export function TeacherQuestionEditor({
                         value={aiNotes}
                         onChange={(e) => setAiNotes(e.target.value)}
                         placeholder="e.g. নিউটনের গতিসূত্র, ভরবেগ এবং ঘর্ষণ বল — বোর্ড পরীক্ষার মানের প্রশ্ন।"
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
                       />
                     </div>
 
@@ -1074,7 +1117,7 @@ export function TeacherQuestionEditor({
                         ) : (
                           <Sparkles className="h-4 w-4 text-amber" />
                         )}
-                        <span>{aiGenerating ? "Generating drafts..." : "Generate Drafts"}</span>
+                        <span>{aiGenerating ? (aiProgress ?? "Generating drafts...") : "Generate Drafts"}</span>
                       </button>
                     </div>
                   </form>

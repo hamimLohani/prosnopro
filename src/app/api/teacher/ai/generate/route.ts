@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, message: "Exam not found." }, { status: 404 });
   }
 
-  const count = Math.min(25, Math.max(1, Math.floor(Number(body.count) || 5)));
+  const count = Math.min(100, Math.max(1, Math.floor(Number(body.count) || 5)));
 
   try {
     const drafts = await generateMcqDrafts({
