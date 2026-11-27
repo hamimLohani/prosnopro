@@ -49,6 +49,13 @@ export default function SignupChooserPage() {
             </span>
           </Link>
         </div>
+
+        <p className="mt-6 text-sm text-slate-600">
+          Already have an account?{" "}
+          <Link href="/login" className="font-semibold text-navy hover:underline">
+            Sign in
+          </Link>
+        </p>
       </main>
     </div>
   );

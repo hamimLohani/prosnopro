@@ -58,20 +58,12 @@ export function Navbar({ ctx }: NavbarProps) {
               <SignOutButton className={ctx.profile ? "hidden sm:inline-flex" : ""} />
             </>
           ) : (
-            <>
-              <Link
-                href="/login"
-                className="inline-flex min-h-[36px] sm:min-h-[38px] items-center rounded-lg px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-100 whitespace-nowrap"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/signup"
-                className="inline-flex min-h-[36px] sm:min-h-[38px] items-center rounded-lg bg-navy px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-navy-strong whitespace-nowrap"
-              >
-                Get started
-              </Link>
-            </>
+            <Link
+              href="/signup"
+              className="inline-flex min-h-[36px] sm:min-h-[38px] items-center rounded-lg bg-navy px-3 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-navy-strong whitespace-nowrap"
+            >
+              Get started
+            </Link>
           )}
 
           <MobileSidebar
