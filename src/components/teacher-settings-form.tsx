@@ -3,6 +3,7 @@
 import {
   AlertTriangle,
   CheckCircle2,
+  ExternalLink,
   KeyRound,
   Loader2,
   ShieldCheck,
@@ -391,6 +392,34 @@ export function TeacherSettingsForm({
           })}
         </div>
 
+        <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3.5 sm:p-4 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">
+                How to create &amp; copy your {providerMeta.label} key
+              </h3>
+              <p className="text-xs text-slate-500">{providerMeta.freeTierNote}</p>
+            </div>
+            <a
+              href={providerMeta.keyConsoleUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-[40px] shrink-0 items-center justify-center gap-1.5 rounded-lg border border-navy/20 bg-white px-3 py-2 text-xs font-semibold text-navy shadow-xs hover:bg-navy hover:text-white transition"
+            >
+              <span>Create &amp; Copy Key</span>
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          </div>
+
+          <ol className="space-y-1.5 text-xs text-slate-700 list-decimal list-inside">
+            {providerMeta.keySetupSteps.map((step, idx) => (
+              <li key={idx} className="leading-relaxed">
+                {step}
+              </li>
+            ))}
+          </ol>
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <label htmlFor="ai-key-input" className="block text-sm font-medium text-slate-700">
@@ -405,7 +434,17 @@ export function TeacherSettingsForm({
               placeholder={hasKey ? `Saved (${keyHint}) — paste to replace` : "Paste your API key"}
               className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 font-mono text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
-            <p className="text-xs text-slate-500">{providerMeta.keyConsoleHint}</p>
+            <p className="text-xs text-slate-500">
+              Need a key?{" "}
+              <a
+                href={providerMeta.keyConsoleUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-navy underline underline-offset-2 hover:text-navy-strong"
+              >
+                {providerMeta.keyConsoleHint}
+              </a>
+            </p>
           </div>
 
           <div className="space-y-1.5">

@@ -11,6 +11,8 @@ export interface ProviderMeta {
   suggestedModels: string[];
   supportsVision: boolean;
   keyConsoleHint: string;
+  keyConsoleUrl: string;
+  keySetupSteps: string[];
 }
 
 export const PROVIDER_CATALOG: Record<AiProviderId, ProviderMeta> = {
@@ -28,6 +30,12 @@ export const PROVIDER_CATALOG: Record<AiProviderId, ProviderMeta> = {
     ],
     supportsVision: true,
     keyConsoleHint: "Get a key at aistudio.google.com/apikey",
+    keyConsoleUrl: "https://aistudio.google.com/apikey",
+    keySetupSteps: [
+      "Open Google AI Studio using the link above and sign in with your Google account.",
+      "Tap \"Create API key\", choose or create a Google Cloud project, and confirm.",
+      "Tap \"Copy\" on your new key, return here, and paste it into the API Key field below.",
+    ],
   },
   groq: {
     id: "groq",
@@ -42,6 +50,12 @@ export const PROVIDER_CATALOG: Record<AiProviderId, ProviderMeta> = {
     ],
     supportsVision: true,
     keyConsoleHint: "Get a key at console.groq.com/keys",
+    keyConsoleUrl: "https://console.groq.com/keys",
+    keySetupSteps: [
+      "Open Groq Console using the link above and sign in with Google or GitHub.",
+      "Tap \"Create API Key\", enter a name (e.g. ProsnoPro), and submit.",
+      "Tap \"Copy\" immediately (Groq shows the full key only once), then paste it below.",
+    ],
   },
   openai: {
     id: "openai",
@@ -52,6 +66,12 @@ export const PROVIDER_CATALOG: Record<AiProviderId, ProviderMeta> = {
     suggestedModels: ["gpt-4.1-mini", "gpt-4o-mini"],
     supportsVision: true,
     keyConsoleHint: "Get a key at platform.openai.com/api-keys",
+    keyConsoleUrl: "https://platform.openai.com/api-keys",
+    keySetupSteps: [
+      "Open OpenAI API Keys using the link above and sign in (active API billing credit is required).",
+      "Tap \"+ Create new secret key\", give it a name, and create the key.",
+      "Tap \"Copy\" right away (you won't be able to view it again), then paste it below.",
+    ],
   },
   anthropic: {
     id: "anthropic",
@@ -62,6 +82,12 @@ export const PROVIDER_CATALOG: Record<AiProviderId, ProviderMeta> = {
     suggestedModels: ["claude-sonnet-4-5", "claude-3-5-haiku-latest"],
     supportsVision: true,
     keyConsoleHint: "Get a key at console.anthropic.com",
+    keyConsoleUrl: "https://console.anthropic.com/settings/keys",
+    keySetupSteps: [
+      "Open Anthropic Console using the link above and sign in (prepaid API credits are required).",
+      "Tap \"Create Key\", name it (e.g. ProsnoPro), and confirm.",
+      "Tap \"Copy Key\" immediately before closing the dialog, then paste it below.",
+    ],
   },
 };
 
