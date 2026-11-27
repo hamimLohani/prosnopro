@@ -80,7 +80,7 @@ export function TeacherQuestionEditor({
   const [correctIndex, setCorrectIndex] = useState<number>(0);
   const [explanation, setExplanation] = useState("");
   const [marks, setMarks] = useState<string>(String(exam.default_marks));
-  const [saveToBank, setSaveToBank] = useState(false);
+  const [saveToBank, setSaveToBank] = useState(true);
 
   // AI Generation state (uses teacher's saved BYOK API key)
   const [aiClassLevel, setAiClassLevel] = useState(exam.class ?? "");
@@ -97,7 +97,7 @@ export function TeacherQuestionEditor({
   // Draft Review Queue (shared by With AI & PDF Import)
   const [drafts, setDrafts] = useState<DraftMcqQuestion[]>([]);
   const [editingDraftIdx, setEditingDraftIdx] = useState<number | null>(null);
-  const [saveDraftsToBank, setSaveDraftsToBank] = useState(false);
+  const [saveDraftsToBank, setSaveDraftsToBank] = useState(true);
   const [savingDrafts, setSavingDrafts] = useState(false);
 
   const [busy, setBusy] = useState(false);
