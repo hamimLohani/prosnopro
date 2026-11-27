@@ -64,6 +64,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
     }
 
     const cleanName = name.trim();
+    const cleanClass = classLevel.trim();
     const cleanCode = normalizeExamCode(code);
     const parsedDuration = Number(durationMinutes);
     const parsedOptions = Number(optionsPerQuestion);
@@ -72,6 +73,10 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
 
     if (!cleanName) {
       setError("Exam-এর নাম দেওয়া আবশ্যক।");
+      return;
+    }
+    if (!cleanClass) {
+      setError("Class / শ্রেণি দেওয়া আবশ্যক।");
       return;
     }
     if (!isValidExamCode(cleanCode)) {
@@ -241,11 +246,12 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
 
           <div className="space-y-1.5">
             <label htmlFor="exam-class" className="block text-sm font-medium text-slate-700">
-              Class / শ্রেণি <span className="text-xs font-normal text-slate-400">(ঐচ্ছিক)</span>
+              Class / শ্রেণি
             </label>
             <input
               id="exam-class"
               type="text"
+              required
               maxLength={60}
               value={classLevel}
               onChange={(e) => setClassLevel(e.target.value)}
