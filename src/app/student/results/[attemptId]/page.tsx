@@ -85,21 +85,21 @@ export default async function StudentResultDetailPage({ params }: ResultDetailPa
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar ctx={ctx} />
-      <main className="mx-auto w-full max-w-4xl flex-1 space-y-6 px-4 py-8">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+      <main className="mx-auto w-full max-w-4xl flex-1 space-y-5 sm:space-y-6 px-3 py-5 sm:px-4 sm:py-8">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
               {exam.subject || "General"} • {exam.medium === "bn" ? "Bangla" : "English"}
             </p>
-            <h1 className="text-2xl font-bold text-navy">{exam.name}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-navy">{exam.name}</h1>
           </div>
-          <Link href="/student/results" className="text-sm font-semibold text-navy hover:underline">
+          <Link href="/student/results" className="py-1 text-sm font-semibold text-navy hover:underline">
             ← Back to My Results
           </Link>
         </div>
 
         {attempt.results_released && attempt.score !== null && attempt.total_marks !== null ? (
-          <section className="rounded-2xl bg-navy p-6 text-white flex flex-wrap items-center justify-between gap-4">
+          <section className="rounded-2xl bg-navy p-5 sm:p-6 text-white flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-wider text-slate-300">Final Score</p>
               <p className="mt-1 text-3xl font-extrabold text-amber">
@@ -114,14 +114,14 @@ export default async function StudentResultDetailPage({ params }: ResultDetailPa
               </p>
             </div>
             {pct !== null && (
-              <div className="rounded-xl bg-white/10 px-5 py-3 text-right">
+              <div className="rounded-xl bg-white/10 px-4 py-2.5 sm:px-5 sm:py-3 text-right">
                 <p className="text-xs text-slate-300">Percentage</p>
-                <p className="text-2xl font-bold">{pct}%</p>
+                <p className="text-xl sm:text-2xl font-bold">{pct}%</p>
               </div>
             )}
           </section>
         ) : (
-          <section className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-700">
+          <section className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 text-sm text-slate-700">
             <Clock className="h-5 w-5 text-navy shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold text-slate-900">Results are not released yet</p>
@@ -137,7 +137,7 @@ export default async function StudentResultDetailPage({ params }: ResultDetailPa
         )}
 
         {attempt.results_released && !exam.show_answers && (
-          <section className="flex items-center gap-2.5 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
+          <section className="flex items-center gap-2.5 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 text-sm text-slate-600">
             <Lock className="h-4 w-4 text-slate-500 shrink-0" />
             <span>
               Your teacher chose not to reveal correct answers and explanations for this exam.
@@ -157,10 +157,10 @@ export default async function StudentResultDetailPage({ params }: ResultDetailPa
               return (
                 <article
                   key={q.id}
-                  className="rounded-2xl border border-slate-200 bg-white p-5 space-y-3"
+                  className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 space-y-3"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm font-semibold text-slate-900 sm:text-base">
+                    <p className="text-[15px] font-semibold leading-relaxed text-slate-900 sm:text-base">
                       {idx + 1}. <MathText text={q.text} />
                     </p>
                     <span
@@ -187,14 +187,14 @@ export default async function StudentResultDetailPage({ params }: ResultDetailPa
                     </span>
                   </div>
 
-                  <div className="grid gap-2 sm:grid-cols-2 text-sm">
+                  <div className="grid gap-2 sm:grid-cols-2 text-[15px] sm:text-sm">
                     {q.options.map((opt, optIdx) => {
                       const isCorrectOpt = q.correct_index === optIdx;
                       const isChosenOpt = q.chosen_index === optIdx;
                       return (
                         <div
                           key={optIdx}
-                          className={`rounded-lg border px-3 py-2 ${
+                          className={`rounded-xl border px-3.5 py-2.5 leading-relaxed ${
                             isCorrectOpt
                               ? "border-emerald-400 bg-emerald-50 font-semibold text-emerald-950"
                               : isChosenOpt

@@ -118,40 +118,43 @@ export function StudentPracticeClient({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       <form
         onSubmit={handleSearch}
-        className="rounded-2xl border border-slate-200 bg-white p-4 grid gap-3 sm:grid-cols-5"
+        className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 grid gap-2.5 sm:gap-3 sm:grid-cols-5"
       >
         <div className="relative sm:col-span-2">
-          <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
           <input
             type="text"
+            enterKeyHint="search"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="Keyword (Bangla or English)..."
-            className="w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-sm"
+            className="h-11 w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-base sm:text-sm"
           />
         </div>
         <input
           type="text"
+          enterKeyHint="search"
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
           placeholder="Subject"
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
         />
         <input
           type="text"
+          enterKeyHint="search"
           value={classLevel}
           onChange={(e) => setClassLevel(e.target.value)}
           placeholder="Class (e.g. HSC)"
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
         />
         <div className="flex gap-2">
           <select
             value={medium}
             onChange={(e) => setMedium(e.target.value as "all" | ExamMedium)}
-            className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm"
+            className="h-11 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-base sm:text-sm"
           >
             <option value="all">All Media</option>
             <option value="bn">Bangla</option>
@@ -160,7 +163,7 @@ export function StudentPracticeClient({
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
+            className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             <span>Search</span>
@@ -188,7 +191,7 @@ export function StudentPracticeClient({
             return (
               <article
                 key={item.id}
-                className="rounded-2xl border border-slate-200 bg-white p-5 space-y-3"
+                className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 space-y-3"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                   <div className="flex flex-wrap items-center gap-2">
@@ -213,18 +216,18 @@ export function StudentPracticeClient({
                     onClick={() =>
                       setRevealedByQid((prev) => ({ ...prev, [item.id]: !prev[item.id] }))
                     }
-                    className="inline-flex items-center gap-1 font-semibold text-navy hover:underline cursor-pointer"
+                    className="inline-flex min-h-[36px] items-center gap-1 rounded-lg px-2 py-1 font-semibold text-navy hover:bg-slate-100 cursor-pointer"
                   >
                     {revealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                     <span>{revealed ? "Hide answer" : "Reveal answer"}</span>
                   </button>
                 </div>
 
-                <p className="text-sm font-semibold text-slate-900 sm:text-base">
+                <p className="text-[15px] font-semibold leading-relaxed text-slate-900 sm:text-base">
                   {idx + 1}. <MathText text={item.text} />
                 </p>
 
-                <div className="grid gap-2 sm:grid-cols-2 text-sm">
+                <div className="grid gap-2 sm:grid-cols-2 text-[15px] sm:text-sm">
                   {item.options.map((opt, optIdx) => {
                     const isCorrect = optIdx === item.correct_index;
                     const isChosen = chosen === optIdx;
@@ -243,7 +246,7 @@ export function StudentPracticeClient({
                         onClick={() =>
                           setSelectedByQid((prev) => ({ ...prev, [item.id]: optIdx }))
                         }
-                        className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left transition cursor-pointer ${cardClass}`}
+                        className={`flex min-h-[44px] items-center justify-between gap-2 rounded-xl border px-3.5 py-2.5 text-left transition active:scale-[0.99] cursor-pointer ${cardClass}`}
                       >
                         <span>
                           <span className="mr-1.5 font-semibold">

@@ -51,10 +51,10 @@ export default async function StudentPracticePage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar ctx={ctx} />
-      <main className="mx-auto w-full max-w-5xl flex-1 space-y-6 px-4 py-8">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+      <main className="mx-auto w-full max-w-5xl flex-1 space-y-5 sm:space-y-6 px-3 py-5 sm:px-4 sm:py-8">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-navy">Practice Search</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-navy">Practice Search</h1>
             <p className="text-sm text-slate-600">
               Practice with shared teacher questions and closed exams where practice sharing is on.
             </p>

@@ -36,7 +36,7 @@ export function NavLink({ href, exact = false, className = "", children }: NavLi
     <Link
       href={href}
       prefetch={true}
-      className={`rounded-lg px-2.5 py-1.5 text-sm font-medium transition ${
+      className={`inline-flex min-h-[38px] items-center rounded-lg px-3 py-1.5 text-sm font-medium transition ${
         isActive
           ? "bg-slate-100 font-semibold text-navy"
           : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"

@@ -47,19 +47,19 @@ export default async function ExamSubmittedPage({ params }: SubmittedPageProps) 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar ctx={ctx} />
-      <main className="mx-auto flex w-full max-w-2xl flex-1 items-center justify-center px-4 py-10">
+      <main className="mx-auto flex w-full max-w-2xl flex-1 items-start sm:items-center justify-center px-3 py-6 sm:px-4 sm:py-10">
         {!summary?.ok || !summary.exam || !summary.attempt ? (
-          <div className="w-full rounded-2xl border border-slate-200 bg-white p-6 text-center space-y-4">
+          <div className="w-full rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 text-center space-y-4">
             <h1 className="text-xl font-bold text-navy">Attempt not found</h1>
             <Link
               href="/student"
-              className="inline-block rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white"
+              className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl bg-navy px-5 py-2.5 text-sm font-semibold text-white"
             >
               Back to Student Dashboard
             </Link>
           </div>
         ) : (
-          <div className="w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 space-y-6">
+          <div className="w-full rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-8 space-y-5 sm:space-y-6">
             <div className="flex items-start gap-3">
               <div className="rounded-xl bg-emerald-100 p-2.5 text-emerald-700 shrink-0">
                 <CheckCircle2 className="h-6 w-6" />
@@ -68,7 +68,7 @@ export default async function ExamSubmittedPage({ params }: SubmittedPageProps) 
                 <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
                   {summary.attempt.status === "auto_submitted" ? "Auto-submitted" : "Submitted"}
                 </p>
-                <h1 className="text-2xl font-bold text-navy">{summary.exam.name}</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-navy">{summary.exam.name}</h1>
                 <p className="text-xs text-slate-500">
                   Submitted at {new Date(summary.attempt.submitted_at).toLocaleString()}
                 </p>
@@ -112,18 +112,18 @@ export default async function ExamSubmittedPage({ params }: SubmittedPageProps) 
               </div>
             )}
 
-            <div className="flex flex-wrap justify-end gap-3">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 sm:gap-3">
               {summary.attempt.results_released && (
                 <Link
                   href={`/student/results/${summary.attempt.id}`}
-                  className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-navy hover:bg-slate-50"
+                  className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-navy hover:bg-slate-50"
                 >
                   View Result Details
                 </Link>
               )}
               <Link
                 href="/student"
-                className="rounded-xl bg-navy px-5 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong"
+                className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl bg-navy px-5 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong"
               >
                 Back to Student Dashboard
               </Link>

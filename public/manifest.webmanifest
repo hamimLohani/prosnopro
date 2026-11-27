@@ -1,0 +1,18 @@
+{
+  "name": "ProsnoPro — Timed Online Exams",
+  "short_name": "ProsnoPro",
+  "description": "Mobile-first, low-bandwidth online MCQ exam platform in Bangla and English.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#162456",
+  "icons": [
+    {
+      "src": "/logo-1.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

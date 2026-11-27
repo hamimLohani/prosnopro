@@ -141,13 +141,15 @@ export function TeacherCodeInput({
           type="text"
           inputMode="text"
           autoCapitalize="characters"
+          autoCorrect="off"
+          spellCheck={false}
           autoComplete="off"
           maxLength={12}
           disabled={disabled}
           value={value}
           onChange={(e) => handleChange(e.target.value)}
           placeholder="e.g. RAHIM26"
-          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 pr-10 font-mono text-sm uppercase tracking-wider text-slate-900 placeholder:normal-case placeholder:tracking-normal focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15 disabled:bg-slate-100"
+          className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 pr-10 font-mono text-base sm:text-sm uppercase tracking-wider text-slate-900 placeholder:normal-case placeholder:tracking-normal focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15 disabled:bg-slate-100"
         />
         <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
           {status === "checking" && <Loader2 className="h-4 w-4 animate-spin text-slate-400" />}

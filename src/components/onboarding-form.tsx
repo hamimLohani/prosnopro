@@ -114,7 +114,7 @@ export function OnboardingForm({
           <button
             type="button"
             onClick={() => setRole("student")}
-            className={`flex flex-col items-start gap-1 rounded-xl border p-3.5 text-left transition cursor-pointer ${
+            className={`flex min-h-[88px] flex-col items-start gap-1 rounded-xl border p-3.5 text-left transition active:scale-[0.99] cursor-pointer ${
               role === "student"
                 ? "border-navy bg-navy/5 ring-2 ring-navy/15"
                 : "border-slate-200 hover:bg-slate-50"
@@ -128,7 +128,7 @@ export function OnboardingForm({
           <button
             type="button"
             onClick={() => setRole("teacher")}
-            className={`flex flex-col items-start gap-1 rounded-xl border p-3.5 text-left transition cursor-pointer ${
+            className={`flex min-h-[88px] flex-col items-start gap-1 rounded-xl border p-3.5 text-left transition active:scale-[0.99] cursor-pointer ${
               role === "teacher"
                 ? "border-navy bg-navy/5 ring-2 ring-navy/15"
                 : "border-slate-200 hover:bg-slate-50"
@@ -151,11 +151,13 @@ export function OnboardingForm({
             id="onboarding-name"
             type="text"
             required
+            autoCapitalize="words"
+            enterKeyHint="next"
             maxLength={120}
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your full name"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+            className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
           />
         </div>
 
@@ -175,11 +177,12 @@ export function OnboardingForm({
               <input
                 id="onboarding-roll"
                 type="text"
+                enterKeyHint="next"
                 maxLength={60}
                 value={roll}
                 onChange={(e) => setRoll(e.target.value)}
                 placeholder="e.g. 1042"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+                className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
               />
             </div>
 
@@ -190,22 +193,23 @@ export function OnboardingForm({
               <input
                 id="onboarding-inst"
                 type="text"
+                enterKeyHint="done"
                 maxLength={160}
                 value={institution}
                 onChange={(e) => setInstitution(e.target.value)}
                 placeholder="School / College"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+                className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
               />
             </div>
           </div>
         )}
 
-        <label className="flex items-start gap-2.5 rounded-lg bg-slate-50 p-3 text-xs text-slate-600 cursor-pointer">
+        <label className="flex min-h-[44px] items-start gap-2.5 rounded-lg bg-slate-50 p-3 text-xs text-slate-600 cursor-pointer">
           <input
             type="checkbox"
             checked={agreedPrivacy}
             onChange={(e) => setAgreedPrivacy(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-navy focus:ring-navy"
+            className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 text-navy focus:ring-navy"
           />
           <span>
             I acknowledge the{" "}
@@ -219,7 +223,7 @@ export function OnboardingForm({
         <button
           type="submit"
           disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
+          className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           <span>Complete setup &amp; continue</span>

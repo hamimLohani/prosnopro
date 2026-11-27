@@ -65,54 +65,64 @@ export function StudentJoinForm() {
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="flex items-start gap-3">
-        <div className="rounded-lg bg-amber-100 p-2.5 text-amber-700 shrink-0">
-          <KeyRound className="h-5 w-5" />
-        </div>
-        <div className="flex-1 space-y-4">
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+      <div className="space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="rounded-lg bg-amber-100 p-2.5 text-amber-700 shrink-0">
+            <KeyRound className="h-5 w-5" />
+          </div>
           <div>
             <h2 className="text-lg font-bold text-slate-900">Join an exam</h2>
             <p className="text-sm text-slate-600">
               Enter the Teacher Code and Exam Code provided by your teacher.
             </p>
           </div>
-
-          {error && (
-            <div className="rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-sm text-rose-800">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleJoin} className="grid gap-3 sm:grid-cols-3">
-            <input
-              type="text"
-              required
-              maxLength={12}
-              value={teacherCode}
-              onChange={(e) => setTeacherCode(normalizeTeacherCode(e.target.value))}
-              placeholder="Teacher Code (e.g. RAHIM26)"
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 font-mono text-sm uppercase tracking-wider text-slate-900 placeholder:normal-case placeholder:tracking-normal focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-            />
-            <input
-              type="text"
-              required
-              maxLength={16}
-              value={examCode}
-              onChange={(e) => setExamCode(normalizeExamCode(e.target.value))}
-              placeholder="Exam Code (e.g. PHY01)"
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 font-mono text-sm uppercase tracking-wider text-slate-900 placeholder:normal-case placeholder:tracking-normal focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
-            >
-              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              <span>Join Exam</span>
-            </button>
-          </form>
         </div>
+
+        {error && (
+          <div className="rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-sm text-rose-800">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleJoin} className="grid gap-3 sm:grid-cols-3">
+          <input
+            type="text"
+            required
+            maxLength={12}
+            autoCapitalize="characters"
+            autoCorrect="off"
+            autoComplete="off"
+            spellCheck={false}
+            enterKeyHint="next"
+            value={teacherCode}
+            onChange={(e) => setTeacherCode(normalizeTeacherCode(e.target.value))}
+            placeholder="Teacher Code (e.g. RAHIM26)"
+            className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-base sm:text-sm uppercase tracking-wider text-slate-900 placeholder:normal-case placeholder:tracking-normal focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+          />
+          <input
+            type="text"
+            required
+            maxLength={16}
+            autoCapitalize="characters"
+            autoCorrect="off"
+            autoComplete="off"
+            spellCheck={false}
+            enterKeyHint="go"
+            value={examCode}
+            onChange={(e) => setExamCode(normalizeExamCode(e.target.value))}
+            placeholder="Exam Code (e.g. PHY01)"
+            className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-base sm:text-sm uppercase tracking-wider text-slate-900 placeholder:normal-case placeholder:tracking-normal focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong active:scale-[0.99] disabled:opacity-60 cursor-pointer"
+          >
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+            <span>Join Exam</span>
+          </button>
+        </form>
       </div>
     </section>
   );

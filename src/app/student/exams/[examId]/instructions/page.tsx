@@ -37,7 +37,7 @@ export default async function ExamInstructionsPage({ params }: InstructionsPageP
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar ctx={ctx} />
-      <main className="mx-auto flex w-full max-w-4xl flex-1 items-center justify-center px-4 py-10">
+      <main className="mx-auto flex w-full max-w-4xl flex-1 items-start sm:items-center justify-center px-3 pt-4 pb-28 sm:px-4 sm:py-10">
         {result?.ok && result.exam ? (
           <ExamInstructionsClient exam={result.exam} />
         ) : (

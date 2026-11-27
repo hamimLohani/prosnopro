@@ -28,7 +28,7 @@ export default async function HomePage() {
 
       <main className="flex-1">
         <section className="border-b border-slate-200 bg-white">
-          <div className="mx-auto max-w-5xl px-4 py-14 sm:py-20">
+          <div className="mx-auto max-w-5xl px-4 py-10 sm:py-20">
             <div className="max-w-2xl space-y-5">
               <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900">
                 <span>বাংলা &amp; English MCQ Platform</span>
@@ -36,7 +36,7 @@ export default async function HomePage() {
                 <span>Zero-Cost Edition</span>
               </div>
 
-              <h1 className="text-3xl font-extrabold tracking-tight text-navy sm:text-5xl">
+              <h1 className="text-2xl font-extrabold tracking-tight text-navy sm:text-5xl">
                 Fair, fast online exams that work even on weak mobile networks.
               </h1>
 
@@ -46,11 +46,11 @@ export default async function HomePage() {
                 questions.
               </p>
 
-              <div className="flex flex-wrap items-center gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3 pt-2">
                 {ctx.userId ? (
                   <Link
                     href={dashboardHref}
-                    className="inline-flex items-center gap-2 rounded-xl bg-navy px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-strong"
+                    className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl bg-navy px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-strong"
                   >
                     <span>Open your dashboard</span>
                     <ArrowRight className="h-4 w-4" />
@@ -58,24 +58,24 @@ export default async function HomePage() {
                 ) : (
                   <>
                     <Link
-                      href="/signup/teacher"
-                      className="inline-flex items-center gap-2 rounded-xl bg-navy px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-strong"
+                      href="/signup/student"
+                      className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl bg-navy px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-strong"
                     >
-                      <span>Create Teacher Account</span>
+                      <span>Join as Student</span>
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                     <Link
-                      href="/signup/student"
-                      className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+                      href="/signup/teacher"
+                      className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
                     >
-                      <span>Join as Student</span>
+                      <span>Create Teacher Account</span>
                     </Link>
                   </>
                 )}
 
                 <Link
                   href="/tools/bangla-spike"
-                  className="inline-flex items-center gap-1.5 rounded-xl px-4 py-3 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                  className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-4 py-3 text-sm font-medium text-slate-600 hover:bg-slate-100"
                 >
                   <FileText className="h-4 w-4" />
                   <span>Bangla Print &amp; PDF Spike</span>
@@ -85,8 +85,8 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-5xl px-4 py-12">
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
+          <div className="grid gap-3.5 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
               <div className="mb-3 inline-flex rounded-lg bg-navy/10 p-2.5 text-navy">
                 <Wifi className="h-5 w-5" />

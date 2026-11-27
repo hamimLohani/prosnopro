@@ -492,6 +492,16 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
 
   const medium = examInfo?.medium ?? "bn";
   const isLowTime = remainingSeconds <= 120;
+  const nextUnansweredIdx = questions.findIndex((q) => typeof answers[q.id] !== "number");
+  const nextUnansweredQuestion = nextUnansweredIdx >= 0 ? questions[nextUnansweredIdx] : null;
+
+  function jumpToQuestion(questionId: string) {
+    setShowNavDrawer(false);
+    document.getElementById(`question-${questionId}`)?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
 
   return (
     <>
@@ -499,7 +509,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
         Printing is disabled during an active ProsnoPro exam.
       </div>
 
-      <div className="no-print relative min-h-screen select-none [-webkit-touch-callout:none] pb-24">
+      <div className="no-print relative min-h-screen select-none [-webkit-touch-callout:none] pb-32 sm:pb-12">
         {/* Faint repeating watermark */}
         <div
           aria-hidden="true"
@@ -517,7 +527,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
         {/* Session Takeover Modal */}
         {takenOver && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-4">
-            <div className="max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-4 text-center">
+            <div className="w-full max-w-md rounded-2xl bg-white p-5 sm:p-6 shadow-xl space-y-4 text-center">
               <ShieldAlert className="mx-auto h-10 w-10 text-rose-600" />
               <h2 className="text-xl font-bold text-slate-900">Session active elsewhere</h2>
               <p className="text-sm text-slate-600">
@@ -526,7 +536,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
               </p>
               <Link
                 href="/student"
-                className="inline-block rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white"
+                className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl bg-navy px-5 py-2.5 text-sm font-semibold text-white"
               >
                 Return to Student Dashboard
               </Link>
@@ -536,8 +546,8 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
 
         {/* Submit Confirmation Modal */}
         {showConfirmModal && (
-          <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/60 p-4">
-            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-4">
+          <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-slate-900/60 p-0 sm:p-4">
+            <div className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:p-6 shadow-xl space-y-4">
               <h2 className="text-lg font-bold text-navy">Submit your exam?</h2>
               <div className="rounded-xl bg-slate-50 p-4 text-sm space-y-1">
                 <p>
@@ -556,11 +566,11 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
               <p className="text-xs text-slate-500">
                 Once submitted, answers cannot be changed.
               </p>
-              <div className="flex justify-end gap-2.5">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={() => setShowConfirmModal(false)}
-                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                  className="min-h-[44px] w-full sm:w-auto rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
                 >
                   Review answers
                 </button>
@@ -568,7 +578,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                   type="button"
                   disabled={submitting}
                   onClick={() => void submitExam()}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong cursor-pointer"
+                  className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong cursor-pointer"
                 >
                   {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
                   <span>Confirm Submit</span>
@@ -580,17 +590,17 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
 
         {/* Sticky Top Exam Bar */}
         <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
-          <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
+          <div className="mx-auto flex max-w-5xl items-center justify-between gap-2.5 px-3 py-2.5 sm:px-4 sm:py-3">
             <div className="min-w-0">
               <h1 className="truncate text-sm font-bold text-navy sm:text-base">
                 {examInfo?.name}
               </h1>
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] sm:text-xs text-slate-500">
                 <span>
                   {answeredCount}/{questions.length} answered
                 </span>
                 <span>•</span>
-                <span className="inline-flex items-center gap-1">
+                <span className="inline-flex items-center gap-1 whitespace-nowrap">
                   {syncState === "synced" && (
                     <>
                       <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
@@ -621,20 +631,21 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
 
             <div className="flex items-center gap-2 shrink-0">
               <div
-                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-mono text-sm font-bold ${
+                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 sm:px-3 font-mono text-sm font-bold tabular-nums ${
                   isLowTime
                     ? "bg-rose-100 text-rose-800 animate-pulse"
                     : "bg-navy/10 text-navy"
                 }`}
               >
-                <Clock className="h-4 w-4" />
+                <Clock className="h-4 w-4 shrink-0" />
                 <span>{formatRemaining(remainingSeconds)}</span>
               </div>
 
               <button
                 type="button"
+                aria-expanded={showNavDrawer}
                 onClick={() => setShowNavDrawer((v) => !v)}
-                className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 lg:hidden cursor-pointer"
+                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 active:bg-slate-100 lg:hidden cursor-pointer"
               >
                 <Grid className="h-4 w-4" />
                 <span>Map</span>
@@ -653,25 +664,33 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
           </div>
 
           {showNavDrawer && (
-            <div className="border-t border-slate-200 bg-slate-50 px-4 py-3 lg:hidden">
-              <div className="flex flex-wrap gap-1.5">
+            <div className="max-h-[55vh] overflow-y-auto overscroll-contain border-t border-slate-200 bg-slate-50 px-3 py-3 sm:px-4 lg:hidden">
+              <div className="mb-2.5 flex items-center justify-between gap-2 text-xs">
+                <span className="font-semibold text-slate-700">
+                  Questions ({answeredCount}/{questions.length} answered)
+                </span>
+                {nextUnansweredQuestion && (
+                  <button
+                    type="button"
+                    onClick={() => jumpToQuestion(nextUnansweredQuestion.id)}
+                    className="rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 font-semibold text-amber-900 active:bg-amber-100 cursor-pointer"
+                  >
+                    Next #{nextUnansweredIdx + 1} →
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-6 gap-2 sm:grid-cols-10">
                 {questions.map((q, idx) => {
                   const answered = typeof answers[q.id] === "number";
                   return (
                     <button
                       key={q.id}
                       type="button"
-                      onClick={() => {
-                        setShowNavDrawer(false);
-                        document.getElementById(`question-${q.id}`)?.scrollIntoView({
-                          behavior: "smooth",
-                          block: "center",
-                        });
-                      }}
-                      className={`h-8 w-8 rounded-lg text-xs font-semibold cursor-pointer ${
+                      onClick={() => jumpToQuestion(q.id)}
+                      className={`h-10 rounded-lg text-xs font-semibold transition active:scale-95 cursor-pointer ${
                         answered
                           ? "bg-navy text-white"
-                          : "border border-slate-300 bg-white text-slate-700"
+                          : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
                       }`}
                     >
                       {idx + 1}
@@ -684,7 +703,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
         </header>
 
         {fatalError && (
-          <div className="mx-auto mt-4 max-w-5xl px-4">
+          <div className="mx-auto mt-4 max-w-5xl px-3 sm:px-4">
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
               <span className="inline-flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 shrink-0" />
@@ -694,7 +713,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                 type="button"
                 disabled={submitting}
                 onClick={() => void submitExam()}
-                className="rounded-lg bg-rose-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-800 cursor-pointer"
+                className="min-h-[38px] rounded-lg bg-rose-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-800 cursor-pointer"
               >
                 Retry Submit
               </button>
@@ -703,18 +722,21 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
         )}
 
         {/* Main Content + Desktop Navigator */}
-        <div className="mx-auto grid max-w-5xl gap-6 px-4 py-6 lg:grid-cols-[1fr_240px]">
-          <div className="space-y-4">
+        <div className="mx-auto grid max-w-5xl gap-5 px-3 py-4 sm:gap-6 sm:px-4 sm:py-6 lg:grid-cols-[1fr_240px]">
+          <div className="space-y-3.5 sm:space-y-4">
             {questions.map((q, idx) => {
               const selected = answers[q.id];
+              const isQuestionAnswered = typeof selected === "number";
               return (
                 <article
                   key={q.id}
                   id={`question-${q.id}`}
-                  className="rounded-2xl border border-slate-200 bg-white p-5 space-y-3.5"
+                  className={`scroll-mt-20 sm:scroll-mt-24 rounded-2xl border bg-white p-4 sm:p-5 space-y-3.5 transition-colors ${
+                    isQuestionAnswered ? "border-navy/30" : "border-slate-200"
+                  }`}
                 >
                   <div className="flex items-baseline justify-between gap-3">
-                    <p className="text-sm font-semibold leading-relaxed text-slate-900 sm:text-base">
+                    <p className="text-[15px] font-semibold leading-relaxed text-slate-900 break-words sm:text-base">
                       <span className="mr-1.5 text-navy">{idx + 1}.</span>
                       <MathText text={q.text} />
                     </p>
@@ -731,14 +753,14 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                           key={opt.canonicalIndex}
                           type="button"
                           onClick={() => selectOption(q.id, opt.canonicalIndex)}
-                          className={`flex w-full items-start gap-3 rounded-xl border px-3.5 py-3 text-left text-sm transition cursor-pointer ${
+                          className={`flex min-h-[48px] w-full items-center sm:items-start gap-3 rounded-xl border px-3.5 py-3 text-left text-[15px] sm:text-sm transition active:scale-[0.99] cursor-pointer ${
                             isSelected
                               ? "border-navy bg-navy/5 font-medium text-navy ring-1 ring-navy"
                               : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
                           }`}
                         >
                           <span
-                            className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-xs font-bold ${
+                            className={`sm:mt-0.5 flex h-7 w-7 sm:h-5 sm:w-5 shrink-0 items-center justify-center rounded-full border text-xs font-bold ${
                               isSelected
                                 ? "border-navy bg-navy text-white"
                                 : "border-slate-300 text-slate-600"
@@ -746,7 +768,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                           >
                             {optionLabel(displayIdx, medium)}
                           </span>
-                          <span className="leading-relaxed">
+                          <span className="flex-1 leading-relaxed break-words">
                             <MathText text={opt.text} />
                           </span>
                         </button>
@@ -754,12 +776,12 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                     })}
                   </div>
 
-                  {typeof selected === "number" && (
+                  {isQuestionAnswered && (
                     <div className="flex justify-end">
                       <button
                         type="button"
                         onClick={() => clearOption(q.id)}
-                        className="text-xs font-medium text-slate-500 hover:text-slate-800 cursor-pointer"
+                        className="min-h-[36px] rounded-lg px-2.5 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 cursor-pointer"
                       >
                         Clear answer
                       </button>
@@ -771,7 +793,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
           </div>
 
           <aside className="hidden lg:block">
-            <div className="sticky top-20 rounded-2xl border border-slate-200 bg-white p-4 space-y-4">
+            <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-4 space-y-4">
               <div>
                 <h2 className="text-sm font-bold text-navy">Question Navigator</h2>
                 <p className="text-xs text-slate-500">
@@ -785,12 +807,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                     <button
                       key={q.id}
                       type="button"
-                      onClick={() => {
-                        document.getElementById(`question-${q.id}`)?.scrollIntoView({
-                          behavior: "smooth",
-                          block: "center",
-                        });
-                      }}
+                      onClick={() => jumpToQuestion(q.id)}
                       className={`h-8 rounded-lg text-xs font-semibold cursor-pointer ${
                         answered
                           ? "bg-navy text-white"
@@ -816,19 +833,34 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
         </div>
 
         {/* Mobile Bottom Submit Bar */}
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 p-3 backdrop-blur sm:hidden">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-semibold text-slate-700">
-              {answeredCount} / {questions.length} answered
-            </span>
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-3 pt-2.5 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur sm:hidden">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                {answeredCount}/{questions.length} answered
+              </span>
+              {nextUnansweredQuestion ? (
+                <button
+                  type="button"
+                  onClick={() => jumpToQuestion(nextUnansweredQuestion.id)}
+                  className="inline-flex min-h-[36px] items-center rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-900 active:bg-amber-100 cursor-pointer"
+                >
+                  Next #{nextUnansweredIdx + 1}
+                </button>
+              ) : (
+                <span className="inline-flex items-center rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700">
+                  All answered
+                </span>
+              )}
+            </div>
             <button
               type="button"
               disabled={submitting}
               onClick={() => setShowConfirmModal(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-navy px-5 py-2.5 text-sm font-semibold text-white"
+              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white active:scale-[0.99] cursor-pointer"
             >
               <Send className="h-4 w-4" />
-              <span>Submit Exam</span>
+              <span>Submit</span>
             </button>
           </div>
         </div>

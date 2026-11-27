@@ -202,7 +202,7 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
         type="button"
         onClick={handleGoogleAuth}
         disabled={!configured || loadingGoogle || loadingForm}
-        className="flex w-full items-center justify-center gap-2.5 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+        className="flex min-h-[44px] w-full items-center justify-center gap-2.5 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
       >
         {loadingGoogle ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -245,11 +245,13 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
               id="full-name"
               type="text"
               required
+              autoCapitalize="words"
+              enterKeyHint="next"
               maxLength={120}
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={role === "teacher" ? "e.g. Md. Abdur Rahim" : "e.g. Tasnim Akter"}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+              className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
           </div>
         )}
@@ -263,10 +265,11 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
             type="email"
             required
             autoComplete="email"
+            enterKeyHint="next"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+            className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
           />
         </div>
 
@@ -276,7 +279,7 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
               Password
             </label>
             {isLogin && (
-              <Link href="/reset-password" className="text-xs font-medium text-navy hover:underline">
+              <Link href="/reset-password" className="py-0.5 text-xs font-medium text-navy hover:underline">
                 Forgot password?
               </Link>
             )}
@@ -287,10 +290,11 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
             required
             minLength={isLogin ? 1 : 8}
             autoComplete={isLogin ? "current-password" : "new-password"}
+            enterKeyHint={isLogin ? "go" : "next"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder={isLogin ? "Your password" : "At least 8 characters"}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+            className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
           />
         </div>
 
@@ -312,11 +316,12 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
               <input
                 id="roll"
                 type="text"
+                enterKeyHint="next"
                 maxLength={60}
                 value={roll}
                 onChange={(e) => setRoll(e.target.value)}
                 placeholder="e.g. 1042"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+                className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
               />
             </div>
             <div className="space-y-1.5">
@@ -326,23 +331,24 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
               <input
                 id="institution"
                 type="text"
+                enterKeyHint="done"
                 maxLength={160}
                 value={institution}
                 onChange={(e) => setInstitution(e.target.value)}
                 placeholder="School / College"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+                className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
               />
             </div>
           </div>
         )}
 
         {!isLogin && (
-          <label className="flex items-start gap-2.5 rounded-lg bg-slate-50 p-3 text-xs text-slate-600 cursor-pointer">
+          <label className="flex min-h-[44px] items-start gap-2.5 rounded-lg bg-slate-50 p-3 text-xs text-slate-600 cursor-pointer">
             <input
               type="checkbox"
               checked={agreedPrivacy}
               onChange={(e) => setAgreedPrivacy(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-navy focus:ring-navy"
+              className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 text-navy focus:ring-navy"
             />
             <span>
               I understand that ProsnoPro records account name, email, and exam session/device
@@ -358,7 +364,7 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
         <button
           type="submit"
           disabled={!configured || loadingForm || loadingGoogle}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+          className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
         >
           {loadingForm && <Loader2 className="h-4 w-4 animate-spin" />}
           <span>
