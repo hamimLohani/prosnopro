@@ -51,15 +51,23 @@ export function Navbar({ ctx }: NavbarProps) {
                   </NavLink>
                 </>
               )}
+              <NavLink href="/about" className="hidden sm:inline-flex">
+                About
+              </NavLink>
               <SignOutButton className={ctx.profile ? "hidden sm:inline-flex" : ""} />
             </>
           ) : (
-            <Link
-              href="/signup"
-              className="inline-flex min-h-[36px] sm:min-h-[38px] items-center rounded-lg bg-navy px-3 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-navy-strong whitespace-nowrap"
-            >
-              শুরু করুন
-            </Link>
+            <>
+              <NavLink href="/about" className="hidden sm:inline-flex">
+                About
+              </NavLink>
+              <Link
+                href="/signup"
+                className="inline-flex min-h-[36px] sm:min-h-[38px] items-center rounded-lg bg-navy px-3 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-navy-strong whitespace-nowrap"
+              >
+                শুরু করুন
+              </Link>
+            </>
           )}
 
           <MobileSidebar
