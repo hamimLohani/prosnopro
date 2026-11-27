@@ -75,7 +75,7 @@ export function TeacherQuestionEditor({
   const [saveToBank, setSaveToBank] = useState(false);
 
   // AI Generation state (uses teacher's saved BYOK API key)
-  const [aiClassLevel, setAiClassLevel] = useState("");
+  const [aiClassLevel, setAiClassLevel] = useState(exam.class ?? "");
   const [aiSubject, setAiSubject] = useState(exam.subject);
   const [aiCount, setAiCount] = useState("5");
   const [aiNotes, setAiNotes] = useState("");

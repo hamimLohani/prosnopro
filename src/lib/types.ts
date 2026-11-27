@@ -38,6 +38,7 @@ export interface Exam {
   teacher_id: string;
   name: string;
   subject: string;
+  class: string;
   medium: ExamMedium;
   question_count: number;
   duration_minutes: number;

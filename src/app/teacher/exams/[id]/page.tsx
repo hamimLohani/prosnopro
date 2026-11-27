@@ -77,6 +77,7 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
                     : "Draft"}
               </span>
               <span className="text-xs text-slate-500">
+                {exam.class ? `${exam.class} • ` : ""}
                 {exam.subject || "General"} • {exam.medium === "bn" ? "বাংলা" : "English"}
               </span>
             </div>

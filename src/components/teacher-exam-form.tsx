@@ -27,6 +27,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
 
   const [name, setName] = useState(exam?.name ?? "");
   const [subject, setSubject] = useState(exam?.subject ?? "");
+  const [classLevel, setClassLevel] = useState(exam?.class ?? "");
   const [medium, setMedium] = useState<ExamMedium>(exam?.medium ?? "bn");
   const [code, setCode] = useState(() => exam?.code ?? generateExamCode());
   const [durationMinutes, setDurationMinutes] = useState(String(exam?.duration_minutes ?? 30));
@@ -124,6 +125,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
     const payload = {
       name: cleanName,
       subject: subject.trim(),
+      class: classLevel.trim(),
       medium,
       code: cleanCode,
       duration_minutes: parsedDuration,
@@ -233,6 +235,21 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="যেমন: পদার্থবিজ্ঞান / Physics"
+              className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="exam-class" className="block text-sm font-medium text-slate-700">
+              Class / শ্রেণি <span className="text-xs font-normal text-slate-400">(ঐচ্ছিক)</span>
+            </label>
+            <input
+              id="exam-class"
+              type="text"
+              maxLength={60}
+              value={classLevel}
+              onChange={(e) => setClassLevel(e.target.value)}
+              placeholder="যেমন: Class 9-10 / HSC / Admission"
               className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
           </div>
