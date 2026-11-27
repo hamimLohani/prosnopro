@@ -31,15 +31,15 @@ export default async function TeacherSettingsPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar ctx={ctx} />
-      <main className="mx-auto w-full max-w-3xl flex-1 space-y-6 px-4 py-8">
-        <div className="flex items-center justify-between">
+      <main className="mx-auto w-full max-w-3xl flex-1 space-y-5 sm:space-y-6 px-3 py-5 sm:px-4 sm:py-8">
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
           <div>
-            <h1 className="text-2xl font-bold text-navy">Settings</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-navy">Settings</h1>
             <p className="text-sm text-slate-600">
               Manage your Teacher Code and personal BYOK AI API key.
             </p>
           </div>
-          <Link href="/teacher" className="text-sm font-semibold text-navy hover:underline">
+          <Link href="/teacher" className="py-1 text-sm font-semibold text-navy hover:underline shrink-0">
             ← Back to Dashboard
           </Link>
         </div>

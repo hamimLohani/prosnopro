@@ -67,24 +67,24 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar ctx={ctx} />
-      <main className="mx-auto w-full max-w-4xl flex-1 space-y-6 px-4 py-8">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
+      <main className="mx-auto w-full max-w-4xl flex-1 space-y-5 sm:space-y-6 px-3 py-5 sm:px-4 sm:py-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
               Student Preview &amp; Review
             </p>
-            <h1 className="text-2xl font-bold text-navy">{exam.name}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-navy break-words">{exam.name}</h1>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="grid grid-cols-2 sm:flex items-center gap-2.5 shrink-0">
             <Link
               href={`/teacher/exams/${exam.id}/questions`}
-              className="rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               ← Edit Questions
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}`}
-              className="rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               Exam Detail
             </Link>
@@ -93,9 +93,9 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
 
         {/* Validation Checklist */}
         {warnings.length > 0 ? (
-          <div className="rounded-2xl border border-amber-300 bg-amber-50 p-5 space-y-2">
+          <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 sm:p-5 space-y-2">
             <div className="flex items-center gap-2 font-bold text-amber-950">
-              <AlertTriangle className="h-5 w-5 text-amber-600" />
+              <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
               <span>Warnings to fix before publishing</span>
             </div>
             <ul className="list-disc pl-5 text-sm text-amber-900 space-y-1">
@@ -105,7 +105,7 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
             </ul>
           </div>
         ) : (
-          <div className="flex items-center justify-between flex-wrap gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:p-5">
             <div className="flex items-center gap-2.5 text-emerald-950">
               <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
               <div>
@@ -127,10 +127,10 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
         )}
 
         {/* Student View Preview */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 space-y-6">
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-5 sm:space-y-6">
           <div className="border-b border-slate-200 pb-4 flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">{exam.name}</h2>
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">{exam.name}</h2>
               <p className="text-xs text-slate-500">
                 {exam.subject || "General"} • {exam.medium === "bn" ? "Bangla" : "English"} •{" "}
                 {exam.duration_minutes} minutes
@@ -142,11 +142,11 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
             </span>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-5 sm:space-y-6">
             {qList.map((q, idx) => (
               <div key={q.id} className="space-y-3 border-b border-slate-100 pb-5 last:border-0 last:pb-0">
                 <div className="flex items-baseline justify-between gap-3">
-                  <p className="text-sm font-semibold text-slate-900">
+                  <p className="min-w-0 flex-1 text-[15px] sm:text-sm font-semibold text-slate-900 break-words">
                     {idx + 1}. <MathText text={q.text} />
                   </p>
                   <span className="shrink-0 text-xs text-slate-500">[{q.marks}]</span>
@@ -155,7 +155,7 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
                   {q.options.map((opt, optIdx) => (
                     <div
                       key={optIdx}
-                      className={`rounded-lg border px-3 py-2 text-sm ${
+                      className={`rounded-lg border px-3 py-2.5 sm:py-2 text-sm break-words ${
                         optIdx === q.correct_index
                           ? "border-emerald-300 bg-emerald-50/70 text-emerald-950"
                           : "border-slate-200 text-slate-700"

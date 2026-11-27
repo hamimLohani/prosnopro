@@ -80,7 +80,7 @@ export function ExamResultsClient({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       {statusMessage && (
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
           {statusMessage}
@@ -89,11 +89,11 @@ export function ExamResultsClient({
 
       {/* Manual Release Banner */}
       {exam.result_release === "manual" && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
           <div className="text-sm text-amber-950">
             {exam.results_released_at ? (
               <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-800">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
                 Results released to students on{" "}
                 {new Date(exam.results_released_at).toLocaleString()}.
               </span>
@@ -106,7 +106,7 @@ export function ExamResultsClient({
               type="button"
               disabled={releasing}
               onClick={handleReleaseManual}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-xs font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
+              className="inline-flex min-h-[42px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-xs font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer shrink-0"
             >
               {releasing ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -120,15 +120,15 @@ export function ExamResultsClient({
       )}
 
       {/* Summary Stats */}
-      <section className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+      <section className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4">
           <p className="text-xs text-slate-500">Submitted Attempts</p>
           <p className="mt-1 text-2xl font-bold text-navy">{analytics.submittedCount}</p>
           {analytics.inProgressCount > 0 && (
             <p className="text-xs text-slate-500">{analytics.inProgressCount} in progress</p>
           )}
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4">
           <p className="text-xs text-slate-500">Average Score</p>
           <p className="mt-1 text-2xl font-bold text-slate-900">
             {analytics.averageScore !== null ? analytics.averageScore : "—"}
@@ -139,13 +139,13 @@ export function ExamResultsClient({
               : `Out of ${analytics.totalMarks}`}
           </p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4">
           <p className="text-xs text-slate-500">Highest Score</p>
           <p className="mt-1 text-2xl font-bold text-emerald-700">
             {analytics.highestScore !== null ? analytics.highestScore : "—"}
           </p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4">
           <p className="text-xs text-slate-500">Lowest Score</p>
           <p className="mt-1 text-2xl font-bold text-rose-700">
             {analytics.lowestScore !== null ? analytics.lowestScore : "—"}
@@ -154,7 +154,7 @@ export function ExamResultsClient({
       </section>
 
       {/* Client-Side Exports */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 space-y-4">
         <h2 className="text-base font-bold text-navy">Export Results &amp; Question Paper</h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -162,33 +162,33 @@ export function ExamResultsClient({
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
               Results Exports
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => exportResultsCsv(exam, attempts)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                className="inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
               >
-                <Download className="h-3.5 w-3.5" />
-                <span>CSV (Excel Bangla)</span>
+                <Download className="h-3.5 w-3.5 shrink-0" />
+                <span>CSV (Excel)</span>
               </button>
               <button
                 type="button"
                 disabled={exportBusy !== null}
                 onClick={handleExcelExport}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
+                className="inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
               >
                 {exportBusy === "xlsx" ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
                 ) : (
-                  <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-700" />
+                  <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
                 )}
                 <span>Excel (.xlsx)</span>
               </button>
               <Link
                 href={`/teacher/exams/${exam.id}/print?mode=results`}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                className="col-span-2 sm:col-span-1 inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
               >
-                <Printer className="h-3.5 w-3.5 text-navy" />
+                <Printer className="h-3.5 w-3.5 text-navy shrink-0" />
                 <span>PDF (Print)</span>
               </Link>
             </div>
@@ -198,31 +198,31 @@ export function ExamResultsClient({
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
               Question Paper &amp; Answer Key
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
               <Link
                 href={`/teacher/exams/${exam.id}/print?mode=paper`}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                className="inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
               >
-                <Printer className="h-3.5 w-3.5 text-navy" />
+                <Printer className="h-3.5 w-3.5 text-navy shrink-0" />
                 <span>Paper PDF</span>
               </Link>
               <Link
                 href={`/teacher/exams/${exam.id}/print?mode=key`}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                className="inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
               >
-                <Printer className="h-3.5 w-3.5 text-emerald-700" />
-                <span>Answer Key PDF</span>
+                <Printer className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
+                <span>Key PDF</span>
               </Link>
               <button
                 type="button"
                 disabled={exportBusy !== null}
                 onClick={() => handleDocxExport(false)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
+                className="inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
               >
                 {exportBusy === "docx-paper" ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
                 ) : (
-                  <FileText className="h-3.5 w-3.5 text-navy" />
+                  <FileText className="h-3.5 w-3.5 text-navy shrink-0" />
                 )}
                 <span>Paper (.docx)</span>
               </button>
@@ -230,12 +230,12 @@ export function ExamResultsClient({
                 type="button"
                 disabled={exportBusy !== null}
                 onClick={() => handleDocxExport(true)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
+                className="inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
               >
                 {exportBusy === "docx-key" ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
                 ) : (
-                  <FileText className="h-3.5 w-3.5 text-emerald-700" />
+                  <FileText className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
                 )}
                 <span>Key (.docx)</span>
               </button>
@@ -244,137 +244,240 @@ export function ExamResultsClient({
         </div>
       </section>
 
-      {/* Student Scores Table */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 space-y-4">
+      {/* Student Scores Table / Mobile Cards */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-4">
         <h2 className="text-base font-bold text-navy">Student Results ({attempts.length})</h2>
 
         {attempts.length === 0 ? (
           <p className="text-sm text-slate-500">No attempts recorded yet.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 text-xs uppercase text-slate-500">
-                  <th className="py-2 pr-4">Student</th>
-                  <th className="py-2 pr-4">Roll</th>
-                  <th className="py-2 pr-4">Score</th>
-                  <th className="py-2 pr-4">%</th>
-                  <th className="py-2 pr-4">Time Taken</th>
-                  <th className="py-2 pr-4">Status</th>
-                  <th className="py-2 pr-4">Tab Switches</th>
-                  <th className="py-2">Detail</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {attempts.map((a) => {
-                  const pct =
-                    a.score !== null && a.total_marks && Number(a.total_marks) > 0
-                      ? `${((Number(a.score) / Number(a.total_marks)) * 100).toFixed(1)}%`
-                      : "—";
-                  const isOpen = expandedAttemptId === a.id;
-                  const answerMap = a.answers ?? a.draft_answers ?? {};
+          <>
+            {/* Mobile Results Cards */}
+            <div className="divide-y divide-slate-100 sm:hidden">
+              {attempts.map((a) => {
+                const pct =
+                  a.score !== null && a.total_marks && Number(a.total_marks) > 0
+                    ? `${((Number(a.score) / Number(a.total_marks)) * 100).toFixed(1)}%`
+                    : "—";
+                const isOpen = expandedAttemptId === a.id;
+                const answerMap = a.answers ?? a.draft_answers ?? {};
 
-                  return (
-                    <Fragment key={a.id}>
-                      <tr>
-                        <td className="py-3 pr-4 font-medium text-slate-900">{a.student_name}</td>
-                        <td className="py-3 pr-4 text-slate-600">{a.student_roll ?? "—"}</td>
-                        <td className="py-3 pr-4 font-semibold text-slate-900">
+                return (
+                  <div key={a.id} className="py-3.5 space-y-2.5 text-sm">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-slate-900">{a.student_name}</p>
+                        <p className="text-xs text-slate-500">
+                          {a.student_roll ? `Roll: ${a.student_roll}` : "No Roll"} •{" "}
+                          {formatTimeTaken(a.started_at, a.submitted_at)} •{" "}
+                          <span className="capitalize">{a.status.replace("_", " ")}</span>
+                        </p>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <p className="font-extrabold text-navy">
                           {a.score !== null && a.total_marks !== null
-                            ? `${a.score} / ${a.total_marks}`
+                            ? `${a.score}/${a.total_marks}`
                             : "—"}
-                        </td>
-                        <td className="py-3 pr-4 text-slate-700">{pct}</td>
-                        <td className="py-3 pr-4 text-xs text-slate-600">
-                          {formatTimeTaken(a.started_at, a.submitted_at)}
-                        </td>
-                        <td className="py-3 pr-4">
-                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs capitalize text-slate-700">
-                            {a.status.replace("_", " ")}
-                          </span>
-                        </td>
-                        <td className="py-3 pr-4 text-xs text-slate-600">
-                          {a.violation_counts?.tab_switches ?? 0}
-                        </td>
-                        <td className="py-3">
-                          <button
-                            type="button"
-                            onClick={() => setExpandedAttemptId(isOpen ? null : a.id)}
-                            className="inline-flex items-center gap-1 text-xs font-semibold text-navy hover:underline cursor-pointer"
-                          >
-                            <span>{isOpen ? "Hide" : "Inspect"}</span>
-                            {isOpen ? (
-                              <ChevronUp className="h-3.5 w-3.5" />
-                            ) : (
-                              <ChevronDown className="h-3.5 w-3.5" />
-                            )}
-                          </button>
-                        </td>
-                      </tr>
+                        </p>
+                        <p className="text-xs font-medium text-slate-500">{pct}</p>
+                      </div>
+                    </div>
 
-                      {isOpen && (
-                        <tr>
-                          <td colSpan={8} className="bg-slate-50 p-4">
-                            <div className="space-y-2 text-xs">
-                              <p className="font-semibold text-slate-700">
-                                Submitted:{" "}
-                                {a.submitted_at
-                                  ? new Date(a.submitted_at).toLocaleString()
-                                  : "In progress"}{" "}
-                                • Blurs: {a.violation_counts?.blurs ?? 0} • Copy attempts:{" "}
-                                {a.violation_counts?.copy_attempts ?? 0} • Away:{" "}
-                                {a.violation_counts?.away_seconds ?? 0}s
-                              </p>
-                              <div className="grid gap-2 sm:grid-cols-2">
-                                {questions.map((q, qIdx) => {
-                                  const chosen = answerMap[q.id];
-                                  const isAnswered = typeof chosen === "number";
-                                  const isRight = isAnswered && chosen === q.correct_index;
-                                  return (
-                                    <div
-                                      key={q.id}
-                                      className={`rounded-lg border p-2.5 bg-white ${
-                                        isRight
-                                          ? "border-emerald-200"
-                                          : isAnswered
-                                            ? "border-rose-200"
-                                            : "border-slate-200"
-                                      }`}
-                                    >
-                                      <p className="font-medium text-slate-900">
-                                        Q{qIdx + 1}: <MathText text={q.text} />
-                                      </p>
-                                      <p className="mt-1 text-slate-600">
-                                        Chosen:{" "}
-                                        <span className="font-semibold">
-                                          {isAnswered
-                                            ? `${optionLabel(chosen, exam.medium)}) ${q.options[chosen] ?? ""}`
-                                            : "Unanswered"}
-                                        </span>{" "}
-                                        • Correct:{" "}
-                                        <span className="font-semibold text-emerald-700">
-                                          {optionLabel(q.correct_index, exam.medium)}
-                                        </span>
-                                      </p>
-                                    </div>
-                                  );
-                                })}
+                    <div className="flex items-center justify-between gap-2 text-xs">
+                      <span className="text-slate-500">
+                        Switches: {a.violation_counts?.tab_switches ?? 0}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setExpandedAttemptId(isOpen ? null : a.id)}
+                        className="inline-flex min-h-[36px] items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 font-semibold text-navy hover:bg-slate-50 cursor-pointer"
+                      >
+                        <span>{isOpen ? "Hide Answers" : "Inspect Answers"}</span>
+                        {isOpen ? (
+                          <ChevronUp className="h-3.5 w-3.5" />
+                        ) : (
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                    </div>
+
+                    {isOpen && (
+                      <div className="rounded-xl bg-slate-50 p-3 space-y-2 text-xs">
+                        <p className="font-semibold text-slate-700">
+                          Submitted:{" "}
+                          {a.submitted_at ? new Date(a.submitted_at).toLocaleString() : "In progress"}{" "}
+                          • Blurs: {a.violation_counts?.blurs ?? 0} • Copy:{" "}
+                          {a.violation_counts?.copy_attempts ?? 0} • Away:{" "}
+                          {a.violation_counts?.away_seconds ?? 0}s
+                        </p>
+                        <div className="grid gap-2">
+                          {questions.map((q, qIdx) => {
+                            const chosen = answerMap[q.id];
+                            const isAnswered = typeof chosen === "number";
+                            const isRight = isAnswered && chosen === q.correct_index;
+                            return (
+                              <div
+                                key={q.id}
+                                className={`rounded-lg border p-2.5 bg-white ${
+                                  isRight
+                                    ? "border-emerald-200"
+                                    : isAnswered
+                                      ? "border-rose-200"
+                                      : "border-slate-200"
+                                }`}
+                              >
+                                <p className="font-medium text-slate-900 break-words">
+                                  Q{qIdx + 1}: <MathText text={q.text} />
+                                </p>
+                                <p className="mt-1 text-slate-600 break-words">
+                                  Chosen:{" "}
+                                  <span className="font-semibold">
+                                    {isAnswered
+                                      ? `${optionLabel(chosen, exam.medium)}) ${q.options[chosen] ?? ""}`
+                                      : "Unanswered"}
+                                  </span>{" "}
+                                  • Correct:{" "}
+                                  <span className="font-semibold text-emerald-700">
+                                    {optionLabel(q.correct_index, exam.medium)}
+                                  </span>
+                                </p>
                               </div>
-                            </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Results Table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-xs uppercase text-slate-500">
+                    <th className="py-2 pr-4">Student</th>
+                    <th className="py-2 pr-4">Roll</th>
+                    <th className="py-2 pr-4">Score</th>
+                    <th className="py-2 pr-4">%</th>
+                    <th className="py-2 pr-4">Time Taken</th>
+                    <th className="py-2 pr-4">Status</th>
+                    <th className="py-2 pr-4">Tab Switches</th>
+                    <th className="py-2">Detail</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {attempts.map((a) => {
+                    const pct =
+                      a.score !== null && a.total_marks && Number(a.total_marks) > 0
+                        ? `${((Number(a.score) / Number(a.total_marks)) * 100).toFixed(1)}%`
+                        : "—";
+                    const isOpen = expandedAttemptId === a.id;
+                    const answerMap = a.answers ?? a.draft_answers ?? {};
+
+                    return (
+                      <Fragment key={a.id}>
+                        <tr>
+                          <td className="py-3 pr-4 font-medium text-slate-900">{a.student_name}</td>
+                          <td className="py-3 pr-4 text-slate-600">{a.student_roll ?? "—"}</td>
+                          <td className="py-3 pr-4 font-semibold text-slate-900">
+                            {a.score !== null && a.total_marks !== null
+                              ? `${a.score} / ${a.total_marks}`
+                              : "—"}
+                          </td>
+                          <td className="py-3 pr-4 text-slate-700">{pct}</td>
+                          <td className="py-3 pr-4 text-xs text-slate-600">
+                            {formatTimeTaken(a.started_at, a.submitted_at)}
+                          </td>
+                          <td className="py-3 pr-4">
+                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs capitalize text-slate-700">
+                              {a.status.replace("_", " ")}
+                            </span>
+                          </td>
+                          <td className="py-3 pr-4 text-xs text-slate-600">
+                            {a.violation_counts?.tab_switches ?? 0}
+                          </td>
+                          <td className="py-3">
+                            <button
+                              type="button"
+                              onClick={() => setExpandedAttemptId(isOpen ? null : a.id)}
+                              className="inline-flex items-center gap-1 text-xs font-semibold text-navy hover:underline cursor-pointer"
+                            >
+                              <span>{isOpen ? "Hide" : "Inspect"}</span>
+                              {isOpen ? (
+                                <ChevronUp className="h-3.5 w-3.5" />
+                              ) : (
+                                <ChevronDown className="h-3.5 w-3.5" />
+                              )}
+                            </button>
                           </td>
                         </tr>
-                      )}
-                    </Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+
+                        {isOpen && (
+                          <tr>
+                            <td colSpan={8} className="bg-slate-50 p-4">
+                              <div className="space-y-2 text-xs">
+                                <p className="font-semibold text-slate-700">
+                                  Submitted:{" "}
+                                  {a.submitted_at
+                                    ? new Date(a.submitted_at).toLocaleString()
+                                    : "In progress"}{" "}
+                                  • Blurs: {a.violation_counts?.blurs ?? 0} • Copy attempts:{" "}
+                                  {a.violation_counts?.copy_attempts ?? 0} • Away:{" "}
+                                  {a.violation_counts?.away_seconds ?? 0}s
+                                </p>
+                                <div className="grid gap-2 sm:grid-cols-2">
+                                  {questions.map((q, qIdx) => {
+                                    const chosen = answerMap[q.id];
+                                    const isAnswered = typeof chosen === "number";
+                                    const isRight = isAnswered && chosen === q.correct_index;
+                                    return (
+                                      <div
+                                        key={q.id}
+                                        className={`rounded-lg border p-2.5 bg-white ${
+                                          isRight
+                                            ? "border-emerald-200"
+                                            : isAnswered
+                                              ? "border-rose-200"
+                                              : "border-slate-200"
+                                        }`}
+                                      >
+                                        <p className="font-medium text-slate-900">
+                                          Q{qIdx + 1}: <MathText text={q.text} />
+                                        </p>
+                                        <p className="mt-1 text-slate-600">
+                                          Chosen:{" "}
+                                          <span className="font-semibold">
+                                            {isAnswered
+                                              ? `${optionLabel(chosen, exam.medium)}) ${q.options[chosen] ?? ""}`
+                                              : "Unanswered"}
+                                          </span>{" "}
+                                          • Correct:{" "}
+                                          <span className="font-semibold text-emerald-700">
+                                            {optionLabel(q.correct_index, exam.medium)}
+                                          </span>
+                                        </p>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </section>
 
       {/* Per-Question Analytics */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 space-y-4">
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-4">
         <h2 className="text-base font-bold text-navy">Per-Question Analytics</h2>
 
         {analytics.perQuestion.length === 0 ? (
@@ -382,12 +485,12 @@ export function ExamResultsClient({
         ) : (
           <div className="space-y-4">
             {analytics.perQuestion.map((qa, idx) => (
-              <div key={qa.questionId} className="rounded-xl border border-slate-200 p-4 space-y-2.5">
+              <div key={qa.questionId} className="rounded-xl border border-slate-200 p-3.5 sm:p-4 space-y-2.5">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <p className="text-sm font-semibold text-slate-900">
+                  <p className="min-w-0 flex-1 text-sm font-semibold text-slate-900 break-words">
                     {idx + 1}. <MathText text={qa.text} />
                   </p>
-                  <span className="rounded-full bg-navy/10 px-2.5 py-0.5 text-xs font-bold text-navy">
+                  <span className="shrink-0 rounded-full bg-navy/10 px-2.5 py-0.5 text-xs font-bold text-navy">
                     {qa.percentCorrect}% correct ({qa.correctCount}/{analytics.submittedCount})
                   </span>
                 </div>
@@ -399,7 +502,7 @@ export function ExamResultsClient({
                     return (
                       <div
                         key={optIdx}
-                        className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-1.5 ${
+                        className={`flex items-start sm:items-center justify-between gap-2 rounded-lg border px-3 py-2 ${
                           isCorrect
                             ? "border-emerald-300 bg-emerald-50 text-emerald-900"
                             : isTopWrong
@@ -407,12 +510,12 @@ export function ExamResultsClient({
                               : "border-slate-200 bg-slate-50 text-slate-700"
                         }`}
                       >
-                        <span className="truncate">
+                        <span className="min-w-0 break-words">
                           {optionLabel(optIdx, exam.medium)}) <MathText text={opt} />
                         </span>
                         <span className="shrink-0 font-semibold">
                           {qa.optionCounts[optIdx]}
-                          {isTopWrong && " (most common wrong)"}
+                          {isTopWrong && " (most wrong)"}
                         </span>
                       </div>
                     );

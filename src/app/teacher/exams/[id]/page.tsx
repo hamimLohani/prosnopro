@@ -57,10 +57,10 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar ctx={ctx} />
-      <main className="mx-auto w-full max-w-5xl flex-1 space-y-6 px-4 py-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2.5">
+      <main className="mx-auto w-full max-w-5xl flex-1 space-y-5 sm:space-y-6 px-3 py-5 sm:px-4 sm:py-8">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0 space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
               <span
                 className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${
                   exam.status === "published"
@@ -76,16 +76,16 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
                 {exam.subject || "General"} • {exam.medium === "bn" ? "Bangla" : "English"}
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-navy sm:text-3xl">{exam.name}</h1>
+            <h1 className="text-xl font-bold text-navy sm:text-3xl break-words">{exam.name}</h1>
           </div>
 
-          <Link href="/teacher" className="text-sm font-semibold text-navy hover:underline">
+          <Link href="/teacher" className="py-1 text-sm font-semibold text-navy hover:underline shrink-0">
             ← Back to Dashboard
           </Link>
         </div>
 
         {/* Share Codes Banner */}
-        <section className="rounded-2xl bg-navy p-6 text-white flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <section className="rounded-2xl bg-navy p-4 sm:p-6 text-white flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <p className="text-xs font-semibold uppercase tracking-wider text-amber">
               Student Join Codes
@@ -99,68 +99,68 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+            <div className="rounded-xl border border-white/15 bg-white/10 px-3.5 py-2.5">
               <span className="block text-[10px] uppercase text-slate-300">Teacher Code</span>
-              <span className="font-mono text-lg font-bold tracking-wider text-white">
+              <span className="font-mono text-base sm:text-lg font-bold tracking-wider text-white">
                 {teacherCode}
               </span>
             </div>
-            <div className="rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 flex items-center gap-3">
-              <div>
-                <span className="block text-[10px] uppercase text-slate-300">Exam Code</span>
-                <span className="font-mono text-lg font-bold tracking-wider text-amber">
-                  {exam.code}
-                </span>
-              </div>
+            <div className="rounded-xl border border-white/15 bg-white/10 px-3.5 py-2.5">
+              <span className="block text-[10px] uppercase text-slate-300">Exam Code</span>
+              <span className="font-mono text-base sm:text-lg font-bold tracking-wider text-amber">
+                {exam.code}
+              </span>
+            </div>
+            <div className="col-span-2 sm:col-span-1 flex items-center justify-stretch sm:justify-end [&>button]:w-full sm:[&>button]:w-auto">
               <TeacherCodeCopy code={`Teacher: ${teacherCode} | Exam: ${exam.code}`} />
             </div>
           </div>
         </section>
 
         {/* Actions & Navigation */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
-          <div className="flex flex-wrap items-center gap-3">
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 space-y-4">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5">
             <Link
               href={`/teacher/exams/${exam.id}/questions`}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong"
+              className="inline-flex min-h-[44px] items-center justify-center sm:justify-start gap-1.5 rounded-xl bg-navy px-3 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-navy-strong"
             >
-              <Edit3 className="h-4 w-4" />
+              <Edit3 className="h-4 w-4 shrink-0" />
               <span>Questions ({exam.question_count})</span>
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}/review`}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex min-h-[44px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              <Eye className="h-4 w-4" />
-              <span>Review Preview</span>
+              <Eye className="h-4 w-4 shrink-0" />
+              <span>Review</span>
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}/edit`}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex min-h-[44px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              <Settings2 className="h-4 w-4" />
-              <span>Edit Settings</span>
+              <Settings2 className="h-4 w-4 shrink-0" />
+              <span>Settings</span>
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}/monitor`}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex min-h-[44px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              <Radio className="h-4 w-4 text-emerald-600" />
+              <Radio className="h-4 w-4 shrink-0 text-emerald-600" />
               <span>Monitor</span>
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}/results`}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex min-h-[44px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              <BarChart3 className="h-4 w-4 text-navy" />
-              <span>Results &amp; Exports</span>
+              <BarChart3 className="h-4 w-4 shrink-0 text-navy" />
+              <span>Results</span>
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}/print?mode=paper`}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex min-h-[44px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              <Printer className="h-4 w-4 text-slate-600" />
+              <Printer className="h-4 w-4 shrink-0 text-slate-600" />
               <span>Print PDF</span>
             </Link>
           </div>
@@ -176,75 +176,100 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
         </section>
 
         {/* Quick Stats */}
-        <section className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 flex items-center gap-3">
-            <HelpCircle className="h-5 w-5 text-navy" />
+        <section className="grid grid-cols-3 gap-2.5 sm:gap-4">
+          <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+            <HelpCircle className="h-5 w-5 text-navy shrink-0" />
             <div>
-              <p className="text-xs text-slate-500">Questions</p>
-              <p className="text-xl font-bold text-slate-900">{exam.question_count}</p>
+              <p className="text-[11px] sm:text-xs text-slate-500">Questions</p>
+              <p className="text-lg sm:text-xl font-bold text-slate-900">{exam.question_count}</p>
             </div>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 flex items-center gap-3">
-            <Clock className="h-5 w-5 text-amber-600" />
+          <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+            <Clock className="h-5 w-5 text-amber-600 shrink-0" />
             <div>
-              <p className="text-xs text-slate-500">Duration</p>
-              <p className="text-xl font-bold text-slate-900">{exam.duration_minutes} min</p>
+              <p className="text-[11px] sm:text-xs text-slate-500">Duration</p>
+              <p className="text-lg sm:text-xl font-bold text-slate-900">{exam.duration_minutes}m</p>
             </div>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 flex items-center gap-3">
-            <Users className="h-5 w-5 text-emerald-600" />
+          <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+            <Users className="h-5 w-5 text-emerald-600 shrink-0" />
             <div>
-              <p className="text-xs text-slate-500">Attempts</p>
-              <p className="text-xl font-bold text-slate-900">{attemptList.length}</p>
+              <p className="text-[11px] sm:text-xs text-slate-500">Attempts</p>
+              <p className="text-lg sm:text-xl font-bold text-slate-900">{attemptList.length}</p>
             </div>
           </div>
         </section>
 
-        {/* Attempts List Preview (full analytics & export arrive in Step 4) */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-navy">Student Attempts</h2>
+        {/* Attempts List Preview */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-base sm:text-lg font-bold text-navy">Student Attempts</h2>
             <Link
               href={`/teacher/exams/${exam.id}/results`}
               className="text-xs font-semibold text-navy hover:underline"
             >
-              Open Full Results, Analytics &amp; Exports →
+              Full Results &amp; Exports →
             </Link>
           </div>
 
           {attemptList.length === 0 ? (
             <p className="text-sm text-slate-500">No students have entered this exam yet.</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200 text-xs uppercase text-slate-500">
-                    <th className="py-2 pr-4">Student</th>
-                    <th className="py-2 pr-4">Roll / ID</th>
-                    <th className="py-2 pr-4">Status</th>
-                    <th className="py-2 pr-4">Score</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {attemptList.map((a) => (
-                    <tr key={a.id}>
-                      <td className="py-2.5 pr-4 font-medium text-slate-900">{a.student_name}</td>
-                      <td className="py-2.5 pr-4 text-slate-600">{a.student_roll ?? "—"}</td>
-                      <td className="py-2.5 pr-4">
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium capitalize text-slate-700">
-                          {a.status.replace("_", " ")}
-                        </span>
-                      </td>
-                      <td className="py-2.5 pr-4 font-semibold text-slate-900">
+            <>
+              {/* Mobile Attempt Cards */}
+              <div className="divide-y divide-slate-100 sm:hidden">
+                {attemptList.map((a) => (
+                  <div key={a.id} className="flex items-center justify-between gap-3 py-3 text-sm">
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-slate-900">{a.student_name}</p>
+                      <p className="text-xs text-slate-500">
+                        {a.student_roll ? `Roll: ${a.student_roll}` : "No Roll"} •{" "}
+                        <span className="capitalize">{a.status.replace("_", " ")}</span>
+                      </p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <span className="font-bold text-navy">
                         {a.score !== null && a.total_marks !== null
-                          ? `${a.score} / ${a.total_marks}`
-                          : "In progress"}
-                      </td>
+                          ? `${a.score}/${a.total_marks}`
+                          : "Live"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Attempts Table */}
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-xs uppercase text-slate-500">
+                      <th className="py-2 pr-4">Student</th>
+                      <th className="py-2 pr-4">Roll / ID</th>
+                      <th className="py-2 pr-4">Status</th>
+                      <th className="py-2 pr-4">Score</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {attemptList.map((a) => (
+                      <tr key={a.id}>
+                        <td className="py-2.5 pr-4 font-medium text-slate-900">{a.student_name}</td>
+                        <td className="py-2.5 pr-4 text-slate-600">{a.student_roll ?? "—"}</td>
+                        <td className="py-2.5 pr-4">
+                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium capitalize text-slate-700">
+                            {a.status.replace("_", " ")}
+                          </span>
+                        </td>
+                        <td className="py-2.5 pr-4 font-semibold text-slate-900">
+                          {a.score !== null && a.total_marks !== null
+                            ? `${a.score} / ${a.total_marks}`
+                            : "In progress"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </section>
       </main>

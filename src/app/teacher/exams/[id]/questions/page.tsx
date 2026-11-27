@@ -54,25 +54,25 @@ export default async function ExamQuestionsPage({ params }: QuestionsPageProps) 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar ctx={ctx} />
-      <main className="mx-auto w-full max-w-4xl flex-1 space-y-6 px-4 py-8">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
+      <main className="mx-auto w-full max-w-4xl flex-1 space-y-5 sm:space-y-6 px-3 py-5 sm:px-4 sm:py-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
               Question Editor • {exam.code}
             </p>
-            <h1 className="text-2xl font-bold text-navy">{exam.name}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-navy break-words">{exam.name}</h1>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="grid grid-cols-2 sm:flex items-center gap-2.5 shrink-0">
             <Link
               href={`/teacher/exams/${exam.id}`}
-              className="rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               Exam Detail
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}/review`}
-              className="rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong"
+              className="inline-flex min-h-[42px] items-center justify-center rounded-xl bg-navy px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-navy-strong"
             >
               Review &amp; Publish →
             </Link>

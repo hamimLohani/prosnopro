@@ -111,13 +111,13 @@ export function ExamLifecycleActions({
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-2.5">
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5">
         {status !== "published" && (
           <button
             type="button"
             disabled={!canPublish || busy !== null}
             onClick={handlePublish}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
+            className="col-span-2 sm:col-span-1 inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
           >
             {busy === "publish" ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -133,7 +133,7 @@ export function ExamLifecycleActions({
             type="button"
             disabled={busy !== null}
             onClick={handleClose}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 disabled:opacity-50 cursor-pointer"
+            className="col-span-2 sm:col-span-1 inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 disabled:opacity-50 cursor-pointer"
           >
             {busy === "close" ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -148,7 +148,7 @@ export function ExamLifecycleActions({
           type="button"
           disabled={busy !== null}
           onClick={handleDuplicate}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
+          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
         >
           {busy === "duplicate" ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -162,7 +162,7 @@ export function ExamLifecycleActions({
           type="button"
           disabled={busy !== null}
           onClick={handleDelete}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-3.5 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-50 cursor-pointer"
+          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-white px-3.5 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-50 cursor-pointer"
         >
           {busy === "delete" ? (
             <Loader2 className="h-4 w-4 animate-spin" />

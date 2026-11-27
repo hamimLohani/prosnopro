@@ -665,9 +665,9 @@ export function TeacherQuestionEditor({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       {hasAttempts && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
           <span>
             Students have already started this exam. Adding, deleting, or reordering questions is
             locked, but you can fix typos or answer keys and re-grade.
@@ -676,7 +676,7 @@ export function TeacherQuestionEditor({
             type="button"
             disabled={regrading}
             onClick={handleRegrade}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-700 disabled:opacity-50 cursor-pointer"
+            className="inline-flex min-h-[40px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-700 disabled:opacity-50 cursor-pointer shrink-0"
           >
             {regrading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -703,13 +703,13 @@ export function TeacherQuestionEditor({
       {(!hasAttempts || editingId) && (
         <section className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           {!editingId && (
-            <div className="flex flex-wrap border-b border-slate-200 bg-slate-50 px-4 pt-3 gap-1">
+            <div className="grid grid-cols-2 sm:flex border-b border-slate-200 bg-slate-50 p-2 sm:px-4 sm:pt-3 sm:pb-0 gap-1.5 sm:gap-1">
               <button
                 type="button"
                 onClick={() => setActiveTab("manual")}
-                className={`rounded-t-lg px-4 py-2 text-sm font-semibold cursor-pointer ${
+                className={`inline-flex min-h-[42px] items-center justify-center rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
                   activeTab === "manual"
-                    ? "border border-b-white border-slate-200 bg-white text-navy -mb-px"
+                    ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -718,43 +718,43 @@ export function TeacherQuestionEditor({
               <button
                 type="button"
                 onClick={() => setActiveTab("bank")}
-                className={`inline-flex items-center gap-1.5 rounded-t-lg px-4 py-2 text-sm font-semibold cursor-pointer ${
+                className={`inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
                   activeTab === "bank"
-                    ? "border border-b-white border-slate-200 bg-white text-navy -mb-px"
+                    ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                <BookOpen className="h-3.5 w-3.5 text-emerald-700" />
+                <BookOpen className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
                 <span>Question Bank</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab("ai")}
-                className={`inline-flex items-center gap-1.5 rounded-t-lg px-4 py-2 text-sm font-semibold cursor-pointer ${
+                className={`inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
                   activeTab === "ai"
-                    ? "border border-b-white border-slate-200 bg-white text-navy -mb-px"
+                    ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                <Sparkles className="h-3.5 w-3.5 text-amber" />
-                <span>With AI (Your Key)</span>
+                <Sparkles className="h-3.5 w-3.5 text-amber shrink-0" />
+                <span>With AI</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab("pdf")}
-                className={`inline-flex items-center gap-1.5 rounded-t-lg px-4 py-2 text-sm font-semibold cursor-pointer ${
+                className={`inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
                   activeTab === "pdf"
-                    ? "border border-b-white border-slate-200 bg-white text-navy -mb-px"
+                    ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                <FileUp className="h-3.5 w-3.5 text-navy" />
+                <FileUp className="h-3.5 w-3.5 text-navy shrink-0" />
                 <span>PDF Import</span>
               </button>
             </div>
           )}
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {/* TAB 2: Question Bank Snapshot Import */}
             {activeTab === "bank" && !editingId && (
               <div className="space-y-4">
@@ -774,13 +774,13 @@ export function TeacherQuestionEditor({
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="relative">
-                    <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                    <Search className="pointer-events-none absolute left-3 top-3.5 sm:top-3 h-4 w-4 text-slate-400" />
                     <input
                       type="text"
                       value={bankKeyword}
                       onChange={(e) => setBankKeyword(e.target.value)}
                       placeholder="Search keyword or tag..."
-                      className="w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-sm"
+                      className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-base sm:text-sm"
                     />
                   </div>
                   <input
@@ -788,7 +788,7 @@ export function TeacherQuestionEditor({
                     value={bankSubject}
                     onChange={(e) => setBankSubject(e.target.value)}
                     placeholder="Filter by subject..."
-                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                    className="h-11 sm:h-[42px] rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
                   />
                 </div>
 
@@ -818,10 +818,10 @@ export function TeacherQuestionEditor({
                                   : prev.filter((id) => id !== b.id),
                               );
                             }}
-                            className="mt-1 h-4 w-4 rounded border-slate-300 text-navy"
+                            className="mt-0.5 h-5 w-5 sm:h-4 sm:w-4 shrink-0 rounded border-slate-300 text-navy"
                           />
-                          <div className="space-y-1 text-xs">
-                            <p className="font-semibold text-slate-900">
+                          <div className="min-w-0 space-y-1 text-xs">
+                            <p className="font-semibold text-slate-900 break-words">
                               <MathText text={b.text} />
                             </p>
                             <p className="text-slate-500">
@@ -840,7 +840,7 @@ export function TeacherQuestionEditor({
                     type="button"
                     disabled={selectedBankIds.length === 0 || importingBank}
                     onClick={handleImportFromBank}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-50 cursor-pointer"
+                    className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-50 cursor-pointer"
                   >
                     {importingBank ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -863,7 +863,7 @@ export function TeacherQuestionEditor({
                     <button
                       type="button"
                       onClick={resetForm}
-                      className="text-xs font-semibold text-slate-500 hover:text-slate-800 cursor-pointer"
+                      className="min-h-[36px] px-2 text-xs font-semibold text-slate-500 hover:text-slate-800 cursor-pointer"
                     >
                       Cancel edit
                     </button>
@@ -888,7 +888,7 @@ export function TeacherQuestionEditor({
                         ? "এখানে বাংলা বা ইংরেজিতে প্রশ্ন লিখুন..."
                         : "Enter question text..."
                     }
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
                   />
                   {text.includes("$") && (
                     <div className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-800 border border-slate-200">
@@ -908,7 +908,7 @@ export function TeacherQuestionEditor({
                     {options.map((opt, idx) => (
                       <div
                         key={idx}
-                        className={`flex items-center gap-2 rounded-lg border p-2 ${
+                        className={`flex min-h-[44px] items-center gap-2 rounded-lg border px-2.5 py-2 ${
                           correctIndex === idx
                             ? "border-emerald-400 bg-emerald-50/50"
                             : "border-slate-300 bg-white"
@@ -920,9 +920,9 @@ export function TeacherQuestionEditor({
                           aria-label={`Mark option ${optionLabel(idx, exam.medium)} correct`}
                           checked={correctIndex === idx}
                           onChange={() => setCorrectIndex(idx)}
-                          className="h-4 w-4 text-emerald-600 cursor-pointer"
+                          className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 text-emerald-600 cursor-pointer"
                         />
-                        <span className="font-semibold text-xs text-slate-600 w-5 text-center">
+                        <span className="font-semibold text-xs text-slate-600 w-5 text-center shrink-0">
                           {optionLabel(idx, exam.medium)}
                         </span>
                         <input
@@ -935,7 +935,7 @@ export function TeacherQuestionEditor({
                             setOptions(next);
                           }}
                           placeholder={`Option ${optionLabel(idx, exam.medium)}`}
-                          className="w-full bg-transparent text-sm text-slate-900 focus:outline-none"
+                          className="w-full bg-transparent text-base sm:text-sm text-slate-900 focus:outline-none"
                         />
                       </div>
                     ))}
@@ -954,7 +954,7 @@ export function TeacherQuestionEditor({
                       value={explanation}
                       onChange={(e) => setExplanation(e.target.value)}
                       placeholder="Shown after results release if Show Answers is enabled"
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+                      className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
                     />
                   </div>
 
@@ -969,18 +969,18 @@ export function TeacherQuestionEditor({
                       min="0.25"
                       value={marks}
                       onChange={(e) => setMarks(e.target.value)}
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+                      className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
                     />
                   </div>
                 </div>
 
                 {!editingId && (
-                  <label className="inline-flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+                  <label className="flex min-h-[40px] items-center gap-2.5 text-xs text-slate-600 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={saveToBank}
                       onChange={(e) => setSaveToBank(e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-300 text-navy"
+                      className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 rounded border-slate-300 text-navy"
                     />
                     <span>Also save a copy to my Question Bank</span>
                   </label>
@@ -990,7 +990,7 @@ export function TeacherQuestionEditor({
                   <button
                     type="submit"
                     disabled={busy}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
+                    className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
                   >
                     {busy ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -1020,7 +1020,7 @@ export function TeacherQuestionEditor({
                     </div>
                     <Link
                       href="/teacher/settings#ai-key"
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-navy px-3.5 py-2 text-xs font-semibold text-white hover:bg-navy-strong"
+                      className="inline-flex min-h-[40px] w-full sm:w-auto shrink-0 items-center justify-center gap-1.5 rounded-lg bg-navy px-3.5 py-2 text-xs font-semibold text-white hover:bg-navy-strong"
                     >
                       <KeyRound className="h-3.5 w-3.5" />
                       <span>Add API Key in Settings</span>
@@ -1057,7 +1057,7 @@ export function TeacherQuestionEditor({
                           value={aiClassLevel}
                           onChange={(e) => setAiClassLevel(e.target.value)}
                           placeholder="e.g. Class 9–10 / HSC"
-                          className="h-[42px] w-full rounded-lg border border-slate-300 px-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+                          className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
                         />
                       </div>
 
@@ -1071,7 +1071,7 @@ export function TeacherQuestionEditor({
                           value={aiSubject}
                           onChange={(e) => setAiSubject(e.target.value)}
                           placeholder="e.g. পদার্থবিজ্ঞান"
-                          className="h-[42px] w-full rounded-lg border border-slate-300 px-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+                          className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
                         />
                       </div>
 
@@ -1086,7 +1086,7 @@ export function TeacherQuestionEditor({
                           max={100}
                           value={aiCount}
                           onChange={(e) => setAiCount(e.target.value)}
-                          className="h-[42px] w-full rounded-lg border border-slate-300 px-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+                          className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
                         />
                       </div>
                     </div>
@@ -1102,7 +1102,7 @@ export function TeacherQuestionEditor({
                         value={aiNotes}
                         onChange={(e) => setAiNotes(e.target.value)}
                         placeholder="e.g. নিউটনের গতিসূত্র, ভরবেগ এবং ঘর্ষণ বল — বোর্ড পরীক্ষার মানের প্রশ্ন।"
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
                       />
                     </div>
 
@@ -1110,7 +1110,7 @@ export function TeacherQuestionEditor({
                       <button
                         type="submit"
                         disabled={aiGenerating}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
+                        className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
                       >
                         {aiGenerating ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -1143,7 +1143,7 @@ export function TeacherQuestionEditor({
                     </div>
                     <Link
                       href="/teacher/settings#ai-key"
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-navy px-3.5 py-2 text-xs font-semibold text-white hover:bg-navy-strong"
+                      className="inline-flex min-h-[40px] w-full sm:w-auto shrink-0 items-center justify-center gap-1.5 rounded-lg bg-navy px-3.5 py-2 text-xs font-semibold text-white hover:bg-navy-strong"
                     >
                       <KeyRound className="h-3.5 w-3.5" />
                       <span>Add API Key</span>
@@ -1162,7 +1162,7 @@ export function TeacherQuestionEditor({
                       </p>
                     </div>
 
-                    <label className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center hover:border-navy hover:bg-slate-100/70 cursor-pointer">
+                    <label className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-5 sm:p-6 text-center hover:border-navy hover:bg-slate-100/70 cursor-pointer">
                       <FileUp className="h-6 w-6 text-navy" />
                       <span className="text-sm font-semibold text-slate-800">
                         {pdfImporting
@@ -1190,7 +1190,7 @@ export function TeacherQuestionEditor({
 
       {/* Draft Review Queue */}
       {drafts.length > 0 && (
-        <section className="rounded-2xl border-2 border-amber-300 bg-amber-50/40 p-6 space-y-4">
+        <section className="rounded-2xl border-2 border-amber-300 bg-amber-50/40 p-4 sm:p-6 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold text-navy">
@@ -1204,7 +1204,7 @@ export function TeacherQuestionEditor({
               <button
                 type="button"
                 onClick={() => setDrafts([])}
-                className="text-xs font-semibold text-rose-700 hover:underline cursor-pointer"
+                className="min-h-[36px] text-xs font-semibold text-rose-700 hover:underline cursor-pointer"
               >
                 Discard all drafts
               </button>
@@ -1215,14 +1215,14 @@ export function TeacherQuestionEditor({
             {drafts.map((draft, dIdx) => (
               <div
                 key={dIdx}
-                className="rounded-xl border border-slate-200 bg-white p-4 space-y-3"
+                className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 space-y-3"
               >
-                <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-bold text-amber-700">Draft #{dIdx + 1}</span>
                   <button
                     type="button"
                     onClick={() => setDrafts((prev) => prev.filter((_, idx) => idx !== dIdx))}
-                    className="text-xs text-rose-600 hover:underline cursor-pointer"
+                    className="min-h-[32px] px-2 text-xs text-rose-600 hover:underline cursor-pointer"
                   >
                     Remove
                   </button>
@@ -1236,14 +1236,14 @@ export function TeacherQuestionEditor({
                     next[dIdx] = { ...draft, text: e.target.value };
                     setDrafts(next);
                   }}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
                 />
 
                 <div className="grid gap-2 sm:grid-cols-2">
                   {draft.options.map((opt, optIdx) => (
                     <div
                       key={optIdx}
-                      className={`flex items-center gap-2 rounded-lg border p-2 ${
+                      className={`flex min-h-[44px] items-center gap-2 rounded-lg border px-2.5 py-2 ${
                         draft.correct_index === optIdx
                           ? "border-emerald-400 bg-emerald-50/60"
                           : "border-slate-200"
@@ -1258,9 +1258,9 @@ export function TeacherQuestionEditor({
                           next[dIdx] = { ...draft, correct_index: optIdx };
                           setDrafts(next);
                         }}
-                        className="h-4 w-4 text-emerald-600 cursor-pointer"
+                        className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 text-emerald-600 cursor-pointer"
                       />
-                      <span className="text-xs font-semibold text-slate-600">
+                      <span className="text-xs font-semibold text-slate-600 shrink-0">
                         {optionLabel(optIdx, exam.medium)}
                       </span>
                       <input
@@ -1273,7 +1273,7 @@ export function TeacherQuestionEditor({
                           next[dIdx] = { ...draft, options: nextOpts };
                           setDrafts(next);
                         }}
-                        className="w-full bg-transparent text-xs text-slate-900 focus:outline-none"
+                        className="w-full bg-transparent text-base sm:text-xs text-slate-900 focus:outline-none"
                       />
                     </div>
                   ))}
@@ -1282,13 +1282,13 @@ export function TeacherQuestionEditor({
             ))}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-            <label className="inline-flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
+            <label className="flex min-h-[40px] items-center gap-2.5 text-xs text-slate-700 cursor-pointer">
               <input
                 type="checkbox"
                 checked={saveDraftsToBank}
                 onChange={(e) => setSaveDraftsToBank(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-navy"
+                className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 rounded border-slate-300 text-navy"
               />
               <span>Also save approved drafts to my Question Bank</span>
             </label>
@@ -1297,7 +1297,7 @@ export function TeacherQuestionEditor({
               type="button"
               disabled={savingDrafts}
               onClick={handleSaveAllDrafts}
-              className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60 cursor-pointer"
+              className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60 cursor-pointer"
             >
               {savingDrafts ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -1325,62 +1325,63 @@ export function TeacherQuestionEditor({
             {questions.map((q, idx) => (
               <div
                 key={q.id}
-                className="rounded-2xl border border-slate-200 bg-white p-5 space-y-3"
+                className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 space-y-3"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-semibold text-slate-500">
                       Q{idx + 1} • {q.marks} mark{Number(q.marks) === 1 ? "" : "s"}
                     </span>
-                    <p className="text-sm font-semibold text-slate-900 leading-relaxed">
-                      <MathText text={q.text} />
-                    </p>
-                  </div>
 
-                  <div className="flex items-center gap-1 shrink-0">
-                    {!hasAttempts && (
-                      <>
-                        <button
-                          type="button"
-                          disabled={idx === 0 || busy}
-                          onClick={() => handleMove(idx, -1)}
-                          title="Move up"
-                          className="rounded p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
-                        >
-                          <ArrowUp className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          disabled={idx === questions.length - 1 || busy}
-                          onClick={() => handleMove(idx, 1)}
-                          title="Move down"
-                          className="rounded p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
-                        >
-                          <ArrowDown className="h-4 w-4" />
-                        </button>
-                      </>
-                    )}
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => startEdit(q)}
-                      title="Edit"
-                      className="rounded p-1.5 text-slate-600 hover:bg-slate-100 cursor-pointer"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    {!hasAttempts && (
+                    <div className="flex items-center gap-1 shrink-0">
+                      {!hasAttempts && (
+                        <>
+                          <button
+                            type="button"
+                            disabled={idx === 0 || busy}
+                            onClick={() => handleMove(idx, -1)}
+                            title="Move up"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
+                          >
+                            <ArrowUp className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={idx === questions.length - 1 || busy}
+                            onClick={() => handleMove(idx, 1)}
+                            title="Move down"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
+                          >
+                            <ArrowDown className="h-4 w-4" />
+                          </button>
+                        </>
+                      )}
                       <button
                         type="button"
                         disabled={busy}
-                        onClick={() => handleDelete(q)}
-                        title="Delete"
-                        className="rounded p-1.5 text-rose-600 hover:bg-rose-50 cursor-pointer"
+                        onClick={() => startEdit(q)}
+                        title="Edit"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 cursor-pointer"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Pencil className="h-4 w-4" />
                       </button>
-                    )}
+                      {!hasAttempts && (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => handleDelete(q)}
+                          title="Delete"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-rose-600 hover:bg-rose-50 cursor-pointer"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
+
+                  <p className="text-[15px] sm:text-sm font-semibold text-slate-900 leading-relaxed break-words">
+                    <MathText text={q.text} />
+                  </p>
                 </div>
 
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -1389,7 +1390,7 @@ export function TeacherQuestionEditor({
                     return (
                       <div
                         key={optIdx}
-                        className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs ${
+                        className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 sm:py-2 text-[13px] sm:text-xs ${
                           isCorrect
                             ? "border-emerald-300 bg-emerald-50 font-semibold text-emerald-900"
                             : "border-slate-200 bg-slate-50 text-slate-700"
@@ -1398,7 +1399,7 @@ export function TeacherQuestionEditor({
                         {isCorrect && (
                           <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                         )}
-                        <span>
+                        <span className="min-w-0 break-words">
                           {optionLabel(optIdx, exam.medium)}) <MathText text={opt} />
                         </span>
                       </div>

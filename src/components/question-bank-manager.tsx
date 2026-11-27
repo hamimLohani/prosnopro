@@ -206,8 +206,8 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
   }, [classFilter, items, keyword, mediumFilter, scope, subjectFilter, teacherId]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="space-y-5 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <p className="text-sm text-slate-600">
           {items.length} question(s) accessible ({items.filter((i) => i.teacher_id === teacherId).length}{" "}
           yours)
@@ -221,7 +221,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
               setShowForm(true);
             }
           }}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong cursor-pointer"
+          className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           <span>{showForm ? "Close Form" : "Add Bank Question"}</span>
@@ -242,7 +242,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
       {showForm && (
         <form
           onSubmit={handleSave}
-          className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4"
+          className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm space-y-4"
         >
           <h2 className="text-base font-bold text-navy">
             {editingId ? "Edit Bank Question" : "New Question Bank Item"}
@@ -254,14 +254,14 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Question text (Bangla or English, inline $...$ math supported)"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm"
           />
 
           <div className="grid gap-2.5 sm:grid-cols-2">
             {options.map((opt, idx) => (
               <div
                 key={idx}
-                className={`flex items-center gap-2 rounded-lg border p-2 ${
+                className={`flex min-h-[44px] items-center gap-2.5 rounded-lg border px-2.5 py-2 ${
                   correctIndex === idx ? "border-emerald-400 bg-emerald-50/60" : "border-slate-300"
                 }`}
               >
@@ -270,7 +270,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
                   name="bank-correct"
                   checked={correctIndex === idx}
                   onChange={() => setCorrectIndex(idx)}
-                  className="h-4 w-4 text-emerald-600 cursor-pointer"
+                  className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 text-emerald-600 cursor-pointer"
                 />
                 <input
                   type="text"
@@ -282,7 +282,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
                     setOptions(next);
                   }}
                   placeholder={`Option ${idx + 1}`}
-                  className="w-full bg-transparent text-sm focus:outline-none"
+                  className="w-full bg-transparent text-base sm:text-sm focus:outline-none"
                 />
               </div>
             ))}
@@ -294,19 +294,19 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Subject"
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="h-11 sm:h-[42px] rounded-lg border border-slate-300 px-3 text-base sm:text-sm"
             />
             <input
               type="text"
               value={classLevel}
               onChange={(e) => setClassLevel(e.target.value)}
               placeholder="Class (e.g. HSC)"
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="h-11 sm:h-[42px] rounded-lg border border-slate-300 px-3 text-base sm:text-sm"
             />
             <select
               value={medium}
               onChange={(e) => setMedium(e.target.value as ExamMedium)}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+              className="h-11 sm:h-[42px] rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm"
             >
               <option value="bn">Bangla</option>
               <option value="en">English</option>
@@ -314,7 +314,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
             <select
               value={visibility}
               onChange={(e) => setVisibility(e.target.value as "private" | "shared")}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+              className="h-11 sm:h-[42px] rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm"
             >
               <option value="private">Private (only me)</option>
               <option value="shared">Shared (teachers &amp; practice)</option>
@@ -327,29 +327,29 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
               placeholder="Tags (comma-separated, e.g. mechanics, chapter-4)"
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="h-11 sm:h-[42px] rounded-lg border border-slate-300 px-3 text-base sm:text-sm"
             />
             <input
               type="text"
               value={explanation}
               onChange={(e) => setExplanation(e.target.value)}
               placeholder="Explanation (optional)"
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="h-11 sm:h-[42px] rounded-lg border border-slate-300 px-3 text-base sm:text-sm"
             />
           </div>
 
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
             <button
               type="button"
               onClick={resetForm}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 cursor-pointer"
+              className="min-h-[44px] w-full sm:w-auto rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={busy}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong cursor-pointer"
+              className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong cursor-pointer"
             >
               {busy && <Loader2 className="h-4 w-4 animate-spin" />}
               <span>{editingId ? "Update" : "Save Question"}</span>
@@ -359,15 +359,15 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
       )}
 
       {/* Search & Filter Bar */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 grid gap-3 sm:grid-cols-5">
+      <section className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 grid gap-2.5 sm:gap-3 sm:grid-cols-5">
         <div className="relative sm:col-span-2">
-          <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
           <input
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="Search Bangla or English keyword..."
-            className="w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-sm"
+            className="h-11 w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-base sm:text-sm"
           />
         </div>
         <input
@@ -375,20 +375,20 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
           value={subjectFilter}
           onChange={(e) => setSubjectFilter(e.target.value)}
           placeholder="Filter subject"
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="h-11 rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
         />
         <input
           type="text"
           value={classFilter}
           onChange={(e) => setClassFilter(e.target.value)}
           placeholder="Filter class"
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="h-11 rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
         />
         <div className="grid grid-cols-2 gap-2">
           <select
             value={mediumFilter}
             onChange={(e) => setMediumFilter(e.target.value as "all" | ExamMedium)}
-            className="rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs"
+            className="h-11 rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm sm:text-xs"
           >
             <option value="all">All Media</option>
             <option value="bn">Bangla</option>
@@ -397,7 +397,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
           <select
             value={scope}
             onChange={(e) => setScope(e.target.value as "all" | "mine" | "shared")}
-            className="rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs"
+            className="h-11 rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm sm:text-xs"
           >
             <option value="all">All</option>
             <option value="mine">Mine</option>
@@ -418,11 +418,11 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
             return (
               <div
                 key={item.id}
-                className="rounded-2xl border border-slate-200 bg-white p-5 space-y-2.5"
+                className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 space-y-2.5"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
                       <span className="rounded bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">
                         {item.medium === "bn" ? "Bangla" : "English"}
                       </span>
@@ -451,46 +451,47 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
                         {item.visibility}
                       </span>
                     </div>
-                    <p className="text-sm font-semibold text-slate-900">
-                      <MathText text={item.text} />
-                    </p>
+
+                    {isOwner && (
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleVisibility(item)}
+                          title="Toggle private / shared"
+                          className="min-h-[34px] rounded-lg px-2.5 py-1 text-xs font-medium text-navy hover:bg-slate-100 cursor-pointer"
+                        >
+                          {item.visibility === "shared" ? "Make Private" : "Share"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => startEdit(item)}
+                          title="Edit"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 cursor-pointer"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(item)}
+                          title="Delete"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-rose-600 hover:bg-rose-50 cursor-pointer"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
                   </div>
 
-                  {isOwner && (
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleVisibility(item)}
-                        title="Toggle private / shared"
-                        className="rounded px-2 py-1 text-xs font-medium text-navy hover:bg-slate-100 cursor-pointer"
-                      >
-                        {item.visibility === "shared" ? "Make Private" : "Share"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => startEdit(item)}
-                        title="Edit"
-                        className="rounded p-1.5 text-slate-600 hover:bg-slate-100 cursor-pointer"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(item)}
-                        title="Delete"
-                        className="rounded p-1.5 text-rose-600 hover:bg-rose-50 cursor-pointer"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  )}
+                  <p className="text-[15px] sm:text-sm font-semibold leading-relaxed text-slate-900 break-words">
+                    <MathText text={item.text} />
+                  </p>
                 </div>
 
-                <div className="grid gap-1.5 sm:grid-cols-2 text-xs">
+                <div className="grid gap-1.5 sm:grid-cols-2 text-[13px] sm:text-xs">
                   {item.options.map((opt, idx) => (
                     <div
                       key={idx}
-                      className={`flex items-center gap-1.5 rounded border px-2.5 py-1.5 ${
+                      className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 ${
                         idx === item.correct_index
                           ? "border-emerald-300 bg-emerald-50 font-semibold text-emerald-900"
                           : "border-slate-200 bg-slate-50 text-slate-700"
@@ -499,7 +500,9 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
                       {idx === item.correct_index && (
                         <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                       )}
-                      <MathText text={opt} />
+                      <span className="min-w-0 break-words">
+                        <MathText text={opt} />
+                      </span>
                     </div>
                   ))}
                 </div>

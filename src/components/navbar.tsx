@@ -1,5 +1,7 @@
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
+import { MobileSidebar } from "@/components/mobile-sidebar";
 import { NavLink } from "@/components/nav-link";
 import { SignOutButton } from "@/components/sign-out-button";
 import type { CurrentUserContext } from "@/lib/types";
@@ -9,14 +11,23 @@ interface NavbarProps {
 }
 
 export function Navbar({ ctx }: NavbarProps) {
-  const role = ctx?.profile?.role;
+  const role = ctx?.profile?.role ?? null;
   const dashboardHref =
     role === "teacher" ? "/teacher" : role === "student" ? "/student" : "/onboarding";
 
   return (
     <header className="no-print sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex min-h-14 sm:min-h-16 max-w-5xl items-center justify-between gap-2.5 sm:gap-4 px-3 py-1.5 sm:px-4 sm:py-0">
-        <BrandMark href={ctx?.userId ? dashboardHref : "/"} />
+      <div className="mx-auto flex min-h-14 sm:min-h-16 max-w-5xl items-center justify-between gap-2 sm:gap-4 px-3 py-1.5 sm:px-4 sm:py-0">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <MobileSidebar
+            userId={ctx?.userId ?? null}
+            name={ctx?.profile?.name ?? null}
+            email={ctx?.email ?? null}
+            role={role}
+            teacherCode={ctx?.teacherProfile?.teacher_code ?? null}
+          />
+          <BrandMark href={ctx?.userId ? dashboardHref : "/"} />
+        </div>
 
         <nav className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <NavLink href="/tools/bangla-spike" className="hidden sm:inline-flex">
@@ -41,6 +52,13 @@ export function Navbar({ ctx }: NavbarProps) {
                   <NavLink href="/teacher/settings" className="hidden sm:inline-flex">
                     Settings
                   </NavLink>
+                  <Link
+                    href="/teacher/exams/new"
+                    className="inline-flex min-h-[38px] items-center gap-1 rounded-lg bg-navy px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-navy-strong sm:hidden whitespace-nowrap"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>New Exam</span>
+                  </Link>
                 </>
               )}
 
@@ -52,21 +70,27 @@ export function Navbar({ ctx }: NavbarProps) {
                   <NavLink href="/student/practice" className="hidden sm:inline-flex">
                     Practice
                   </NavLink>
+                  <Link
+                    href="/student/results"
+                    className="inline-flex min-h-[38px] items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50 sm:hidden whitespace-nowrap"
+                  >
+                    Results
+                  </Link>
                 </>
               )}
-              <SignOutButton />
+              <SignOutButton className={ctx.profile ? "hidden sm:inline-flex" : ""} />
             </>
           ) : (
             <>
               <Link
                 href="/login"
-                className="inline-flex min-h-[38px] items-center rounded-lg px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-100 whitespace-nowrap"
+                className="inline-flex min-h-[36px] sm:min-h-[38px] items-center rounded-lg px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-100 whitespace-nowrap"
               >
                 Sign in
               </Link>
               <Link
                 href="/signup"
-                className="inline-flex min-h-[38px] items-center rounded-lg bg-navy px-3 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-navy-strong whitespace-nowrap"
+                className="inline-flex min-h-[36px] sm:min-h-[38px] items-center rounded-lg bg-navy px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-navy-strong whitespace-nowrap"
               >
                 Get started
               </Link>
@@ -74,39 +98,6 @@ export function Navbar({ ctx }: NavbarProps) {
           )}
         </nav>
       </div>
-
-      {ctx?.userId && ctx.profile && (
-        <div className="no-scrollbar flex sm:hidden items-center gap-1.5 overflow-x-auto border-t border-slate-100 px-3 py-1.5 text-xs">
-          {role === "teacher" ? (
-            <>
-              <NavLink href="/teacher" exact className="shrink-0 text-xs">
-                Exams
-              </NavLink>
-              <NavLink href="/teacher/bank" className="shrink-0 text-xs">
-                Question Bank
-              </NavLink>
-              <NavLink href="/teacher/settings" className="shrink-0 text-xs">
-                Settings
-              </NavLink>
-              <NavLink href="/tools/bangla-spike" className="shrink-0 text-xs">
-                Bangla Spike
-              </NavLink>
-            </>
-          ) : (
-            <>
-              <NavLink href="/student" exact className="shrink-0 text-xs">
-                Join Exam
-              </NavLink>
-              <NavLink href="/student/results" className="shrink-0 text-xs">
-                My Results
-              </NavLink>
-              <NavLink href="/student/practice" className="shrink-0 text-xs">
-                Practice
-              </NavLink>
-            </>
-          )}
-        </div>
-      )}
     </header>
   );
 }

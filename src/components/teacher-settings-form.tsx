@@ -242,14 +242,14 @@ export function TeacherSettingsForm({
   const providerMeta = PROVIDER_CATALOG[aiProvider];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       <form
         onSubmit={handleSaveProfile}
-        className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-5"
+        className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm space-y-5"
       >
         <div>
           <h2 className="text-lg font-bold text-navy">Teacher Profile &amp; Code</h2>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-slate-600 break-all">
             Account email: <span className="font-medium text-slate-800">{email ?? "—"}</span>
           </p>
         </div>
@@ -276,7 +276,7 @@ export function TeacherSettingsForm({
             maxLength={120}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+            className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
           />
         </div>
 
@@ -301,7 +301,7 @@ export function TeacherSettingsForm({
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex items-center gap-2 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
+          className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
         >
           {saving && <Loader2 className="h-4 w-4 animate-spin" />}
           <span>Save profile</span>
@@ -312,7 +312,7 @@ export function TeacherSettingsForm({
       <form
         id="ai-key"
         onSubmit={handleSaveAiKey}
-        className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-5"
+        className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm space-y-5"
       >
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1">
@@ -371,7 +371,7 @@ export function TeacherSettingsForm({
                 key={id}
                 type="button"
                 onClick={() => handleProviderChange(id)}
-                className={`rounded-xl border p-3.5 text-left transition cursor-pointer ${
+                className={`min-h-[64px] rounded-xl border p-3.5 text-left transition active:scale-[0.99] cursor-pointer ${
                   selected
                     ? "border-navy bg-navy/5 ring-2 ring-navy/15"
                     : "border-slate-200 hover:bg-slate-50"
@@ -403,7 +403,7 @@ export function TeacherSettingsForm({
               value={apiKeyInput}
               onChange={(e) => setApiKeyInput(e.target.value)}
               placeholder={hasKey ? `Saved (${keyHint}) — paste to replace` : "Paste your API key"}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 font-mono text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+              className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 font-mono text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
             <p className="text-xs text-slate-500">{providerMeta.keyConsoleHint}</p>
           </div>
@@ -419,7 +419,7 @@ export function TeacherSettingsForm({
               value={aiModel}
               onChange={(e) => setAiModel(e.target.value)}
               placeholder={providerMeta.defaultTextModel}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 font-mono text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+              className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 font-mono text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
             <datalist id="suggested-ai-models">
               {providerMeta.suggestedModels.map((m) => (
@@ -437,21 +437,21 @@ export function TeacherSettingsForm({
           <span>Encrypted with AES-256-GCM at rest. Never returned to the browser.</span>
         </div>
 
-        <label className="inline-flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+        <label className="flex min-h-[40px] items-center gap-2.5 text-xs text-slate-700 cursor-pointer">
           <input
             type="checkbox"
             checked={verifyBeforeSave}
             onChange={(e) => setVerifyBeforeSave(e.target.checked)}
-            className="h-4 w-4 rounded border-slate-300 text-navy"
+            className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 rounded border-slate-300 text-navy"
           />
           <span>Verify key with {providerMeta.label} before saving</span>
         </label>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5">
           <button
             type="submit"
             disabled={!serverEncryptionReady || aiBusy !== null}
-            className="inline-flex items-center gap-2 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-50 cursor-pointer"
+            className="col-span-2 sm:col-span-1 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-50 cursor-pointer"
           >
             {aiBusy === "save" ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -467,17 +467,17 @@ export function TeacherSettingsForm({
                 type="button"
                 disabled={!serverEncryptionReady || aiBusy !== null}
                 onClick={handleTestSavedKey}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
+                className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
               >
                 {aiBusy === "test" && <Loader2 className="h-4 w-4 animate-spin" />}
-                <span>Test Saved Key</span>
+                <span>Test Key</span>
               </button>
 
               <button
                 type="button"
                 disabled={!serverEncryptionReady || aiBusy !== null}
                 onClick={handleRemoveKey}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-50 cursor-pointer"
+                className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-50 cursor-pointer"
               >
                 {aiBusy === "remove" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
