@@ -18,11 +18,11 @@ export const PROVIDER_CATALOG: Record<AiProviderId, ProviderMeta> = {
     id: "gemini",
     label: "Google Gemini (AI Studio)",
     freeTierNote: "Free tier available without a credit card; supports Bangla text & PDF images.",
-    defaultTextModel: "gemini-3.8-flash",
-    defaultVisionModel: "gemini-3.8-flash",
+    defaultTextModel: "gemini-4-hydrogen",
+    defaultVisionModel: "gemini-4-hydrogen",
     suggestedModels: [
-      "gemini-3.8-flash",
       "gemini-4-hydrogen",
+      "gemini-3.8-flash",
       "gemini-3.5-flash-lite",
       "gemini-2.5-flash",
     ],
@@ -69,6 +69,14 @@ export function isValidProvider(raw: unknown): raw is AiProviderId {
   return raw === "gemini" || raw === "groq" || raw === "openai" || raw === "anthropic";
 }
 
+class ProviderHttpError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+  }
+}
+
 interface ProviderCallParams {
   provider: AiProviderId;
   model?: string | null;
@@ -86,18 +94,23 @@ function parseDataUrl(dataUrl: string): { mimeType: string; base64: string } {
   return { mimeType: match[1], base64: match[2] };
 }
 
-async function callProviderRaw({
+async function callSingleModel({
   provider,
-  model,
+  chosenModel,
   apiKey,
   systemPrompt,
   userPrompt,
   imageDataUrls = [],
-}: ProviderCallParams): Promise<string> {
+}: {
+  provider: AiProviderId;
+  chosenModel: string;
+  apiKey: string;
+  systemPrompt: string;
+  userPrompt: string;
+  imageDataUrls?: string[];
+}): Promise<string> {
   const meta = PROVIDER_CATALOG[provider];
   const hasImages = imageDataUrls.length > 0;
-  const chosenModel =
-    model?.trim() || (hasImages ? meta.defaultVisionModel : meta.defaultTextModel);
 
   if (provider === "gemini") {
     const parts: Array<Record<string, unknown>> = [{ text: `${systemPrompt}\n\n${userPrompt}` }];
@@ -130,12 +143,12 @@ async function callProviderRaw({
     };
 
     if (!res.ok) {
-      throw new Error(json.error?.message ?? `Gemini API error (${res.status}).`);
+      throw new ProviderHttpError(json.error?.message ?? `Gemini API error (${res.status}).`, res.status);
     }
 
     const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text) {
-      throw new Error("Gemini returned an empty response.");
+      throw new ProviderHttpError("Gemini returned an empty response.", 502);
     }
     return text;
   }
@@ -146,8 +159,6 @@ async function callProviderRaw({
         ? "https://api.groq.com/openai/v1/chat/completions"
         : "https://api.openai.com/v1/chat/completions";
 
-    // On Groq, if the teacher picked a text-only model (like llama-3.3-70b-versatile)
-    // but sent PDF images, automatically use Groq's vision model for this image batch.
     const effectiveModel =
       provider === "groq" && hasImages && chosenModel.includes("llama-3.3-70b")
         ? meta.defaultVisionModel
@@ -186,12 +197,15 @@ async function callProviderRaw({
     };
 
     if (!res.ok) {
-      throw new Error(json.error?.message ?? `${meta.label} API error (${res.status}).`);
+      throw new ProviderHttpError(
+        json.error?.message ?? `${meta.label} API error (${res.status}).`,
+        res.status,
+      );
     }
 
     const text = json.choices?.[0]?.message?.content;
     if (!text) {
-      throw new Error(`${meta.label} returned an empty response.`);
+      throw new ProviderHttpError(`${meta.label} returned an empty response.`, 502);
     }
     return text;
   }
@@ -228,37 +242,135 @@ async function callProviderRaw({
   };
 
   if (!res.ok) {
-    throw new Error(json.error?.message ?? `Anthropic API error (${res.status}).`);
+    throw new ProviderHttpError(
+      json.error?.message ?? `Anthropic API error (${res.status}).`,
+      res.status,
+    );
   }
 
   const text = json.content?.find((b) => b.type === "text")?.text;
   if (!text) {
-    throw new Error("Anthropic returned an empty response.");
+    throw new ProviderHttpError("Anthropic returned an empty response.", 502);
   }
   return text;
 }
 
+async function callProviderRaw({
+  provider,
+  model,
+  apiKey,
+  systemPrompt,
+  userPrompt,
+  imageDataUrls = [],
+}: ProviderCallParams): Promise<string> {
+  const meta = PROVIDER_CATALOG[provider];
+  const hasImages = imageDataUrls.length > 0;
+  const primary = model?.trim() || (hasImages ? meta.defaultVisionModel : meta.defaultTextModel);
+
+  const candidates =
+    provider === "gemini"
+      ? Array.from(new Set([primary, ...meta.suggestedModels]))
+      : provider === "groq" && !hasImages
+        ? Array.from(new Set([primary, "llama-3.3-70b-versatile", "llama-3.1-8b-instant"]))
+        : [primary];
+
+  let lastError: unknown;
+  for (const candidateModel of candidates) {
+    try {
+      return await callSingleModel({
+        provider,
+        chosenModel: candidateModel,
+        apiKey,
+        systemPrompt,
+        userPrompt,
+        imageDataUrls,
+      });
+    } catch (err) {
+      lastError = err;
+      const status = err instanceof ProviderHttpError ? err.status : 0;
+      // Retry on transient overload / rate limit / unavailable model ID; fail immediately on auth/key errors.
+      if (status === 429 || status === 503 || status === 404) {
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("AI request failed.");
+}
+
+/**
+ * Verifies the API key itself via each provider's lightweight /models endpoint
+ * so temporary demand spikes on a specific model or zero-token checks don't reject valid keys.
+ */
 export async function testProviderApiKey(params: {
   provider: AiProviderId;
   model?: string | null;
   apiKey: string;
 }): Promise<{ ok: boolean; message: string }> {
+  const key = params.apiKey.trim();
+  if (!key) {
+    return { ok: false, message: "API key is empty." };
+  }
+
   try {
-    const raw = await callProviderRaw({
-      provider: params.provider,
-      model: params.model,
-      apiKey: params.apiKey,
-      systemPrompt: 'Respond strictly with JSON: {"ok": true}',
-      userPrompt: 'Return {"ok": true}',
-    });
-    if (!raw) {
-      return { ok: false, message: "Empty response from provider." };
+    if (params.provider === "gemini") {
+      const res = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1",
+        {
+          headers: { "x-goog-api-key": key },
+        },
+      );
+      if (res.ok) {
+        return { ok: true, message: "Gemini API key verified successfully." };
+      }
+      const errJson = (await res.json().catch(() => ({}))) as { error?: { message?: string } };
+      return {
+        ok: false,
+        message: errJson.error?.message ?? `Invalid Gemini API key (${res.status}).`,
+      };
     }
-    return { ok: true, message: "API key verified successfully." };
+
+    if (params.provider === "groq" || params.provider === "openai") {
+      const url =
+        params.provider === "groq"
+          ? "https://api.groq.com/openai/v1/models"
+          : "https://api.openai.com/v1/models";
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${key}` },
+      });
+      if (res.ok) {
+        return {
+          ok: true,
+          message: `${PROVIDER_CATALOG[params.provider].label} key verified successfully.`,
+        };
+      }
+      const errJson = (await res.json().catch(() => ({}))) as { error?: { message?: string } };
+      return {
+        ok: false,
+        message: errJson.error?.message ?? `Key verification failed (${res.status}).`,
+      };
+    }
+
+    // Anthropic
+    const res = await fetch("https://api.anthropic.com/v1/models?limit=1", {
+      headers: {
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+      },
+    });
+    if (res.ok) {
+      return { ok: true, message: "Anthropic API key verified successfully." };
+    }
+    const errJson = (await res.json().catch(() => ({}))) as { error?: { message?: string } };
+    return {
+      ok: false,
+      message: errJson.error?.message ?? `Anthropic key verification failed (${res.status}).`,
+    };
   } catch (err) {
     return {
       ok: false,
-      message: err instanceof Error ? err.message : "Failed to verify API key.",
+      message: err instanceof Error ? err.message : "Network error while verifying API key.",
     };
   }
 }
