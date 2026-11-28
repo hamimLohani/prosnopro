@@ -29,6 +29,7 @@ export function ExamLifecycleActions({
   const [busy, setBusy] = useState<string | null>(null);
   const [confirmAction, setConfirmAction] = useState<"close" | "delete" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const isPublished = status === "published";
 
   async function handlePublish() {
     setError(null);
@@ -95,6 +96,17 @@ export function ExamLifecycleActions({
 
   async function handleDelete() {
     setError(null);
+    if (isPublished) {
+      setConfirmAction(null);
+      setError(
+        t(
+          "Live Exam সরাসরি Delete করা যাবে না — আগে Exam বন্ধ (Close) করুন।",
+          "Live exams cannot be deleted directly — close the exam first.",
+        ),
+      );
+      return;
+    }
+
     const supabase = createClient();
     if (!supabase) {
       setConfirmAction(null);
@@ -107,7 +119,14 @@ export function ExamLifecycleActions({
     setBusy(null);
     setConfirmAction(null);
     if (err) {
-      setError(err.message);
+      setError(
+        /close the exam before deleting/i.test(err.message)
+          ? t(
+              "Live Exam সরাসরি Delete করা যাবে না — আগে Exam বন্ধ (Close) করুন।",
+              "Live exams cannot be deleted directly — close the exam first.",
+            )
+          : err.message,
+      );
       return;
     }
     router.push("/teacher");
@@ -175,9 +194,19 @@ export function ExamLifecycleActions({
 
         <button
           type="button"
-          disabled={busy !== null}
-          onClick={() => setConfirmAction("delete")}
-          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-white px-3.5 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-50 cursor-pointer"
+          disabled={busy !== null || isPublished}
+          title={
+            isPublished
+              ? t(
+                  "মুছতে চাইলে আগে Exam-টি Close (বন্ধ) করুন।",
+                  "Close the exam before deleting it.",
+                )
+              : undefined
+          }
+          onClick={() => {
+            if (!isPublished) setConfirmAction("delete");
+          }}
+          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-white px-3.5 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
         >
           {busy === "delete" ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -187,6 +216,15 @@ export function ExamLifecycleActions({
           <span>{t("মুছুন", "Delete")}</span>
         </button>
       </div>
+
+      {isPublished && (
+        <p className="text-xs text-slate-500">
+          {t(
+            "Live Exam সরাসরি মুছে ফেলা যাবে না — Delete করতে হলে আগে Exam বন্ধ (Close) করুন।",
+            "Live exams cannot be deleted directly — close the exam first before deleting.",
+          )}
+        </p>
+      )}
 
       <ConfirmModal
         open={confirmAction !== null}
