@@ -14,9 +14,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { useLang } from "@/components/language-provider";
 import { StatusToast } from "@/components/status-toast";
 import { TeacherCodeInput } from "@/components/teacher-code-input";
-import { PROVIDER_CATALOG, type AiProviderId } from "@/lib/ai/providers";
+import { getProviderUiMeta, PROVIDER_CATALOG, type AiProviderId } from "@/lib/ai/providers";
+import { pickText } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 import { isValidTeacherCode, normalizeTeacherCode } from "@/lib/validation";
 
@@ -46,6 +48,8 @@ export function TeacherSettingsForm({
   returnTo = null,
 }: TeacherSettingsFormProps) {
   const router = useRouter();
+  const { lang } = useLang();
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
   const [name, setName] = useState(initialName);
   const [teacherCode, setTeacherCode] = useState(initialTeacherCode);
   const [codeAvailable, setCodeAvailable] = useState<boolean | null>(true);
@@ -84,17 +88,22 @@ export function TeacherSettingsForm({
 
     const cleanName = name.trim();
     if (!cleanName) {
-      setError("নাম খালি রাখা যাবে না।");
+      setError(t("নাম খালি রাখা যাবে না।", "Name cannot be empty."));
       return;
     }
 
     if (codeChanged) {
       if (!isValidTeacherCode(normalizedNext)) {
-        setError("Teacher Code অবশ্যই ৪–১২টি English অক্ষর বা সংখ্যা হতে হবে।");
+        setError(
+          t(
+            "Teacher Code অবশ্যই ৪–১২টি English অক্ষর বা সংখ্যা হতে হবে।",
+            "Teacher Code must be 4–12 English letters or digits.",
+          ),
+        );
         return;
       }
       if (codeAvailable === false) {
-        setError("এই Teacher Code-টি আগেই নেওয়া হয়েছে।");
+        setError(t("এই Teacher Code-টি আগেই নেওয়া হয়েছে।", "This Teacher Code is already taken."));
         return;
       }
     }
@@ -106,7 +115,12 @@ export function TeacherSettingsForm({
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        setError("Session শেষ হয়ে গেছে। অনুগ্রহ করে আবার Sign in করুন।");
+        setError(
+          t(
+            "Session শেষ হয়ে গেছে। অনুগ্রহ করে আবার Sign in করুন।",
+            "Session expired. Please sign in again.",
+          ),
+        );
         setSaving(false);
         return;
       }
@@ -136,7 +150,7 @@ export function TeacherSettingsForm({
     }
 
     setSaving(false);
-    setStatus("Profile settings Save হয়েছে।");
+    setStatus(t("Profile settings Save হয়েছে।", "Profile settings saved."));
     router.refresh();
   }
 
@@ -153,7 +167,12 @@ export function TeacherSettingsForm({
     setAiError(null);
 
     if (!apiKeyInput.trim() && !hasKey) {
-      setAiError("Save করার আগে আপনার নিজস্ব API Key পেস্ট করুন।");
+      setAiError(
+        t(
+          "Save করার আগে আপনার নিজস্ব API Key পেস্ট করুন।",
+          "Please paste your own API Key before saving.",
+        ),
+      );
       return;
     }
 
@@ -181,7 +200,7 @@ export function TeacherSettingsForm({
       };
 
       if (!res.ok || !data.ok) {
-        setAiError(data.message ?? "API Key Save করা যায়নি।");
+        setAiError(data.message ?? t("API Key Save করা যায়নি।", "Could not save API key."));
         setAiBusy(null);
         return;
       }
@@ -189,10 +208,15 @@ export function TeacherSettingsForm({
       setHasKey(Boolean(data.hasKey));
       setKeyHint(data.keyHint ?? keyHint);
       setApiKeyInput("");
-      setAiStatus(data.message ?? "API Key Save হয়েছে।");
+      setAiStatus(data.message ?? t("API Key Save হয়েছে।", "API Key saved."));
       router.refresh();
     } catch {
-      setAiError("AI Key Save করার সময় Network সমস্যা হয়েছে।");
+      setAiError(
+        t(
+          "AI Key Save করার সময় Network সমস্যা হয়েছে।",
+          "Network error while saving AI key.",
+        ),
+      );
     } finally {
       setAiBusy(null);
       setConfirmAiAction(null);
@@ -214,12 +238,17 @@ export function TeacherSettingsForm({
       });
       const data = (await res.json()) as { ok?: boolean; message?: string };
       if (!res.ok || !data.ok) {
-        setAiError(data.message ?? "Key যাচাই ব্যর্থ হয়েছে।");
+        setAiError(data.message ?? t("Key যাচাই ব্যর্থ হয়েছে।", "Key verification failed."));
       } else {
-        setAiStatus(data.message ?? "আপনার সংরক্ষিত API Key সঠিকভাবে কাজ করছে!");
+        setAiStatus(
+          data.message ??
+            t("আপনার সংরক্ষিত API Key সঠিকভাবে কাজ করছে!", "Your saved API key is working!"),
+        );
       }
     } catch {
-      setAiError("Key টেস্ট করার সময় Network সমস্যা হয়েছে।");
+      setAiError(
+        t("Key টেস্ট করার সময় Network সমস্যা হয়েছে।", "Network error while testing key."),
+      );
     } finally {
       setAiBusy(null);
       setConfirmAiAction(null);
@@ -234,23 +263,25 @@ export function TeacherSettingsForm({
       const res = await fetch("/api/teacher/ai-key", { method: "DELETE" });
       const data = (await res.json()) as { ok?: boolean; message?: string };
       if (!res.ok || !data.ok) {
-        setAiError(data.message ?? "API Key মুছে ফেলা যায়নি।");
+        setAiError(data.message ?? t("API Key মুছে ফেলা যায়নি।", "Could not remove API key."));
       } else {
         setHasKey(false);
         setKeyHint(null);
         setApiKeyInput("");
-        setAiStatus("সংরক্ষিত API Key মুছে ফেলা হয়েছে।");
+        setAiStatus(t("সংরক্ষিত API Key মুছে ফেলা হয়েছে।", "Saved API key removed."));
         router.refresh();
       }
     } catch {
-      setAiError("Key মুছে ফেলার সময় Network সমস্যা হয়েছে।");
+      setAiError(
+        t("Key মুছে ফেলার সময় Network সমস্যা হয়েছে।", "Network error while removing key."),
+      );
     } finally {
       setAiBusy(null);
       setConfirmAiAction(null);
     }
   }
 
-  const providerMeta = PROVIDER_CATALOG[aiProvider];
+  const providerMeta = getProviderUiMeta(aiProvider, lang);
 
   return (
     <div className="space-y-5 sm:space-y-6">
@@ -259,7 +290,9 @@ export function TeacherSettingsForm({
         className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm space-y-5"
       >
         <div>
-          <h2 className="text-lg font-bold text-navy">Teacher Profile ও Code</h2>
+          <h2 className="text-lg font-bold text-navy">
+            {t("Teacher Profile ও Code", "Teacher Profile & Code")}
+          </h2>
           <p className="text-sm text-slate-600 break-all">
             Account Email: <span className="font-medium text-slate-800">{email ?? "—"}</span>
           </p>
@@ -278,7 +311,7 @@ export function TeacherSettingsForm({
 
         <div className="space-y-1.5">
           <label htmlFor="settings-name" className="block text-sm font-medium text-slate-700">
-            প্রদর্শিত নাম (Display Name)
+            {t("প্রদর্শিত নাম (Display Name)", "Display Name")}
           </label>
           <input
             id="settings-name"
@@ -303,8 +336,10 @@ export function TeacherSettingsForm({
           <div className="flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
             <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 mt-0.5" />
             <span>
-              Teacher Code পরিবর্তন করলে শিক্ষার্থীরা পুরনো Teacher Code দিয়ে আর Exam-এ জয়েন করতে
-              পারবে না।
+              {t(
+                "Teacher Code পরিবর্তন করলে শিক্ষার্থীরা পুরনো Teacher Code দিয়ে আর Exam-এ জয়েন করতে পারবে না।",
+                "If you change your Teacher Code, students will no longer be able to join using your old code.",
+              )}
             </span>
           </div>
         )}
@@ -315,7 +350,7 @@ export function TeacherSettingsForm({
           className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
         >
           {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-          <span>Profile Save করুন</span>
+          <span>{t("Profile Save করুন", "Save Profile")}</span>
         </button>
       </form>
 
@@ -329,11 +364,15 @@ export function TeacherSettingsForm({
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-navy">
               <Sparkles className="h-5 w-5 text-amber" />
-              <h2 className="text-lg font-bold">আপনার AI API Key (BYOK)</h2>
+              <h2 className="text-lg font-bold">
+                {t("আপনার AI API Key (BYOK)", "Your AI API Key (BYOK)")}
+              </h2>
             </div>
             <p className="text-sm text-slate-600">
-              AI দিয়ে MCQ Draft তৈরি এবং PDF Import করতে আপনার নিজস্ব Free বা Paid AI Key ব্যবহার
-              করুন। সব কল আপনার Key দিয়ে Server থেকে চলে — কখনো Browser-এ ফেরত পাঠানো হয় না।
+              {t(
+                "AI দিয়ে MCQ Draft তৈরি এবং PDF Import করতে আপনার নিজস্ব Free বা Paid AI Key ব্যবহার করুন। সব কল আপনার Key দিয়ে Server থেকে চলে — কখনো Browser-এ ফেরত পাঠানো হয় না।",
+                "Use your own free or paid AI key to draft MCQs and import PDFs. All AI calls run server-side with your key — it is never returned to the browser.",
+              )}
             </p>
           </div>
 
@@ -344,7 +383,7 @@ export function TeacherSettingsForm({
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-              সেট করা নেই (ঐচ্ছিক)
+              {t("সেট করা নেই (ঐচ্ছিক)", "Not configured (optional)")}
             </span>
           )}
         </div>
@@ -374,7 +413,7 @@ export function TeacherSettingsForm({
 
         <div className="grid gap-2.5 sm:grid-cols-2">
           {PROVIDER_ORDER.map((id) => {
-            const p = PROVIDER_CATALOG[id];
+            const p = getProviderUiMeta(id, lang);
             const selected = aiProvider === id;
             return (
               <button
@@ -440,11 +479,15 @@ export function TeacherSettingsForm({
               autoComplete="off"
               value={apiKeyInput}
               onChange={(e) => setApiKeyInput(e.target.value)}
-              placeholder={hasKey ? `Saved (${keyHint}) — বদলাতে Paste করুন` : "আপনার API Key Paste করুন"}
+              placeholder={
+                hasKey
+                  ? t(`Saved (${keyHint}) — বদলাতে Paste করুন`, `Saved (${keyHint}) — paste to replace`)
+                  : t("আপনার API Key Paste করুন", "Paste your API Key")
+              }
               className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 font-mono text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
             <p className="text-xs text-slate-500">
-              Key প্রয়োজন?{" "}
+              {t("Key প্রয়োজন?", "Need a key?")}{" "}
               <a
                 href={providerMeta.keyConsoleUrl}
                 target="_blank"
@@ -458,7 +501,10 @@ export function TeacherSettingsForm({
 
           <div className="space-y-1.5">
             <label htmlFor="ai-model-input" className="block text-sm font-medium text-slate-700">
-              Model <span className="text-xs font-normal text-slate-400">(ঐচ্ছিক)</span>
+              Model{" "}
+              <span className="text-xs font-normal text-slate-400">
+                ({t("ঐচ্ছিক", "optional")})
+              </span>
             </label>
             <input
               id="ai-model-input"
@@ -482,7 +528,12 @@ export function TeacherSettingsForm({
 
         <div className="flex items-center gap-2 text-xs text-slate-600">
           <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
-          <span>AES-256-GCM দিয়ে Encrypted থাকে। কখনো Browser-এ ফেরত পাঠানো হয় না।</span>
+          <span>
+            {t(
+              "AES-256-GCM দিয়ে Encrypted থাকে। কখনো Browser-এ ফেরত পাঠানো হয় না।",
+              "Encrypted with AES-256-GCM. Never sent back to your browser.",
+            )}
+          </span>
         </div>
 
         <label className="flex min-h-[40px] items-center gap-2.5 text-xs text-slate-700 cursor-pointer">
@@ -492,7 +543,12 @@ export function TeacherSettingsForm({
             onChange={(e) => setVerifyBeforeSave(e.target.checked)}
             className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 rounded border-slate-300 text-navy"
           />
-          <span>Save করার আগে {providerMeta.label} দিয়ে Key যাচাই করুন</span>
+          <span>
+            {t(
+              `Save করার আগে ${providerMeta.label} দিয়ে Key যাচাই করুন`,
+              `Verify key with ${providerMeta.label} before saving`,
+            )}
+          </span>
         </label>
 
         <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5">
@@ -506,7 +562,11 @@ export function TeacherSettingsForm({
             ) : (
               <KeyRound className="h-4 w-4" />
             )}
-            <span>{hasKey && !apiKeyInput.trim() ? "Provider / Model Update করুন" : "API Key Save করুন"}</span>
+            <span>
+              {hasKey && !apiKeyInput.trim()
+                ? t("Provider / Model Update করুন", "Update Provider / Model")
+                : t("API Key Save করুন", "Save API Key")}
+            </span>
           </button>
 
           {hasKey && (
@@ -518,7 +578,7 @@ export function TeacherSettingsForm({
                 className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
               >
                 {aiBusy === "test" && <Loader2 className="h-4 w-4 animate-spin" />}
-                <span>Key টেস্ট করুন</span>
+                <span>{t("Key টেস্ট করুন", "Test Key")}</span>
               </button>
 
               <button
@@ -532,7 +592,7 @@ export function TeacherSettingsForm({
                 ) : (
                   <Trash2 className="h-4 w-4" />
                 )}
-                <span>Key মুছুন</span>
+                <span>{t("Key মুছুন", "Remove Key")}</span>
               </button>
             </>
           )}
@@ -541,13 +601,16 @@ export function TeacherSettingsForm({
         {returnTo && hasKey && (
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <span className="text-xs font-medium text-emerald-900">
-              AI Key প্রস্তুত! এখন আপনার Exam-এ ফিরে গিয়ে প্রশ্ন তৈরি করতে পারেন।
+              {t(
+                "AI Key প্রস্তুত! এখন আপনার Exam-এ ফিরে গিয়ে প্রশ্ন তৈরি করতে পারেন।",
+                "AI key ready! Return to your exam to generate questions.",
+              )}
             </span>
             <Link
               href={returnTo}
               className="inline-flex min-h-[40px] shrink-0 items-center justify-center rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
             >
-              Exam-এ ফিরে যান →
+              {t("Exam-এ ফিরে যান →", "Back to Exam →")}
             </Link>
           </div>
         )}
@@ -558,26 +621,35 @@ export function TeacherSettingsForm({
         tone={confirmAiAction === "remove" ? "danger" : "primary"}
         title={
           confirmAiAction === "remove"
-            ? "AI API Key মুছে ফেলবেন?"
+            ? t("AI API Key মুছে ফেলবেন?", "Remove AI API Key?")
             : confirmAiAction === "test"
-              ? "সংরক্ষিত AI Key টেস্ট করবেন?"
+              ? t("সংরক্ষিত AI Key টেস্ট করবেন?", "Test Saved AI Key?")
               : hasKey && !apiKeyInput.trim()
-                ? "Provider / Model Update করবেন?"
-                : "API Key Save করবেন?"
+                ? t("Provider / Model Update করবেন?", "Update Provider / Model?")
+                : t("API Key Save করবেন?", "Save API Key?")
         }
         message={
           confirmAiAction === "remove"
-            ? "আপনার সংরক্ষিত AI API Key মুছে ফেলতে চান? Manual প্রশ্ন ও Question Bank আগের মতোই কাজ করবে।"
+            ? t(
+                "আপনার সংরক্ষিত AI API Key মুছে ফেলতে চান? Manual প্রশ্ন ও Question Bank আগের মতোই কাজ করবে।",
+                "Are you sure you want to delete your saved AI API key? Manual questions and Question Bank will continue to work normally.",
+              )
             : confirmAiAction === "test"
-              ? `সংরক্ষিত ${providerMeta.label} Key ও ${aiModel.trim() || providerMeta.defaultTextModel} মডেল দিয়ে একটি পরীক্ষামূলক কানেকশন যাচাই করা হবে।`
-              : `${providerMeta.label} (${aiModel.trim() || providerMeta.defaultTextModel}) সেটিংস সেভ করতে চান?`
+              ? t(
+                  `সংরক্ষিত ${providerMeta.label} Key ও ${aiModel.trim() || providerMeta.defaultTextModel} মডেল দিয়ে একটি পরীক্ষামূলক কানেকশন যাচাই করা হবে।`,
+                  `A quick connection check will run using your saved ${providerMeta.label} key and ${aiModel.trim() || providerMeta.defaultTextModel}.`,
+                )
+              : t(
+                  `${providerMeta.label} (${aiModel.trim() || providerMeta.defaultTextModel}) সেটিংস সেভ করতে চান?`,
+                  `Save ${providerMeta.label} (${aiModel.trim() || providerMeta.defaultTextModel}) settings?`,
+                )
         }
         confirmLabel={
           confirmAiAction === "remove"
-            ? "Key মুছুন"
+            ? t("Key মুছুন", "Remove Key")
             : confirmAiAction === "test"
-              ? "হ্যাঁ, টেস্ট করুন"
-              : "নিশ্চিত করে Save করুন"
+              ? t("হ্যাঁ, টেস্ট করুন", "Yes, Test Key")
+              : t("নিশ্চিত করে Save করুন", "Confirm & Save")
         }
         busy={aiBusy !== null}
         onCancel={() => setConfirmAiAction(null)}

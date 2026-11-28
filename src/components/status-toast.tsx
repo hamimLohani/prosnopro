@@ -1,6 +1,8 @@
 "use client";
 
 import { AlertTriangle, CheckCircle2, X } from "lucide-react";
+import { useLang } from "@/components/language-provider";
+import { pickText } from "@/lib/i18n";
 
 interface StatusToastProps {
   message: string | null;
@@ -9,6 +11,7 @@ interface StatusToastProps {
 }
 
 export function StatusToast({ message, tone = "success", onDismiss }: StatusToastProps) {
+  const { lang } = useLang();
   if (!message) return null;
 
   return (
@@ -30,7 +33,7 @@ export function StatusToast({ message, tone = "success", onDismiss }: StatusToas
       <button
         type="button"
         onClick={onDismiss}
-        aria-label="বন্ধ করুন"
+        aria-label={pickText(lang, "বন্ধ করুন", "Dismiss")}
         className="rounded-lg p-1 hover:bg-black/5 cursor-pointer shrink-0"
       >
         <X className="h-3.5 w-3.5" />

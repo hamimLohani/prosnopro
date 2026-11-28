@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { MathText } from "@/components/math-text";
 import { Navbar } from "@/components/navbar";
+import { pickText } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n-server";
 import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
 import type { AttemptStatus, ExamMedium, ResultReleaseMode } from "@/lib/types";
 
@@ -28,7 +30,8 @@ function optionLabel(index: number, medium: ExamMedium): string {
 }
 
 export default async function StudentResultDetailPage({ params }: ResultDetailPageProps) {
-  const ctx = await getCurrentUserContext();
+  const [ctx, lang] = await Promise.all([getCurrentUserContext(), getServerLang()]);
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
   if (!ctx.configured || !ctx.userId) redirect("/login");
   if (!ctx.profile) redirect("/onboarding");
   if (ctx.profile.role !== "student") redirect("/teacher");
@@ -89,19 +92,22 @@ export default async function StudentResultDetailPage({ params }: ResultDetailPa
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              {exam.subject || "General"} • {exam.medium === "bn" ? "বাংলা" : "English"}
+              {exam.subject || "General"} •{" "}
+              {exam.medium === "bn" ? t("বাংলা", "Bangla") : "English"}
             </p>
             <h1 className="text-xl sm:text-2xl font-bold text-navy">{exam.name}</h1>
           </div>
           <Link href="/student/results" className="py-1 text-sm font-semibold text-navy hover:underline">
-            ← আমার Result-এ ফিরে যান
+            {t("← আমার Result-এ ফিরে যান", "← Back to My Results")}
           </Link>
         </div>
 
         {attempt.results_released && attempt.score !== null && attempt.total_marks !== null ? (
           <section className="rounded-2xl bg-navy p-5 sm:p-6 text-white flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-xs uppercase tracking-wider text-slate-300">চূড়ান্ত Score</p>
+              <p className="text-xs uppercase tracking-wider text-slate-300">
+                {t("চূড়ান্ত Score", "Final Score")}
+              </p>
               <p className="mt-1 text-3xl font-extrabold text-amber">
                 {attempt.score}{" "}
                 <span className="text-lg font-semibold text-white">/ {attempt.total_marks}</span>
@@ -109,13 +115,13 @@ export default async function StudentResultDetailPage({ params }: ResultDetailPa
               <p className="mt-1 text-xs text-slate-300">
                 Status: {attempt.status.replace("_", " ")}
                 {attempt.submitted_at
-                  ? ` • Submit: ${new Date(attempt.submitted_at).toLocaleString()}`
+                  ? ` • ${t("Submit:", "Submitted:")} ${new Date(attempt.submitted_at).toLocaleString()}`
                   : ""}
               </p>
             </div>
             {pct !== null && (
               <div className="rounded-xl bg-white/10 px-4 py-2.5 sm:px-5 sm:py-3 text-right">
-                <p className="text-xs text-slate-300">শতকরা</p>
+                <p className="text-xs text-slate-300">{t("শতকরা", "Percentage")}</p>
                 <p className="text-xl sm:text-2xl font-bold">{pct}%</p>
               </div>
             )}
@@ -124,13 +130,24 @@ export default async function StudentResultDetailPage({ params }: ResultDetailPa
           <section className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 text-sm text-slate-700">
             <Clock className="h-5 w-5 text-navy shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-slate-900">Result এখনো প্রকাশ হয়নি</p>
+              <p className="font-semibold text-slate-900">
+                {t("Result এখনো প্রকাশ হয়নি", "Results Not Released Yet")}
+              </p>
               <p className="mt-1 text-slate-600">
                 {exam.result_release === "after_close"
-                  ? "Teacher Exam বন্ধ করার পর Score ও উত্তর দেখা যাবে।"
+                  ? t(
+                      "Teacher Exam বন্ধ করার পর Score ও উত্তর দেখা যাবে।",
+                      "Scores and answers will be available after the teacher closes this exam.",
+                    )
                   : exam.result_release === "manual"
-                    ? "Teacher Result প্রকাশ করার পর Score দেখা যাবে।"
-                    : "এই Exam-এর Score শুধু Teacher-এর জন্য সংরক্ষিত।"}
+                    ? t(
+                        "Teacher Result প্রকাশ করার পর Score দেখা যাবে।",
+                        "Scores will be visible once your teacher releases results.",
+                      )
+                    : t(
+                        "এই Exam-এর Score শুধু Teacher-এর জন্য সংরক্ষিত।",
+                        "Scores for this exam are visible to the teacher only.",
+                      )}
               </p>
             </div>
           </section>
@@ -140,14 +157,19 @@ export default async function StudentResultDetailPage({ params }: ResultDetailPa
           <section className="flex items-center gap-2.5 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 text-sm text-slate-600">
             <Lock className="h-4 w-4 text-slate-500 shrink-0" />
             <span>
-              আপনার Teacher এই Exam-এর সঠিক উত্তর ও ব্যাখ্যা প্রদর্শন বন্ধ রেখেছেন।
+              {t(
+                "আপনার Teacher এই Exam-এর সঠিক উত্তর ও ব্যাখ্যা প্রদর্শন বন্ধ রেখেছেন।",
+                "Your teacher has disabled answer and explanation review for this exam.",
+              )}
             </span>
           </section>
         )}
 
         {attempt.results_released && exam.show_answers && questions.length > 0 && (
           <section className="space-y-4">
-            <h2 className="text-base font-bold text-navy">উত্তর পর্যালোচনা ও ব্যাখ্যা</h2>
+            <h2 className="text-base font-bold text-navy">
+              {t("উত্তর পর্যালোচনা ও ব্যাখ্যা", "Answer Review & Explanations")}
+            </h2>
 
             {questions.map((q, idx) => {
               const isAnswered = q.chosen_index !== null;

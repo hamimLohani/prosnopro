@@ -4,7 +4,7 @@ import { Clock, HelpCircle, Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useLang } from "@/components/language-provider";
-import { CLASS_OPTIONS } from "@/lib/academic-options";
+import { CLASS_OPTIONS, getAcademicOptionLabel } from "@/lib/academic-options";
 import { pickText } from "@/lib/i18n";
 import type { Exam, ExamStatus } from "@/lib/types";
 
@@ -79,7 +79,7 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
             <option value="">All Classes</option>
             {CLASS_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
-                {opt.label}
+                {getAcademicOptionLabel(opt, lang)}
               </option>
             ))}
           </select>
@@ -160,7 +160,7 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
                   )}
                   <span>{exam.subject || "General"}</span>
                   <span>•</span>
-                  <span>{exam.medium === "bn" ? "বাংলা" : "English"}</span>
+                  <span>{exam.medium === "bn" ? t("বাংলা", "Bangla") : "English"}</span>
                   <span className="inline-flex items-center gap-1">
                     <HelpCircle className="h-3.5 w-3.5" />
                     {t(`${exam.question_count}টি প্রশ্ন`, `${exam.question_count} Qs`)}

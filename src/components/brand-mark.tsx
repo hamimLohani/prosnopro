@@ -1,5 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useLang } from "@/components/language-provider";
+import { pickText } from "@/lib/i18n";
 
 interface BrandMarkProps {
   href?: string;
@@ -8,6 +12,7 @@ interface BrandMarkProps {
 }
 
 export function BrandMark({ href = "/", inverted = false, size = "md" }: BrandMarkProps) {
+  const { lang } = useLang();
   const dimension = size === "sm" ? 32 : 38;
   const src = inverted ? "/logo-2.png" : "/logo-1.png";
 
@@ -38,7 +43,7 @@ export function BrandMark({ href = "/", inverted = false, size = "md" }: BrandMa
             inverted ? "text-slate-300" : "text-slate-500"
           }`}
         >
-          প্রশ্নপ্রো • Online Exam
+          {pickText(lang, "প্রশ্নপ্রো • Online Exam", "Online MCQ Exam")}
         </span>
       </span>
     </span>
@@ -52,3 +57,4 @@ export function BrandMark({ href = "/", inverted = false, size = "md" }: BrandMa
     </Link>
   );
 }
+

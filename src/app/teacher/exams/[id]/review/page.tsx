@@ -4,6 +4,8 @@ import { notFound, redirect } from "next/navigation";
 import { ExamLifecycleActions } from "@/components/exam-lifecycle-actions";
 import { MathText } from "@/components/math-text";
 import { Navbar } from "@/components/navbar";
+import { pickText } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n-server";
 import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
 import type { Exam, Question } from "@/lib/types";
 
@@ -19,7 +21,8 @@ function optionLabel(index: number, medium: "bn" | "en"): string {
 }
 
 export default async function ExamReviewPage({ params }: ReviewPageProps) {
-  const ctx = await getCurrentUserContext();
+  const [ctx, lang] = await Promise.all([getCurrentUserContext(), getServerLang()]);
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
   if (!ctx.configured || !ctx.userId) redirect("/login");
   if (!ctx.profile) redirect("/onboarding");
   if (ctx.profile.role !== "teacher") redirect("/student");
@@ -48,16 +51,29 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
   const warnings: string[] = [];
 
   if (qList.length === 0) {
-    warnings.push("এই Exam-এ এখনো কোনো প্রশ্ন যোগ করা হয়নি।");
+    warnings.push(
+      t(
+        "এই Exam-এ এখনো কোনো প্রশ্ন যোগ করা হয়নি।",
+        "No questions have been added to this exam yet.",
+      ),
+    );
   }
   qList.forEach((q, idx) => {
     if (q.options.length !== exam.options_per_question) {
       warnings.push(
-        `প্রশ্ন ${idx + 1}-এ ${q.options.length}টি Option আছে (Exam সেটিংস অনুযায়ী ${exam.options_per_question}টি থাকা দরকার)।`,
+        t(
+          `প্রশ্ন ${idx + 1}-এ ${q.options.length}টি Option আছে (Exam সেটিংস অনুযায়ী ${exam.options_per_question}টি থাকা দরকার)।`,
+          `Question ${idx + 1} has ${q.options.length} options (exam settings require ${exam.options_per_question}).`,
+        ),
       );
     }
     if (q.correct_index < 0 || q.correct_index >= q.options.length) {
-      warnings.push(`প্রশ্ন ${idx + 1}-এ সঠিক উত্তর নির্ধারণ করা নেই।`);
+      warnings.push(
+        t(
+          `প্রশ্ন ${idx + 1}-এ সঠিক উত্তর নির্ধারণ করা নেই।`,
+          `Question ${idx + 1} does not have a valid correct answer selected.`,
+        ),
+      );
     }
   });
 
@@ -71,7 +87,7 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Student Preview ও Review
+              {t("Student Preview ও Review", "Student Preview & Review")}
             </p>
             <h1 className="text-xl sm:text-2xl font-bold text-navy break-words">{exam.name}</h1>
           </div>
@@ -80,13 +96,13 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
               href={`/teacher/exams/${exam.id}/questions`}
               className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              ← প্রশ্ন Edit করুন
+              {t("← প্রশ্ন Edit করুন", "← Edit Questions")}
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}`}
               className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              Exam-এর বিস্তারিত
+              {t("Exam-এর বিস্তারিত", "Exam Details")}
             </Link>
           </div>
         </div>
@@ -96,7 +112,9 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
           <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 sm:p-5 space-y-2">
             <div className="flex items-center gap-2 font-bold text-amber-950">
               <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
-              <span>Publish করার আগে এই সমস্যাগুলো ঠিক করুন</span>
+              <span>
+                {t("Publish করার আগে এই সমস্যাগুলো ঠিক করুন", "Fix these issues before publishing")}
+              </span>
             </div>
             <ul className="list-disc pl-5 text-sm text-amber-900 space-y-1">
               {warnings.map((w, i) => (
@@ -109,9 +127,12 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
             <div className="flex items-center gap-2.5 text-emerald-950">
               <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
               <div>
-                <p className="font-bold">Publish করার জন্য প্রস্তুত</p>
+                <p className="font-bold">{t("Publish করার জন্য প্রস্তুত", "Ready to Publish")}</p>
                 <p className="text-xs text-emerald-800">
-                  {qList.length}টি প্রশ্ন • মোট {totalMarks} নম্বর • {exam.duration_minutes} মিনিট
+                  {t(
+                    `${qList.length}টি প্রশ্ন • মোট ${totalMarks} নম্বর • ${exam.duration_minutes} মিনিট`,
+                    `${qList.length} questions • ${totalMarks} total marks • ${exam.duration_minutes} min`,
+                  )}
                 </p>
               </div>
             </div>
@@ -131,13 +152,19 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
             <div>
               <h2 className="text-base sm:text-lg font-bold text-slate-900">{exam.name}</h2>
               <p className="text-xs text-slate-500">
-                {exam.subject || "General"} • {exam.medium === "bn" ? "বাংলা" : "English"} •{" "}
-                {exam.duration_minutes} মিনিট
-                {exam.negative_marking ? ` • প্রতি ভুল উত্তরে -${exam.negative_value}` : ""}
+                {exam.subject || "General"} •{" "}
+                {exam.medium === "bn" ? t("বাংলা", "Bangla") : "English"} •{" "}
+                {t(`${exam.duration_minutes} মিনিট`, `${exam.duration_minutes} min`)}
+                {exam.negative_marking
+                  ? t(
+                      ` • প্রতি ভুল উত্তরে -${exam.negative_value}`,
+                      ` • -${exam.negative_value} per wrong answer`,
+                    )
+                  : ""}
               </p>
             </div>
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-              শুধু Preview
+              {t("শুধু Preview", "Preview Only")}
             </span>
           </div>
 

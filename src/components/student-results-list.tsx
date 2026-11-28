@@ -114,7 +114,8 @@ export function StudentResultsList({ items }: StudentResultsListProps) {
                     </span>
                   </div>
                   <p className="text-xs text-slate-500">
-                    {item.subject || "General"} • {item.medium === "bn" ? "বাংলা" : "English"} •{" "}
+                    {item.subject || "General"} •{" "}
+                    {item.medium === "bn" ? t("বাংলা", "Bangla") : "English"} •{" "}
                     {item.submitted_at
                       ? `${t("Submit", "Submitted")}: ${new Date(item.submitted_at).toLocaleString()}`
                       : `${t("শুরু", "Started")}: ${new Date(item.started_at).toLocaleString()}`}

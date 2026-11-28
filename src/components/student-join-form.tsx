@@ -25,7 +25,10 @@ export function StudentJoinForm({
   const [error, setError] = useState<string | null>(null);
   const [autoFilledNote, setAutoFilledNote] = useState<string | null>(() =>
     initialTeacherCode && initialExamCode
-      ? "লিংক থেকে Teacher Code ও Exam Code Auto-fill হয়েছে।"
+      ? t(
+          "লিংক থেকে Teacher Code ও Exam Code Auto-fill হয়েছে।",
+          "Teacher Code and Exam Code were auto-filled from the link.",
+        )
       : null,
   );
 
@@ -40,7 +43,12 @@ export function StudentJoinForm({
       e.preventDefault();
       if (teacherMatch) setTeacherCode(normalizeTeacherCode(teacherMatch[1]));
       if (examMatch) setExamCode(normalizeExamCode(examMatch[1]));
-      setAutoFilledNote("Invite মেসেজ থেকে Code Auto-fill হয়েছে!");
+      setAutoFilledNote(
+        t(
+          "Invite মেসেজ থেকে Code Auto-fill হয়েছে!",
+          "Codes auto-filled from invite message!",
+        ),
+      );
       setError(null);
     }
   }
@@ -52,7 +60,12 @@ export function StudentJoinForm({
     const tCode = normalizeTeacherCode(teacherCode);
     const eCode = normalizeExamCode(examCode);
     if (!tCode || !eCode) {
-      setError("Teacher Code এবং Exam Code দুটিই লিখুন।");
+      setError(
+        t(
+          "Teacher Code এবং Exam Code দুটিই লিখুন।",
+          "Please enter both Teacher Code and Exam Code.",
+        ),
+      );
       return;
     }
 
@@ -72,14 +85,19 @@ export function StudentJoinForm({
       };
 
       if (!res.ok || !data.ok) {
-        setError(data.message ?? "Exam-এ জয়েন করা যায়নি।");
+        setError(data.message ?? t("Exam-এ জয়েন করা যায়নি।", "Could not join exam."));
         setLoading(false);
         return;
       }
 
       const targetExamId = data.exam_id ?? data.exam?.id;
       if (!targetExamId) {
-        setError("Server থেকে অপ্রত্যাশিত উত্তর এসেছে।");
+        setError(
+          t(
+            "Server থেকে অপ্রত্যাশিত উত্তর এসেছে।",
+            "Unexpected response from server.",
+          ),
+        );
         setLoading(false);
         return;
       }
@@ -92,7 +110,12 @@ export function StudentJoinForm({
         router.push(`/student/exams/${targetExamId}/instructions`);
       }
     } catch {
-      setError("Exam-এ জয়েন করার সময় Network সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+      setError(
+        t(
+          "Exam-এ জয়েন করার সময় Network সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+          "Network error while joining exam. Please try again.",
+        ),
+      );
       setLoading(false);
     }
   }
@@ -147,7 +170,7 @@ export function StudentJoinForm({
               value={teacherCode}
               onPaste={handleSmartPaste}
               onChange={(e) => setTeacherCode(normalizeTeacherCode(e.target.value))}
-              placeholder="যেমন: RAHIM26"
+              placeholder={t("যেমন: RAHIM26", "e.g. RAHIM26")}
               className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-base sm:text-sm uppercase tracking-wider text-slate-900 placeholder:normal-case placeholder:tracking-normal focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
           </div>
@@ -168,7 +191,7 @@ export function StudentJoinForm({
               value={examCode}
               onPaste={handleSmartPaste}
               onChange={(e) => setExamCode(normalizeExamCode(e.target.value))}
-              placeholder="যেমন: PHY01"
+              placeholder={t("যেমন: PHY01", "e.g. PHY01")}
               className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-base sm:text-sm uppercase tracking-wider text-slate-900 placeholder:normal-case placeholder:tracking-normal focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
           </div>

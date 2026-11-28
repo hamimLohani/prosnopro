@@ -2,6 +2,8 @@
 
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useLang } from "@/components/language-provider";
+import { pickText } from "@/lib/i18n";
 import { isValidTeacherCode, normalizeTeacherCode } from "@/lib/validation";
 
 interface TeacherCodeInputProps {
@@ -16,7 +18,7 @@ interface TeacherCodeInputProps {
 interface AsyncResult {
   code: string;
   status: "available" | "taken" | "error";
-  message: string;
+  reason?: string;
 }
 
 export function TeacherCodeInput({
@@ -27,6 +29,8 @@ export function TeacherCodeInput({
   disabled = false,
   id = "teacher-code",
 }: TeacherCodeInputProps) {
+  const { lang } = useLang();
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
   const [asyncResult, setAsyncResult] = useState<AsyncResult | null>(null);
 
   const onAvailabilityRef = useRef(onAvailabilityChange);
@@ -57,20 +61,20 @@ export function TeacherCodeInput({
         };
 
         if (data.available === true) {
-          setAsyncResult({ code: normalized, status: "available", message: "ব্যবহারযোগ্য (Available)" });
+          setAsyncResult({ code: normalized, status: "available" });
           onAvailabilityRef.current?.(true);
         } else if (data.available === false) {
           setAsyncResult({
             code: normalized,
             status: "taken",
-            message: data.reason ?? "আগেই নেওয়া হয়েছে",
+            reason: data.reason,
           });
           onAvailabilityRef.current?.(false);
         } else {
           setAsyncResult({
             code: normalized,
             status: "error",
-            message: data.reason ?? "এই মুহূর্তে যাচাই করা যাচ্ছে না।",
+            reason: data.reason,
           });
           onAvailabilityRef.current?.(null);
         }
@@ -79,7 +83,6 @@ export function TeacherCodeInput({
           setAsyncResult({
             code: normalized,
             status: "error",
-            message: "Code যাচাইয়ে Network সমস্যা হয়েছে।",
           });
           onAvailabilityRef.current?.(null);
         }
@@ -94,22 +97,36 @@ export function TeacherCodeInput({
 
   let status: "idle" | "checking" | "available" | "taken" | "invalid" | "unchanged" | "error" =
     "idle";
-  let message = "৪–১২টি English অক্ষর বা সংখ্যা (যেমন: RAHIM2026)";
+  let message = t(
+    "৪–১২টি English অক্ষর বা সংখ্যা (যেমন: RAHIM2026)",
+    "4–12 English letters or digits (e.g. RAHIM2026)",
+  );
 
   if (!normalized) {
     status = "idle";
   } else if (!isValidTeacherCode(normalized)) {
     status = "invalid";
-    message = "৪–১২টি English অক্ষর বা সংখ্যা ব্যবহার করুন (কোনো স্পেস বা চিহ্ন নয়)।";
+    message = t(
+      "৪–১২টি English অক্ষর বা সংখ্যা ব্যবহার করুন (কোনো স্পেস বা চিহ্ন নয়)।",
+      "Use 4–12 English letters or digits only (no spaces or symbols).",
+    );
   } else if (currentNorm && normalized === currentNorm) {
     status = "unchanged";
-    message = "বর্তমান Teacher Code";
+    message = t("বর্তমান Teacher Code", "Current Teacher Code");
   } else if (asyncResult && asyncResult.code === normalized) {
     status = asyncResult.status;
-    message = asyncResult.message;
+    if (asyncResult.status === "available") {
+      message = t("ব্যবহারযোগ্য (Available)", "Available");
+    } else if (asyncResult.status === "taken") {
+      message = asyncResult.reason ?? t("আগেই নেওয়া হয়েছে", "Already taken");
+    } else {
+      message =
+        asyncResult.reason ??
+        t("এই মুহূর্তে যাচাই করা যাচ্ছে না।", "Unable to verify right now.");
+    }
   } else {
     status = "checking";
-    message = "যাচাই করা হচ্ছে...";
+    message = t("যাচাই করা হচ্ছে...", "Checking availability...");
   }
 
   function handleChange(raw: string) {

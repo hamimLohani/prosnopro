@@ -4,6 +4,8 @@ import { KeyRound, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useLang } from "@/components/language-provider";
+import { pickText } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 
 interface ResetPasswordFormProps {
@@ -12,6 +14,8 @@ interface ResetPasswordFormProps {
 
 export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
   const router = useRouter();
+  const { lang } = useLang();
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -42,16 +46,26 @@ export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
         return;
       }
 
-      setMessage("এই Email-এ Account থাকলে একটি Password reset link পাঠানো হয়েছে।");
+      setMessage(
+        t(
+          "এই Email-এ Account থাকলে একটি Password reset link পাঠানো হয়েছে।",
+          "If an account exists for this email, a password reset link has been sent.",
+        ),
+      );
       return;
     }
 
     if (password.length < 8) {
-      setError("Password কমপক্ষে ৮ অক্ষরের হতে হবে।");
+      setError(
+        t(
+          "Password কমপক্ষে ৮ অক্ষরের হতে হবে।",
+          "Password must be at least 8 characters long.",
+        ),
+      );
       return;
     }
     if (password !== confirmPassword) {
-      setError("দুটি Password মিলছে না।");
+      setError(t("দুটি Password মিলছে না।", "Passwords do not match."));
       return;
     }
 
@@ -64,7 +78,12 @@ export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
       return;
     }
 
-    setMessage("Password আপডেট হয়েছে। Sign in পেজে নেওয়া হচ্ছে...");
+    setMessage(
+      t(
+        "Password আপডেট হয়েছে। Sign in পেজে নেওয়া হচ্ছে...",
+        "Password updated. Redirecting to sign in...",
+      ),
+    );
     router.push("/login");
     router.refresh();
   }
@@ -75,12 +94,20 @@ export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
         <KeyRound className="h-6 w-6" />
       </div>
       <h1 className="text-2xl font-bold text-navy">
-        {mode === "request" ? "Password Reset করুন" : "নতুন Password সেট করুন"}
+        {mode === "request"
+          ? t("Password Reset করুন", "Reset Password")
+          : t("নতুন Password সেট করুন", "Set New Password")}
       </h1>
       <p className="mt-1.5 text-sm text-slate-600">
         {mode === "request"
-          ? "আপনার Account Email লিখুন, আমরা একটি Reset link পাঠিয়ে দেব।"
-          : "একটি শক্তিশালী Password দিন (কমপক্ষে ৮ অক্ষর)।"}
+          ? t(
+              "আপনার Account Email লিখুন, আমরা একটি Reset link পাঠিয়ে দেব।",
+              "Enter your account email and we will send you a reset link.",
+            )
+          : t(
+              "একটি শক্তিশালী Password দিন (কমপক্ষে ৮ অক্ষর)।",
+              "Choose a strong password (at least 8 characters).",
+            )}
       </p>
 
       {message && (
@@ -98,7 +125,7 @@ export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
         {mode === "request" ? (
           <div className="space-y-1.5">
             <label htmlFor="reset-email" className="block text-sm font-medium text-slate-700">
-              Email ঠিকানা
+              {t("Email ঠিকানা", "Email Address")}
             </label>
             <input
               id="reset-email"
@@ -114,7 +141,7 @@ export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
           <>
             <div className="space-y-1.5">
               <label htmlFor="new-password" className="block text-sm font-medium text-slate-700">
-                নতুন Password
+                {t("নতুন Password", "New Password")}
               </label>
               <input
                 id="new-password"
@@ -128,7 +155,7 @@ export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
             </div>
             <div className="space-y-1.5">
               <label htmlFor="confirm-password" className="block text-sm font-medium text-slate-700">
-                Password নিশ্চিত করুন
+                {t("Password নিশ্চিত করুন", "Confirm Password")}
               </label>
               <input
                 id="confirm-password"
@@ -149,13 +176,17 @@ export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          <span>{mode === "request" ? "Reset Link পাঠান" : "Password আপডেট করুন"}</span>
+          <span>
+            {mode === "request"
+              ? t("Reset Link পাঠান", "Send Reset Link")
+              : t("Password আপডেট করুন", "Update Password")}
+          </span>
         </button>
       </form>
 
       <div className="mt-5 border-t border-slate-100 pt-4 text-center text-sm text-slate-600">
         <Link href="/login" className="font-semibold text-navy hover:underline">
-          Sign in পেজে ফিরে যান
+          {t("Sign in পেজে ফিরে যান", "Back to Sign in")}
         </Link>
       </div>
     </div>

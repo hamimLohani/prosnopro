@@ -1,4 +1,5 @@
 import { parseAndValidateQuestionsJson, type DraftMcqQuestion } from "@/lib/ai/schema";
+import { pickText, type AppLang } from "@/lib/i18n";
 
 export type AiProviderId = "gemini" | "groq" | "openai" | "anthropic";
 
@@ -6,13 +7,16 @@ export interface ProviderMeta {
   id: AiProviderId;
   label: string;
   freeTierNote: string;
+  freeTierNoteEn: string;
   defaultTextModel: string;
   defaultVisionModel: string;
   suggestedModels: string[];
   supportsVision: boolean;
   keyConsoleHint: string;
+  keyConsoleHintEn: string;
   keyConsoleUrl: string;
   keySetupSteps: string[];
+  keySetupStepsEn: string[];
 }
 
 export const PROVIDER_CATALOG: Record<AiProviderId, ProviderMeta> = {
@@ -20,6 +24,7 @@ export const PROVIDER_CATALOG: Record<AiProviderId, ProviderMeta> = {
     id: "gemini",
     label: "Google Gemini (AI Studio)",
     freeTierNote: "Credit card ছাড়াই Free tier পাওয়া যায়; বাংলা লেখা ও PDF image সাপোর্ট করে।",
+    freeTierNoteEn: "Free tier available with no credit card; supports Bangla text and PDF images.",
     defaultTextModel: "gemini-4-hydrogen",
     defaultVisionModel: "gemini-4-hydrogen",
     suggestedModels: [
@@ -30,17 +35,24 @@ export const PROVIDER_CATALOG: Record<AiProviderId, ProviderMeta> = {
     ],
     supportsVision: true,
     keyConsoleHint: "aistudio.google.com/apikey থেকে Key নিন",
+    keyConsoleHintEn: "Get a key at aistudio.google.com/apikey",
     keyConsoleUrl: "https://aistudio.google.com/apikey",
     keySetupSteps: [
       "উপরের লিংক থেকে Google AI Studio খুলুন এবং আপনার Google Account দিয়ে Sign in করুন।",
       "\"Create API key\" বাটনে ট্যাপ করুন, একটি Google Cloud Project সিলেক্ট/তৈরি করে নিশ্চিত করুন।",
       "নতুন Key-এর পাশে \"Copy\" ট্যাপ করুন, এরপর এখানে ফিরে এসে নিচের API Key বক্সে Paste করুন।",
     ],
+    keySetupStepsEn: [
+      "Open Google AI Studio from the button above and sign in with your Google account.",
+      "Click \"Create API key\" and select or create a Google Cloud project.",
+      "Click \"Copy\" next to your new key, then paste it into the API Key box below.",
+    ],
   },
   groq: {
     id: "groq",
     label: "Groq Cloud",
     freeTierNote: "Credit card ছাড়াই Free tier পাওয়া যায়; অত্যন্ত দ্রুত কাজ করে।",
+    freeTierNoteEn: "Free tier available with no credit card; very fast generation.",
     defaultTextModel: "llama-3.3-70b-versatile",
     defaultVisionModel: "qwen/qwen3.8-27b",
     suggestedModels: [
@@ -50,46 +62,76 @@ export const PROVIDER_CATALOG: Record<AiProviderId, ProviderMeta> = {
     ],
     supportsVision: true,
     keyConsoleHint: "console.groq.com/keys থেকে Key নিন",
+    keyConsoleHintEn: "Get a key at console.groq.com/keys",
     keyConsoleUrl: "https://console.groq.com/keys",
     keySetupSteps: [
       "উপরের লিংক থেকে Groq Console খুলুন এবং Google বা GitHub দিয়ে Sign in করুন।",
       "\"Create API Key\" ট্যাপ করে একটি নাম দিন (যেমন: ProsnoPro) এবং Submit করুন।",
       "সাথে সাথে \"Copy\" ট্যাপ করুন (Groq পুরো Key একবারই দেখায়), তারপর নিচে Paste করুন।",
     ],
+    keySetupStepsEn: [
+      "Open Groq Console from the button above and sign in with Google or GitHub.",
+      "Click \"Create API Key\", enter a name (e.g. ProsnoPro), and submit.",
+      "Copy the key right away (Groq shows it once), then paste it below.",
+    ],
   },
   openai: {
     id: "openai",
     label: "OpenAI",
     freeTierNote: "OpenAI Account-এ সক্রিয় Paid API billing থাকা প্রয়োজন।",
+    freeTierNoteEn: "Requires active paid API billing on your OpenAI account.",
     defaultTextModel: "gpt-4.1-mini",
     defaultVisionModel: "gpt-4.1-mini",
     suggestedModels: ["gpt-4.1-mini", "gpt-4o-mini"],
     supportsVision: true,
     keyConsoleHint: "platform.openai.com/api-keys থেকে Key নিন",
+    keyConsoleHintEn: "Get a key at platform.openai.com/api-keys",
     keyConsoleUrl: "https://platform.openai.com/api-keys",
     keySetupSteps: [
       "উপরের লিংক থেকে OpenAI API Keys পেজ খুলুন এবং Sign in করুন (Active billing credit থাকতে হবে)।",
       "\"+ Create new secret key\" ট্যাপ করুন, একটি নাম দিন এবং Key তৈরি করুন।",
       "সাথে সাথে \"Copy\" ট্যাপ করুন (পরে আর দেখা যাবে না), এরপর নিচে Paste করুন।",
     ],
+    keySetupStepsEn: [
+      "Open OpenAI API Keys from the button above and sign in (active billing credit required).",
+      "Click \"+ Create new secret key\", give it a name, and create it.",
+      "Copy it immediately (it won't be shown again), then paste it below.",
+    ],
   },
   anthropic: {
     id: "anthropic",
     label: "Anthropic Claude",
     freeTierNote: "Anthropic Account-এ Paid API credit থাকা প্রয়োজন।",
+    freeTierNoteEn: "Requires paid API credit on your Anthropic account.",
     defaultTextModel: "claude-sonnet-4-5",
     defaultVisionModel: "claude-sonnet-4-5",
     suggestedModels: ["claude-sonnet-4-5", "claude-3-5-haiku-latest"],
     supportsVision: true,
     keyConsoleHint: "console.anthropic.com থেকে Key নিন",
+    keyConsoleHintEn: "Get a key at console.anthropic.com",
     keyConsoleUrl: "https://console.anthropic.com/settings/keys",
     keySetupSteps: [
       "উপরের লিংক থেকে Anthropic Console খুলুন এবং Sign in করুন (Prepaid API credit প্রয়োজন)।",
       "\"Create Key\" ট্যাপ করে একটি নাম দিন (যেমন: ProsnoPro) এবং Confirm করুন।",
       "ডায়ালগ বন্ধ করার আগেই \"Copy Key\" ট্যাপ করুন, তারপর নিচে Paste করুন।",
     ],
+    keySetupStepsEn: [
+      "Open Anthropic Console from the button above and sign in (prepaid API credit required).",
+      "Click \"Create Key\", name it (e.g. ProsnoPro), and confirm.",
+      "Click \"Copy Key\" before closing the dialog, then paste it below.",
+    ],
   },
 };
+
+export function getProviderUiMeta(id: AiProviderId, lang: AppLang) {
+  const meta = PROVIDER_CATALOG[id];
+  return {
+    ...meta,
+    freeTierNote: pickText(lang, meta.freeTierNote, meta.freeTierNoteEn),
+    keyConsoleHint: pickText(lang, meta.keyConsoleHint, meta.keyConsoleHintEn),
+    keySetupSteps: lang === "en" ? meta.keySetupStepsEn : meta.keySetupSteps,
+  };
+}
 
 export function isValidProvider(raw: unknown): raw is AiProviderId {
   return raw === "gemini" || raw === "groq" || raw === "openai" || raw === "anthropic";

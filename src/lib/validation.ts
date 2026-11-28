@@ -1,3 +1,5 @@
+import type { AppLang } from "@/lib/i18n";
+
 export const TEACHER_CODE_REGEX = /^[A-Za-z0-9]{4,12}$/;
 export const EXAM_CODE_REGEX = /^[A-Za-z0-9]{3,16}$/;
 
@@ -99,19 +101,49 @@ export function analyzeBanglaPdfText(rawText: string): BanglaPdfAnalysis {
   };
 }
 
-const JOIN_ERROR_MAP: Record<string, string> = {
-  UNAUTHORIZED: "Exam-এ জয়েন করতে আগে Sign in করুন।",
-  FORBIDDEN: "শুধুমাত্র Student অ্যাকাউন্ট থেকে Exam-এ জয়েন করা যাবে।",
-  RATE_LIMITED: "অনেকবার ভুল Code দেওয়া হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।",
-  EXAM_NOT_FOUND: "Teacher Code বা Exam Code সঠিক নয়। আবার যাচাই করুন।",
-  EXAM_CLOSED: "এই Exam-টি ইতিমধ্যে বন্ধ (Closed) করা হয়েছে।",
-  NOT_OPEN_YET: "এই Exam-টি এখনো শুরু হয়নি।",
-  PAST_CLOSE_TIME: "এই Exam-এর নির্ধারিত সময় শেষ হয়ে গেছে।",
+const JOIN_ERROR_MAP: Record<string, { bn: string; en: string }> = {
+  UNAUTHORIZED: {
+    bn: "Exam-এ জয়েন করতে আগে Sign in করুন।",
+    en: "Please sign in before joining an exam.",
+  },
+  FORBIDDEN: {
+    bn: "শুধুমাত্র Student অ্যাকাউন্ট থেকে Exam-এ জয়েন করা যাবে।",
+    en: "Only student accounts can join exams.",
+  },
+  RATE_LIMITED: {
+    bn: "অনেকবার ভুল Code দেওয়া হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।",
+    en: "Too many incorrect code attempts. Please try again shortly.",
+  },
+  EXAM_NOT_FOUND: {
+    bn: "Teacher Code বা Exam Code সঠিক নয়। আবার যাচাই করুন।",
+    en: "Teacher Code or Exam Code is incorrect. Please check and try again.",
+  },
+  EXAM_CLOSED: {
+    bn: "এই Exam-টি ইতিমধ্যে বন্ধ (Closed) করা হয়েছে।",
+    en: "This exam is already closed.",
+  },
+  NOT_OPEN_YET: {
+    bn: "এই Exam-টি এখনো শুরু হয়নি।",
+    en: "This exam has not opened yet.",
+  },
+  PAST_CLOSE_TIME: {
+    bn: "এই Exam-এর নির্ধারিত সময় শেষ হয়ে গেছে।",
+    en: "The scheduled window for this exam has ended.",
+  },
 };
 
-export function localizeJoinError(code?: string, fallbackMessage?: string): string {
+export function localizeJoinError(
+  code?: string,
+  fallbackMessage?: string,
+  lang: AppLang = "bn",
+): string {
   if (code && JOIN_ERROR_MAP[code]) {
-    return JOIN_ERROR_MAP[code];
+    return lang === "en" ? JOIN_ERROR_MAP[code].en : JOIN_ERROR_MAP[code].bn;
   }
-  return fallbackMessage || "Exam-এ জয়েন করা যায়নি। Code যাচাই করে আবার চেষ্টা করুন।";
+  return (
+    fallbackMessage ||
+    (lang === "en"
+      ? "Could not join the exam. Check your codes and try again."
+      : "Exam-এ জয়েন করা যায়নি। Code যাচাই করে আবার চেষ্টা করুন।")
+  );
 }

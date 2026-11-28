@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useLang } from "@/components/language-provider";
-import { CLASS_OPTIONS } from "@/lib/academic-options";
+import { CLASS_OPTIONS, getAcademicOptionLabel } from "@/lib/academic-options";
 import { pickText } from "@/lib/i18n";
 
 interface ClassSelectProps {
@@ -56,7 +56,7 @@ export function ClassSelect({
         <option value="">{resolvedPlaceholder}</option>
         {CLASS_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value}>
-            {opt.label}
+            {getAcademicOptionLabel(opt, lang)}
           </option>
         ))}
         {allowCustom && (

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ExamMonitorClient } from "@/components/exam-monitor-client";
 import { Navbar } from "@/components/navbar";
+import { pickText } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n-server";
 import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
 import type { AttemptDetail, EntryEvent, Exam } from "@/lib/types";
 
@@ -10,7 +12,8 @@ interface MonitorPageProps {
 }
 
 export default async function ExamMonitorPage({ params }: MonitorPageProps) {
-  const ctx = await getCurrentUserContext();
+  const [ctx, lang] = await Promise.all([getCurrentUserContext(), getServerLang()]);
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
   if (!ctx.configured || !ctx.userId) redirect("/login");
   if (!ctx.profile) redirect("/onboarding");
   if (ctx.profile.role !== "teacher") redirect("/student");
@@ -64,13 +67,13 @@ export default async function ExamMonitorPage({ params }: MonitorPageProps) {
               href={`/teacher/exams/${exam.id}/results`}
               className="inline-flex min-h-[40px] items-center rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              Result ও Analytics
+              {t("Result ও Analytics", "Results & Analytics")}
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}`}
               className="py-1 text-sm font-semibold text-navy hover:underline"
             >
-              ← Exam-এ ফিরে যান
+              {t("← Exam-এ ফিরে যান", "← Back to Exam")}
             </Link>
           </div>
         </div>

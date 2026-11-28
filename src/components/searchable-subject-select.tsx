@@ -3,7 +3,11 @@
 import { Check, ChevronDown, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLang } from "@/components/language-provider";
-import { SUBJECT_OPTIONS } from "@/lib/academic-options";
+import {
+  findAcademicOptionLabel,
+  getAcademicOptionLabel,
+  SUBJECT_OPTIONS,
+} from "@/lib/academic-options";
 import { pickText } from "@/lib/i18n";
 
 interface SearchableSubjectSelectProps {
@@ -28,6 +32,10 @@ export function SearchableSubjectSelect({
   const { lang } = useLang();
   const resolvedPlaceholder =
     placeholder ?? pickText(lang, "বিষয় নির্বাচন করুন", "Select Subject");
+  const resolvedSearchPlaceholder =
+    searchPlaceholder === "Search subject..."
+      ? pickText(lang, "বিষয় খুঁজুন...", "Search subject...")
+      : searchPlaceholder;
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -57,14 +65,17 @@ export function SearchableSubjectSelect({
 
   const selectedLabel = useMemo(() => {
     if (!value) return "";
-    return SUBJECT_OPTIONS.find((o) => o.value === value)?.label ?? value;
-  }, [value]);
+    return findAcademicOptionLabel(SUBJECT_OPTIONS, value, lang);
+  }, [lang, value]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return SUBJECT_OPTIONS;
     return SUBJECT_OPTIONS.filter(
-      (o) => o.value.toLowerCase().includes(q) || o.label.toLowerCase().includes(q),
+      (o) =>
+        o.value.toLowerCase().includes(q) ||
+        o.label.toLowerCase().includes(q) ||
+        Boolean(o.labelBn && o.labelBn.toLowerCase().includes(q)),
     );
   }, [query]);
 
@@ -75,7 +86,8 @@ export function SearchableSubjectSelect({
       SUBJECT_OPTIONS.some(
         (o) =>
           o.value.toLowerCase() === trimmedQuery.toLowerCase() ||
-          o.label.toLowerCase() === trimmedQuery.toLowerCase(),
+          o.label.toLowerCase() === trimmedQuery.toLowerCase() ||
+          Boolean(o.labelBn && o.labelBn.toLowerCase() === trimmedQuery.toLowerCase()),
       ),
   );
 
@@ -114,7 +126,7 @@ export function SearchableSubjectSelect({
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={searchPlaceholder}
+                placeholder={resolvedSearchPlaceholder}
                 className="h-8 w-full rounded-lg border border-slate-200 bg-slate-50 pl-8 pr-2.5 text-sm focus:border-navy focus:bg-white focus:outline-none"
               />
             </div>
@@ -153,7 +165,7 @@ export function SearchableSubjectSelect({
 
             {filtered.length === 0 ? (
               <p className="px-3 py-2 text-center text-xs text-slate-500">
-                No matching preset subject found.
+                {pickText(lang, "কোনো মিল পাওয়া যায়নি।", "No matching preset subject found.")}
               </p>
             ) : (
               filtered.map((opt) => {
@@ -171,7 +183,7 @@ export function SearchableSubjectSelect({
                         : "text-slate-800 hover:bg-slate-50"
                     }`}
                   >
-                    <span className="truncate">{opt.label}</span>
+                    <span className="truncate">{getAcademicOptionLabel(opt, lang)}</span>
                     {selected && <Check className="h-4 w-4 shrink-0 text-navy" />}
                   </button>
                 );
@@ -184,7 +196,9 @@ export function SearchableSubjectSelect({
                 onClick={() => handleSelect(trimmedQuery)}
                 className="mt-1 flex w-full items-center justify-between rounded-lg border border-dashed border-navy/30 bg-navy/5 px-2.5 py-2 text-left text-xs font-semibold text-navy hover:bg-navy/10 cursor-pointer"
               >
-                <span className="truncate">+ Custom: &ldquo;{trimmedQuery}&rdquo;</span>
+                <span className="truncate">
+                  {pickText(lang, `+ কাস্টম: “${trimmedQuery}”`, `+ Custom: “${trimmedQuery}”`)}
+                </span>
               </button>
             )}
           </div>

@@ -3,6 +3,8 @@
 import { AlertTriangle, RefreshCw, ShieldAlert, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useLang } from "@/components/language-provider";
+import { pickText } from "@/lib/i18n";
 import type { AttemptDetail, EntryEvent } from "@/lib/types";
 
 interface ExamMonitorClientProps {
@@ -12,6 +14,8 @@ interface ExamMonitorClientProps {
 
 export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) {
   const router = useRouter();
+  const { lang } = useLang();
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -52,18 +56,26 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
           <span className="inline-flex items-center gap-1.5 font-semibold text-navy">
             <Users className="h-4 w-4" />
-            চলমান: {inProgressCount}
+            {t(`চলমান: ${inProgressCount}`, `In progress: ${inProgressCount}`)}
           </span>
-          <span className="text-slate-600">Submit হয়েছে: {submittedCount}</span>
+          <span className="text-slate-600">
+            {t(`Submit হয়েছে: ${submittedCount}`, `Submitted: ${submittedCount}`)}
+          </span>
           {secondDeviceEvents.length > 0 && (
             <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-semibold text-rose-800">
               <ShieldAlert className="h-3.5 w-3.5" />
-              {secondDeviceEvents.length}টি Second-device সতর্কতা
+              {t(
+                `${secondDeviceEvents.length}টি Second-device সতর্কতা`,
+                `${secondDeviceEvents.length} second-device alert(s)`,
+              )}
             </span>
           )}
           {newTabEvents.length > 0 && (
             <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-900">
-              {newTabEvents.length}টি Extra-tab সতর্কতা
+              {t(
+                `${newTabEvents.length}টি Extra-tab সতর্কতা`,
+                `${newTabEvents.length} extra-tab alert(s)`,
+              )}
             </span>
           )}
         </div>
@@ -76,7 +88,7 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
               onChange={(e) => setAutoRefresh(e.target.checked)}
               className="h-5 w-5 sm:h-4 sm:w-4 rounded border-slate-300 text-navy"
             />
-            <span>Auto-refresh (১৫ সে.)</span>
+            <span>{t("Auto-refresh (১৫ সে.)", "Auto-refresh (15s)")}</span>
           </label>
           <button
             type="button"
@@ -91,10 +103,14 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
 
       {/* Students Table / Mobile Cards */}
       <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-4">
-        <h2 className="text-base font-bold text-navy">অংশগ্রহণকারী Student ({attempts.length})</h2>
+        <h2 className="text-base font-bold text-navy">
+          {t(`অংশগ্রহণকারী Student (${attempts.length})`, `Participating Students (${attempts.length})`)}
+        </h2>
 
         {attempts.length === 0 ? (
-          <p className="text-sm text-slate-500">এখনো কোনো Student এই Exam শুরু করেনি।</p>
+          <p className="text-sm text-slate-500">
+            {t("এখনো কোনো Student এই Exam শুরু করেনি।", "No students have started this exam yet.")}
+          </p>
         ) : (
           <>
             {/* Mobile Monitor Cards */}
@@ -117,8 +133,8 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
                       <div className="min-w-0">
                         <p className="truncate font-semibold text-slate-900">{a.student_name}</p>
                         <p className="text-xs text-slate-500">
-                          {a.student_roll ? `Roll: ${a.student_roll}` : "Roll নেই"} • জয়েন:{" "}
-                          {new Date(a.started_at).toLocaleTimeString()}
+                          {a.student_roll ? `Roll: ${a.student_roll}` : t("Roll নেই", "No roll")} •{" "}
+                          {t("জয়েন:", "Joined:")} {new Date(a.started_at).toLocaleTimeString()}
                         </p>
                       </div>
                       <span
@@ -134,7 +150,10 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
 
                     <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
                       <span>
-                        {v.tab_switches ?? 0} বার switch • {v.away_seconds ?? 0}s বাইরে
+                        {t(
+                          `${v.tab_switches ?? 0} বার switch • ${v.away_seconds ?? 0}s বাইরে`,
+                          `${v.tab_switches ?? 0} switches • ${v.away_seconds ?? 0}s away`,
+                        )}
                         {(v.copy_attempts ?? 0) > 0 && ` • ${v.copy_attempts} copy`}
                       </span>
                       <div className="flex flex-wrap gap-1">
@@ -154,7 +173,9 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
                           </span>
                         )}
                         {!hasSecondDevice && !hasNewTab && resumeCount === 0 && (
-                          <span className="text-emerald-700 font-medium">স্বাভাবিক</span>
+                          <span className="text-emerald-700 font-medium">
+                            {t("স্বাভাবিক", "Normal")}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -170,9 +191,9 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
                   <tr className="border-b border-slate-200 text-xs uppercase text-slate-500">
                     <th className="py-2 pr-4">Student</th>
                     <th className="py-2 pr-4">Roll / ID</th>
-                    <th className="py-2 pr-4">জয়েনের সময়</th>
+                    <th className="py-2 pr-4">{t("জয়েনের সময়", "Joined At")}</th>
                     <th className="py-2 pr-4">Status</th>
-                    <th className="py-2 pr-4">Switch / বাইরে</th>
+                    <th className="py-2 pr-4">{t("Switch / বাইরে", "Switches / Away")}</th>
                     <th className="py-2 pr-4">Alerts</th>
                   </tr>
                 </thead>
@@ -229,7 +250,9 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
                               </span>
                             )}
                             {!hasSecondDevice && !hasNewTab && resumeCount === 0 && (
-                              <span className="text-xs text-slate-400">স্বাভাবিক</span>
+                              <span className="text-xs text-slate-400">
+                                {t("স্বাভাবিক", "Normal")}
+                              </span>
                             )}
                           </div>
                         </td>
@@ -245,9 +268,10 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
         <p className="flex items-start gap-2 rounded-lg bg-slate-50 p-3 text-xs text-slate-600">
           <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 mt-0.5" />
           <span>
-            নোট: মোবাইলের নোটিফিকেশন, ফোন কল বা স্ক্রিন লকের কারণেও মাঝে মাঝে blur বা tab-switch
-            গণনা হতে পারে। বারবার switch, দীর্ঘ সময় বাইরে থাকা বা second-device alert থাকলে যাচাই
-            করুন।
+            {t(
+              "নোট: মোবাইলের নোটিফিকেশন, ফোন কল বা স্ক্রিন লকের কারণেও মাঝে মাঝে blur বা tab-switch গণনা হতে পারে। বারবার switch, দীর্ঘ সময় বাইরে থাকা বা second-device alert থাকলে যাচাই করুন।",
+              "Note: Mobile notifications, incoming calls, or screen locks can occasionally count as a blur or tab switch. Check patterns of repeated switches, long away times, or second-device alerts.",
+            )}
           </span>
         </p>
       </section>

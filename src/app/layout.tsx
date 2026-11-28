@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_Bengali, Plus_Jakarta_Sans } from "next/font/google";
 import { LanguageProvider } from "@/components/language-provider";
+import { pickText } from "@/lib/i18n";
 import { getServerLang } from "@/lib/i18n-server";
 import "./globals.css";
 
@@ -24,24 +25,34 @@ export const viewport: Viewport = {
   themeColor: "#162456",
 };
 
-export const metadata: Metadata = {
-  title: {
-    default: "ProsnoPro — বাংলা ও English অনলাইন MCQ Exam",
-    template: "%s | ProsnoPro",
-  },
-  description:
-    "শিক্ষক ও শিক্ষার্থীদের জন্য সহজ, দ্রুত এবং কম নেটওয়ার্কেও চলা বাংলা ও English অনলাইন MCQ Exam প্ল্যাটফর্ম।",
-  manifest: "/manifest.webmanifest",
-  icons: {
-    icon: "/logo-1.png",
-    apple: "/logo-1.png",
-  },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "ProsnoPro",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const lang = await getServerLang();
+  return {
+    title: {
+      default: pickText(
+        lang,
+        "ProsnoPro — বাংলা ও English অনলাইন MCQ Exam",
+        "ProsnoPro — Online MCQ Exam Platform",
+      ),
+      template: "%s | ProsnoPro",
+    },
+    description: pickText(
+      lang,
+      "শিক্ষক ও শিক্ষার্থীদের জন্য সহজ, দ্রুত এবং কম নেটওয়ার্কেও চলা বাংলা ও English অনলাইন MCQ Exam প্ল্যাটফর্ম।",
+      "Simple, fast, offline-resilient online MCQ exam platform for school, college, and university teachers and students.",
+    ),
+    manifest: "/manifest.webmanifest",
+    icons: {
+      icon: "/logo-1.png",
+      apple: "/logo-1.png",
+    },
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: "ProsnoPro",
+    },
+  };
+}
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const lang = await getServerLang();

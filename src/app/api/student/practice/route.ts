@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import { pickText } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n-server";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
+  const lang = await getServerLang();
   const supabase = await createClient();
   if (!supabase) {
-    return NextResponse.json({ ok: false, message: "Supabase কনফিগার করা নেই।" }, { status: 503 });
+    return NextResponse.json(
+      { ok: false, message: pickText(lang, "Supabase কনফিগার করা নেই।", "Supabase is not configured.") },
+      { status: 503 },
+    );
   }
 
   const sp = request.nextUrl.searchParams;

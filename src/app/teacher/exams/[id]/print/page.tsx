@@ -3,6 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { MathText } from "@/components/math-text";
 import { PrintExportActions } from "@/components/print-export-actions";
 import { computeExamAnalytics, formatTimeTaken } from "@/lib/analytics";
+import { pickText } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n-server";
 import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
 import type { AttemptDetail, Exam, Question } from "@/lib/types";
 
@@ -19,7 +21,8 @@ function optionLabel(index: number, medium: "bn" | "en"): string {
 }
 
 export default async function ExamPrintPage({ params, searchParams }: PrintPageProps) {
-  const ctx = await getCurrentUserContext();
+  const [ctx, lang] = await Promise.all([getCurrentUserContext(), getServerLang()]);
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
   if (!ctx.configured || !ctx.userId) redirect("/login");
   if (!ctx.profile) redirect("/onboarding");
   if (ctx.profile.role !== "teacher") redirect("/student");
@@ -96,7 +99,7 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
             href={`/teacher/exams/${exam.id}/results`}
             className="inline-flex min-h-[34px] items-center font-semibold text-navy hover:underline"
           >
-            ← Result-এ ফিরে যান
+            {t("← Result-এ ফিরে যান", "← Back to Results")}
           </Link>
         </div>
 
@@ -111,7 +114,8 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 break-words">{exam.name}</h1>
             <p className="text-xs sm:text-sm text-slate-700">
               {exam.class ? `${exam.class} • ` : ""}
-              {exam.subject || "General"} • {exam.medium === "bn" ? "বাংলা" : "English"} • Time:{" "}
+              {exam.subject || "General"} •{" "}
+              {exam.medium === "bn" ? t("বাংলা", "Bangla") : "English"} • Time:{" "}
               {exam.duration_minutes} min • Total Marks: {totalMarks}
               {exam.negative_marking ? ` • Negative: -${exam.negative_value}` : ""}
             </p>

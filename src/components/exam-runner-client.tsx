@@ -16,8 +16,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { useLang } from "@/components/language-provider";
 import { MathText } from "@/components/math-text";
+import { pickText } from "@/lib/i18n";
 import type { ExamMedium, StudentExamQuestion, ViolationCounts } from "@/lib/types";
+
+interface LocalizedMsg {
+  bn: string;
+  en: string;
+}
 
 interface StartAttemptPayload {
   ok: boolean;
@@ -67,9 +74,11 @@ function formatRemaining(totalSec: number): string {
 
 export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
   const router = useRouter();
+  const { lang } = useLang();
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
 
   const [loading, setLoading] = useState(true);
-  const [fatalError, setFatalError] = useState<string | null>(null);
+  const [fatalError, setFatalError] = useState<LocalizedMsg | null>(null);
   const [takenOver, setTakenOver] = useState(false);
 
   const [attemptId, setAttemptId] = useState<string | null>(null);
@@ -214,11 +223,17 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
 
       submittingRef.current = false;
       setSubmitting(false);
-      setFatalError("Could not submit right now. Please tap Submit again.");
+      setFatalError({
+        bn: "এই মুহূর্তে Submit করা যাচ্ছে না। অনুগ্রহ করে আবার Submit ট্যাপ করুন।",
+        en: "Could not submit right now. Please tap Submit again.",
+      });
     } catch {
       submittingRef.current = false;
       setSubmitting(false);
-      setFatalError("Network error while submitting. Your answers are saved locally — tap Submit to retry.");
+      setFatalError({
+        bn: "Submit করার সময় Network সমস্যা হয়েছে। আপনার উত্তর ফোনে Save আছে — আবার Submit ট্যাপ করুন।",
+        en: "Network error while submitting. Your answers are saved locally — tap Submit to retry.",
+      });
     }
   }, [clearLocalDraft, examId, router]);
 
@@ -257,10 +272,10 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
         if (!res.ok || !data.ok || !data.attempt || !data.exam || !data.questions) {
           setFatalError(
             data.code === "EXAM_CLOSED"
-              ? "This exam is closed."
+              ? { bn: "এই Exam-টি বন্ধ হয়ে গেছে।", en: "This exam is closed." }
               : data.code === "NO_QUESTIONS"
-                ? "This exam has no questions yet."
-                : "Unable to load exam attempt.",
+                ? { bn: "এই Exam-এ এখনো কোনো প্রশ্ন নেই।", en: "This exam has no questions yet." }
+                : { bn: "Exam Attempt লোড করা যাচ্ছে না।", en: "Unable to load exam attempt." },
           );
           setLoading(false);
           return;
@@ -324,7 +339,10 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
         setLoading(false);
       } catch {
         if (!active) return;
-        setFatalError("Network error while starting the exam. Please reload.");
+        setFatalError({
+          bn: "Exam শুরু করার সময় Network সমস্যা হয়েছে। পেজটি Reload করুন।",
+          en: "Network error while starting the exam. Please reload.",
+        });
         setLoading(false);
       }
     }
@@ -504,7 +522,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center gap-2 text-sm text-slate-600">
         <Loader2 className="h-5 w-5 animate-spin text-navy" />
-        <span>Exam-এর প্রশ্ন লোড হচ্ছে...</span>
+        <span>{t("Exam-এর প্রশ্ন লোড হচ্ছে...", "Loading exam questions...")}</span>
       </div>
     );
   }
@@ -512,13 +530,15 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
   if (fatalError && !examInfo) {
     return (
       <div className="mx-auto mt-16 max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-center space-y-4">
-        <h1 className="text-xl font-bold text-navy">Exam খোলা যাচ্ছে না</h1>
-        <p className="text-sm text-slate-600">{fatalError}</p>
+        <h1 className="text-xl font-bold text-navy">
+          {t("Exam খোলা যাচ্ছে না", "Cannot Open Exam")}
+        </h1>
+        <p className="text-sm text-slate-600">{t(fatalError.bn, fatalError.en)}</p>
         <Link
           href="/student"
           className="inline-block rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white"
         >
-          Student Dashboard-এ ফিরে যান
+          {t("Student Dashboard-এ ফিরে যান", "Back to Student Dashboard")}
         </Link>
       </div>
     );
@@ -549,7 +569,10 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
   return (
     <>
       <div className="hidden print:block p-10 text-center text-sm font-semibold text-slate-800">
-        ProsnoPro Exam চলাকালে Print করা বন্ধ থাকে।
+        {t(
+          "ProsnoPro Exam চলাকালে Print করা বন্ধ থাকে।",
+          "Printing is disabled while a ProsnoPro exam is active.",
+        )}
       </div>
 
       <div className="no-print relative min-h-screen select-none [-webkit-touch-callout:none] pb-32 sm:pb-12">
@@ -582,16 +605,20 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-4">
             <div className="w-full max-w-md rounded-2xl bg-white p-5 sm:p-6 shadow-xl space-y-4 text-center">
               <ShieldAlert className="mx-auto h-10 w-10 text-rose-600" />
-              <h2 className="text-xl font-bold text-slate-900">অন্য জায়গায় Session চালু হয়েছে</h2>
+              <h2 className="text-xl font-bold text-slate-900">
+                {t("অন্য জায়গায় Session চালু হয়েছে", "Session Active Elsewhere")}
+              </h2>
               <p className="text-sm text-slate-600">
-                এই Exam-টি অন্য একটি Browser tab বা ডিভাইসে খোলা হয়েছে, তাই এই উইন্ডোটি লক করা
-                হয়েছে।
+                {t(
+                  "এই Exam-টি অন্য একটি Browser tab বা ডিভাইসে খোলা হয়েছে, তাই এই উইন্ডোটি লক করা হয়েছে।",
+                  "This exam was opened in another browser tab or device, so this window has been locked.",
+                )}
               </p>
               <Link
                 href="/student"
                 className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl bg-navy px-5 py-2.5 text-sm font-semibold text-white"
               >
-                Student Dashboard-এ ফিরে যান
+                {t("Student Dashboard-এ ফিরে যান", "Back to Student Dashboard")}
               </Link>
             </div>
           </div>
@@ -601,32 +628,35 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
         <ConfirmModal
           open={showConfirmModal}
           tone="primary"
-          title="Exam Submit করবেন?"
-          message="একবার Submit করলে আর উত্তর পরিবর্তন করা যাবে না।"
-          confirmLabel="Submit নিশ্চিত করুন"
-          cancelLabel="উত্তরগুলো দেখুন"
+          title={t("Exam Submit করবেন?", "Submit Exam?")}
+          message={t(
+            "একবার Submit করলে আর উত্তর পরিবর্তন করা যাবে না।",
+            "Once submitted, you can no longer change your answers.",
+          )}
+          confirmLabel={t("Submit নিশ্চিত করুন", "Confirm Submit")}
+          cancelLabel={t("উত্তরগুলো দেখুন", "Review Answers")}
           busy={submitting}
           onConfirm={() => void submitExam()}
           onCancel={() => setShowConfirmModal(false)}
         >
           <div className="rounded-xl bg-slate-50 p-4 text-sm space-y-1">
             <p>
-              উত্তর দিয়েছেন:{" "}
+              {t("উত্তর দিয়েছেন:", "Answered:")}{" "}
               <span className="font-bold text-emerald-700">
                 {answeredCount} / {questions.length}
               </span>
             </p>
             <p>
-              উত্তর বাকি:{" "}
+              {t("উত্তর বাকি:", "Remaining:")}{" "}
               <span className="font-bold text-slate-800">
                 {questions.length - answeredCount}
               </span>
             </p>
             {Object.keys(flaggedIds).length > 0 && (
               <p>
-                পুনরায় দেখার জন্য চিহ্নিত:{" "}
+                {t("পুনরায় দেখার জন্য চিহ্নিত:", "Flagged for review:")}{" "}
                 <span className="font-bold text-amber-800">
-                  {Object.keys(flaggedIds).length}টি
+                  {t(`${Object.keys(flaggedIds).length}টি`, `${Object.keys(flaggedIds).length}`)}
                 </span>
               </p>
             )}
@@ -642,7 +672,10 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
               </h1>
               <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] sm:text-xs text-slate-500">
                 <span>
-                  {answeredCount}/{questions.length}টি উত্তর
+                  {t(
+                    `${answeredCount}/${questions.length}টি উত্তর`,
+                    `${answeredCount}/${questions.length} answered`,
+                  )}
                 </span>
                 <span>•</span>
                 <span className="inline-flex items-center gap-1 whitespace-nowrap">
@@ -655,19 +688,19 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                   {syncState === "unsaved" && (
                     <>
                       <CloudUpload className="h-3.5 w-3.5 text-amber-600" />
-                      <span>ফোনে Save আছে</span>
+                      <span>{t("ফোনে Save আছে", "Saved locally")}</span>
                     </>
                   )}
                   {syncState === "syncing" && (
                     <>
                       <Loader2 className="h-3.5 w-3.5 animate-spin text-navy" />
-                      <span>ব্যাকআপ হচ্ছে...</span>
+                      <span>{t("ব্যাকআপ হচ্ছে...", "Backing up...")}</span>
                     </>
                   )}
                   {syncState === "offline" && (
                     <>
                       <CloudOff className="h-3.5 w-3.5 text-rose-600" />
-                      <span>Offline — ফোনে Save আছে</span>
+                      <span>{t("Offline — ফোনে Save আছে", "Offline — saved locally")}</span>
                     </>
                   )}
                 </span>
@@ -712,7 +745,10 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
             <div className="max-h-[55vh] overflow-y-auto overscroll-contain border-t border-slate-200 bg-slate-50 px-3 py-3 sm:px-4 lg:hidden">
               <div className="mb-2.5 flex items-center justify-between gap-2 text-xs">
                 <span className="font-semibold text-slate-700">
-                  প্রশ্ন ({answeredCount}/{questions.length}টি উত্তর)
+                  {t(
+                    `প্রশ্ন (${answeredCount}/${questions.length}টি উত্তর)`,
+                    `Questions (${answeredCount}/${questions.length} answered)`,
+                  )}
                 </span>
                 {nextUnansweredQuestion && (
                   <button
@@ -720,7 +756,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                     onClick={() => jumpToQuestion(nextUnansweredQuestion.id)}
                     className="rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 font-semibold text-amber-900 active:bg-amber-100 cursor-pointer"
                   >
-                    পরবর্তী #{nextUnansweredIdx + 1} →
+                    {t(`পরবর্তী #${nextUnansweredIdx + 1} →`, `Next #${nextUnansweredIdx + 1} →`)}
                   </button>
                 )}
               </div>
@@ -775,7 +811,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
               <span className="inline-flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 shrink-0" />
-                <span>{fatalError}</span>
+                <span>{t(fatalError.bn, fatalError.en)}</span>
               </span>
               <button
                 type="button"
@@ -783,7 +819,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                 onClick={() => void submitExam()}
                 className="min-h-[38px] rounded-lg bg-rose-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-800 cursor-pointer"
               >
-                আবার Submit চেষ্টা করুন
+                {t("আবার Submit চেষ্টা করুন", "Retry Submit")}
               </button>
             </div>
           </div>
@@ -813,7 +849,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                         type="button"
                         onClick={() => toggleFlag(q.id)}
                         aria-pressed={Boolean(flaggedIds[q.id])}
-                        title="পুনরায় দেখার জন্য চিহ্নিত করুন"
+                        title={t("পুনরায় দেখার জন্য চিহ্নিত করুন", "Flag for review")}
                         className={`inline-flex min-h-[32px] items-center gap-1 rounded-lg border px-2 py-1 text-xs font-medium transition cursor-pointer ${
                           flaggedIds[q.id]
                             ? "border-amber-300 bg-amber-50 text-amber-900"
@@ -822,11 +858,11 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                       >
                         <Flag className="h-3.5 w-3.5" />
                         <span className="hidden sm:inline">
-                          {flaggedIds[q.id] ? "চিহ্নিত" : "চিহ্নিত করুন"}
+                          {flaggedIds[q.id] ? t("চিহ্নিত", "Flagged") : t("চিহ্নিত করুন", "Flag")}
                         </span>
                       </button>
                       <span className="text-xs font-medium text-slate-500">
-                        {q.marks} নম্বর
+                        {t(`${q.marks} নম্বর`, `${q.marks} pts`)}
                       </span>
                     </div>
                   </div>
@@ -869,7 +905,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                         onClick={() => clearOption(q.id)}
                         className="min-h-[36px] rounded-lg px-2.5 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 cursor-pointer"
                       >
-                        উত্তর মুছুন
+                        {t("উত্তর মুছুন", "Clear Answer")}
                       </button>
                     </div>
                   )}
@@ -883,7 +919,10 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
               <div>
                 <h2 className="text-sm font-bold text-navy">Question Navigator</h2>
                 <p className="text-xs text-slate-500">
-                  {questions.length}টির মধ্যে {answeredCount}টি উত্তর দেওয়া হয়েছে
+                  {t(
+                    `${questions.length}টির মধ্যে ${answeredCount}টি উত্তর দেওয়া হয়েছে`,
+                    `${answeredCount} of ${questions.length} answered`,
+                  )}
                 </p>
               </div>
               <div className="grid grid-cols-5 gap-1.5">
@@ -912,7 +951,10 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
               </div>
               {Object.keys(flaggedIds).length > 0 && (
                 <p className="text-[11px] font-medium text-amber-800">
-                  হলুদ চিহ্নিত: {Object.keys(flaggedIds).length}টি প্রশ্ন পুনরায় দেখার জন্য রাখা হয়েছে
+                  {t(
+                    `হলুদ চিহ্নিত: ${Object.keys(flaggedIds).length}টি প্রশ্ন পুনরায় দেখার জন্য রাখা হয়েছে`,
+                    `Flagged: ${Object.keys(flaggedIds).length} question(s) marked for review`,
+                  )}
                 </p>
               )}
               <button
@@ -922,7 +964,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong cursor-pointer"
               >
                 <Send className="h-4 w-4" />
-                <span>Exam Submit করুন</span>
+                <span>{t("Exam Submit করুন", "Submit Exam")}</span>
               </button>
             </div>
           </aside>
@@ -933,7 +975,10 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
               <span className="text-xs font-semibold text-slate-700 whitespace-nowrap">
-                {answeredCount}/{questions.length}টি উত্তর
+                {t(
+                  `${answeredCount}/${questions.length}টি উত্তর`,
+                  `${answeredCount}/${questions.length} answered`,
+                )}
               </span>
               {nextUnansweredQuestion ? (
                 <button
@@ -941,11 +986,11 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                   onClick={() => jumpToQuestion(nextUnansweredQuestion.id)}
                   className="inline-flex min-h-[36px] items-center rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-900 active:bg-amber-100 cursor-pointer"
                 >
-                  পরবর্তী #{nextUnansweredIdx + 1}
+                  {t(`পরবর্তী #${nextUnansweredIdx + 1}`, `Next #${nextUnansweredIdx + 1}`)}
                 </button>
               ) : (
                 <span className="inline-flex items-center rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700">
-                  সব উত্তর সম্পন্ন
+                  {t("সব উত্তর সম্পন্ন", "All Answered")}
                 </span>
               )}
             </div>

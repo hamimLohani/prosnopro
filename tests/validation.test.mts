@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  CLASS_OPTIONS,
+  getAcademicOptionLabel,
+  SUBJECT_OPTIONS,
+} from "../src/lib/academic-options.ts";
+import {
   analyzeBanglaPdfText,
   generateExamCode,
   isValidExamCode,
@@ -48,8 +53,32 @@ test("analyzeBanglaPdfText detects Unicode Bangla, English, Bijoy, and empty sca
   assert.equal(scanned.classification, "empty-scanned");
 });
 
-test("localizeJoinError maps known RPC codes to Bangla messages", () => {
+test("localizeJoinError maps known RPC codes to Bangla and English messages", () => {
   assert.match(localizeJoinError("EXAM_NOT_FOUND", "Exam not found"), /Teacher Code/);
   assert.match(localizeJoinError("RATE_LIMITED", "Too many attempts"), /অপেক্ষা|কিছুক্ষণ/);
   assert.equal(localizeJoinError("UNKNOWN", "Custom error"), "Custom error");
+
+  const enCodes = [
+    "UNAUTHORIZED",
+    "FORBIDDEN",
+    "RATE_LIMITED",
+    "EXAM_NOT_FOUND",
+    "EXAM_CLOSED",
+    "NOT_OPEN_YET",
+    "PAST_CLOSE_TIME",
+  ];
+  for (const code of enCodes) {
+    assert.equal(/[\u0980-\u09FF]/.test(localizeJoinError(code, undefined, "en")), false);
+  }
+  assert.equal(/[\u0980-\u09FF]/.test(localizeJoinError("UNKNOWN", undefined, "en")), false);
+});
+
+test("English academic options contain zero Bangla characters", () => {
+  for (const opt of [...CLASS_OPTIONS, ...SUBJECT_OPTIONS]) {
+    assert.equal(
+      /[\u0980-\u09FF]/.test(getAcademicOptionLabel(opt, "en")),
+      false,
+      `Found Bangla in English academic label for ${opt.value}`,
+    );
+  }
 });

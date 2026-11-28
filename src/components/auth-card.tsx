@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { useLang } from "@/components/language-provider";
 import { TeacherCodeInput } from "@/components/teacher-code-input";
+import { pickText } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 import type { UserRole } from "@/lib/types";
 import { isValidTeacherCode, normalizeTeacherCode } from "@/lib/validation";
@@ -23,6 +25,8 @@ export function AuthCard({
   nextPath = null,
 }: AuthCardProps) {
   const router = useRouter();
+  const { lang } = useLang();
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
   const isLogin = mode === "login";
   const role: UserRole | null =
     mode === "signup-teacher" ? "teacher" : mode === "signup-student" ? "student" : null;
@@ -110,26 +114,46 @@ export function AuthCard({
 
     const cleanName = name.trim();
     if (!cleanName) {
-      setError("আপনার পূর্ণ নাম লিখুন।");
+      setError(t("আপনার পূর্ণ নাম লিখুন।", "Please enter your full name."));
       return;
     }
     if (password.length < 8) {
-      setError("Password কমপক্ষে ৮ অক্ষরের হতে হবে।");
+      setError(
+        t(
+          "Password কমপক্ষে ৮ অক্ষরের হতে হবে।",
+          "Password must be at least 8 characters long.",
+        ),
+      );
       return;
     }
     if (!agreedPrivacy) {
-      setError("Account খোলার আগে Privacy Notice-এ সম্মতি দিন।");
+      setError(
+        t(
+          "Account খোলার আগে Privacy Notice-এ সম্মতি দিন।",
+          "Please agree to the Privacy Notice before creating an account.",
+        ),
+      );
       return;
     }
 
     const normalizedCode = normalizeTeacherCode(teacherCode);
     if (role === "teacher") {
       if (!isValidTeacherCode(normalizedCode)) {
-        setError("Teacher Code অবশ্যই ৪–১২টি English অক্ষর বা সংখ্যা হতে হবে।");
+        setError(
+          t(
+            "Teacher Code অবশ্যই ৪–১২টি English অক্ষর বা সংখ্যা হতে হবে।",
+            "Teacher Code must be 4–12 English letters or digits.",
+          ),
+        );
         return;
       }
       if (codeAvailable === false) {
-        setError("এই Teacher Code-টি আগেই নেওয়া হয়েছে। অন্য একটি বেছে নিন।");
+        setError(
+          t(
+            "এই Teacher Code-টি আগেই নেওয়া হয়েছে। অন্য একটি বেছে নিন।",
+            "This Teacher Code is already taken. Please choose another.",
+          ),
+        );
         return;
       }
     }
@@ -187,17 +211,26 @@ export function AuthCard({
       <div className="mb-5 sm:mb-6 space-y-1">
         <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-navy">
           {isLogin
-            ? "স্বাগতম"
+            ? t("স্বাগতম", "Welcome Back")
             : role === "teacher"
-              ? "Teacher Account খুলুন"
-              : "Student Account খুলুন"}
+              ? t("Teacher Account খুলুন", "Create Teacher Account")
+              : t("Student Account খুলুন", "Create Student Account")}
         </h1>
         <p className="text-sm text-slate-600">
           {isLogin
-            ? "Google দিয়ে সহজেই অথবা Email ও Password দিয়ে Sign in করুন।"
+            ? t(
+                "Google দিয়ে সহজেই অথবা Email ও Password দিয়ে Sign in করুন।",
+                "Sign in quickly with Google or use your Email and Password.",
+              )
             : role === "teacher"
-              ? "আপনার Exam room সেট করুন এবং একটি ইউনিক Teacher Code বাছাই করুন।"
-              : "আপনার আসল নাম ব্যবহার করুন — এটি Exam রেকর্ডে দেখা যাবে।"}
+              ? t(
+                  "আপনার Exam room সেট করুন এবং একটি ইউনিক Teacher Code বাছাই করুন।",
+                  "Set up your exam room and choose a unique Teacher Code.",
+                )
+              : t(
+                  "আপনার আসল নাম ব্যবহার করুন — এটি Exam রেকর্ডে দেখা যাবে।",
+                  "Use your real name — it will appear on exam records.",
+                )}
         </p>
       </div>
 
@@ -235,12 +268,12 @@ export function AuthCard({
             />
           </svg>
         )}
-        <span>Google দিয়ে চালিয়ে যান</span>
+        <span>{t("Google দিয়ে চালিয়ে যান", "Continue with Google")}</span>
       </button>
 
       <div className="my-5 flex items-center gap-3 text-xs text-slate-400">
         <div className="h-px flex-1 bg-slate-200" />
-        <span>অথবা Email ও Password ব্যবহার করুন</span>
+        <span>{t("অথবা Email ও Password ব্যবহার করুন", "or use Email & Password")}</span>
         <div className="h-px flex-1 bg-slate-200" />
       </div>
 
@@ -248,7 +281,7 @@ export function AuthCard({
         {!isLogin && (
           <div className="space-y-1.5">
             <label htmlFor="full-name" className="block text-sm font-medium text-slate-700">
-              পূর্ণ নাম
+              {t("পূর্ণ নাম", "Full Name")}
             </label>
             <input
               id="full-name"
@@ -259,7 +292,11 @@ export function AuthCard({
               maxLength={120}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={role === "teacher" ? "যেমন: মোঃ আবদুর রহিম" : "যেমন: তাসনিম আক্তার"}
+              placeholder={
+                role === "teacher"
+                  ? t("যেমন: মোঃ আবদুর রহিম", "e.g. Md. Abdur Rahim")
+                  : t("যেমন: তাসনিম আক্তার", "e.g. Tasnim Akter")
+              }
               className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
           </div>
@@ -267,7 +304,7 @@ export function AuthCard({
 
         <div className="space-y-1.5">
           <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-            Email ঠিকানা
+            {t("Email ঠিকানা", "Email Address")}
           </label>
           <input
             id="email"
@@ -289,7 +326,7 @@ export function AuthCard({
             </label>
             {isLogin && (
               <Link href="/reset-password" className="py-0.5 text-xs font-medium text-navy hover:underline">
-                Password ভুলে গেছেন?
+                {t("Password ভুলে গেছেন?", "Forgot password?")}
               </Link>
             )}
           </div>
@@ -302,7 +339,11 @@ export function AuthCard({
             enterKeyHint={isLogin ? "go" : "next"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder={isLogin ? "আপনার Password" : "কমপক্ষে ৮ অক্ষর"}
+            placeholder={
+              isLogin
+                ? t("আপনার Password", "Your password")
+                : t("কমপক্ষে ৮ অক্ষর", "At least 8 characters")
+            }
             className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
           />
         </div>
@@ -320,7 +361,10 @@ export function AuthCard({
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <label htmlFor="roll" className="block text-sm font-medium text-slate-700">
-                Roll / ID <span className="text-xs font-normal text-slate-400">(ঐচ্ছিক)</span>
+                Roll / ID{" "}
+                <span className="text-xs font-normal text-slate-400">
+                  ({t("ঐচ্ছিক", "optional")})
+                </span>
               </label>
               <input
                 id="roll"
@@ -329,13 +373,16 @@ export function AuthCard({
                 maxLength={60}
                 value={roll}
                 onChange={(e) => setRoll(e.target.value)}
-                placeholder="যেমন: 1042"
+                placeholder={t("যেমন: 1042", "e.g. 1042")}
                 className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
               />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="institution" className="block text-sm font-medium text-slate-700">
-                Institution <span className="text-xs font-normal text-slate-400">(ঐচ্ছিক)</span>
+                Institution{" "}
+                <span className="text-xs font-normal text-slate-400">
+                  ({t("ঐচ্ছিক", "optional")})
+                </span>
               </label>
               <input
                 id="institution"
@@ -344,7 +391,7 @@ export function AuthCard({
                 maxLength={160}
                 value={institution}
                 onChange={(e) => setInstitution(e.target.value)}
-                placeholder="স্কুল / কলেজ"
+                placeholder={t("স্কুল / কলেজ / বিশ্ববিদ্যালয়", "School / College / University")}
                 className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
               />
             </div>
@@ -360,11 +407,23 @@ export function AuthCard({
               className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 text-navy focus:ring-navy"
             />
             <span>
-              আমি{" "}
-              <Link href="/privacy" className="font-semibold text-navy underline">
-                Privacy Notice
-              </Link>{" "}
-              অনুযায়ী Account নাম, Email ও Exam Session তথ্য সংরক্ষণে সম্মত আছি।
+              {lang === "en" ? (
+                <>
+                  I agree to the{" "}
+                  <Link href="/privacy" className="font-semibold text-navy underline">
+                    Privacy Notice
+                  </Link>{" "}
+                  for storing my account details and exam session data.
+                </>
+              ) : (
+                <>
+                  আমি{" "}
+                  <Link href="/privacy" className="font-semibold text-navy underline">
+                    Privacy Notice
+                  </Link>{" "}
+                  অনুযায়ী Account নাম, Email ও Exam Session তথ্য সংরক্ষণে সম্মত আছি।
+                </>
+              )}
             </span>
           </label>
         )}
@@ -379,8 +438,8 @@ export function AuthCard({
             {isLogin
               ? "Sign in"
               : role === "teacher"
-                ? "Teacher Account খুলুন"
-                : "Student Account খুলুন"}
+                ? t("Teacher Account খুলুন", "Create Teacher Account")
+                : t("Student Account খুলুন", "Create Student Account")}
           </span>
         </button>
       </form>
@@ -388,16 +447,16 @@ export function AuthCard({
       <div className="mt-6 border-t border-slate-100 pt-4 text-center text-sm text-slate-600">
         {isLogin ? (
           <p>
-            ProsnoPro-তে নতুন?{" "}
+            {t("ProsnoPro-তে নতুন?", "New to ProsnoPro?")}{" "}
             <Link href="/signup" className="font-semibold text-navy hover:underline">
-              Account খুলুন
+              {t("Account খুলুন", "Create account")}
             </Link>
           </p>
         ) : (
           <p>
-            আগে থেকেই Account আছে?{" "}
+            {t("আগে থেকেই Account আছে?", "Already have an account?")}{" "}
             <Link href="/login" className="font-semibold text-navy hover:underline">
-              Sign in করুন
+              {t("Sign in করুন", "Sign in")}
             </Link>
           </p>
         )}

@@ -3,6 +3,8 @@
 import { MailCheck, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { useLang } from "@/components/language-provider";
+import { pickText } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 
 interface VerifyEmailCardProps {
@@ -10,6 +12,8 @@ interface VerifyEmailCardProps {
 }
 
 export function VerifyEmailCard({ initialEmail }: VerifyEmailCardProps) {
+  const { lang } = useLang();
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
   const [email, setEmail] = useState(initialEmail);
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -27,7 +31,12 @@ export function VerifyEmailCard({ initialEmail }: VerifyEmailCardProps) {
     }
 
     if (!email.trim()) {
-      setError("যে Email দিয়ে Sign up করেছেন সেটি লিখুন।");
+      setError(
+        t(
+          "যে Email দিয়ে Sign up করেছেন সেটি লিখুন।",
+          "Please enter the email address you signed up with.",
+        ),
+      );
       return;
     }
 
@@ -46,7 +55,12 @@ export function VerifyEmailCard({ initialEmail }: VerifyEmailCardProps) {
       return;
     }
 
-    setStatus("Verification link পাঠানো হয়েছে! আপনার Inbox এবং Spam folder চেক করুন।");
+    setStatus(
+      t(
+        "Verification link পাঠানো হয়েছে! আপনার Inbox এবং Spam folder চেক করুন।",
+        "Verification link sent! Please check your Inbox and Spam folder.",
+      ),
+    );
   }
 
   return (
@@ -54,10 +68,13 @@ export function VerifyEmailCard({ initialEmail }: VerifyEmailCardProps) {
       <div className="mb-4 inline-flex rounded-xl bg-navy/10 p-3 text-navy">
         <MailCheck className="h-6 w-6" />
       </div>
-      <h1 className="text-2xl font-bold text-navy">আপনার Email চেক করুন</h1>
+      <h1 className="text-2xl font-bold text-navy">
+        {t("আপনার Email চেক করুন", "Check Your Email")}
+      </h1>
       <p className="mt-2 text-sm text-slate-600">
-        {email ? `${email} ঠিকানায়` : "আপনার ঠিকানায়"} একটি verification link পাঠানো হয়েছে।
-        ProsnoPro Account চালু করতে Email-এর লিংকে ক্লিক করুন।
+        {lang === "en"
+          ? `A verification link has been sent to ${email ? email : "your email address"}. Click the link in the email to activate your ProsnoPro account.`
+          : `${email ? `${email} ঠিকানায়` : "আপনার ঠিকানায়"} একটি verification link পাঠানো হয়েছে। ProsnoPro Account চালু করতে Email-এর লিংকে ক্লিক করুন।`}
       </p>
 
       {status && (
@@ -85,13 +102,13 @@ export function VerifyEmailCard({ initialEmail }: VerifyEmailCardProps) {
           className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
         >
           {sending && <Loader2 className="h-4 w-4 animate-spin" />}
-          <span>আবার Verification Email পাঠান</span>
+          <span>{t("আবার Verification Email পাঠান", "Resend Verification Email")}</span>
         </button>
       </form>
 
       <div className="mt-5 border-t border-slate-100 pt-4 text-center text-sm text-slate-600">
         <Link href="/login" className="font-semibold text-navy hover:underline">
-          Sign in পেজে ফিরে যান
+          {t("Sign in পেজে ফিরে যান", "Back to Sign in")}
         </Link>
       </div>
     </div>

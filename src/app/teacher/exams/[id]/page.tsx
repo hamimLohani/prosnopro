@@ -81,7 +81,8 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
               </span>
               <span className="text-xs text-slate-500">
                 {exam.class ? `${exam.class} • ` : ""}
-                {exam.subject || "General"} • {exam.medium === "bn" ? "বাংলা" : "English"}
+                {exam.subject || "General"} •{" "}
+                {exam.medium === "bn" ? t("বাংলা", "Bangla") : "English"}
               </span>
             </div>
             <h1 className="text-xl font-bold text-navy sm:text-3xl break-words">{exam.name}</h1>
@@ -97,21 +98,33 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
           <div className="space-y-1">
             <p className="text-xs font-semibold uppercase tracking-wider text-amber">
               {exam.status === "published"
-                ? "Live • Join Code শেয়ার করুন"
+                ? t("Live • Join Code শেয়ার করুন", "Live • Share Join Codes")
                 : exam.status === "draft"
                   ? exam.question_count === 0
-                    ? "ধাপ ১ • প্রশ্ন যোগ করুন"
-                    : "ধাপ ২ • Publish করার জন্য প্রস্তুত"
-                  : "Closed Exam"}
+                    ? t("ধাপ ১ • প্রশ্ন যোগ করুন", "Step 1 • Add Questions")
+                    : t("ধাপ ২ • Publish করার জন্য প্রস্তুত", "Step 2 • Ready to Publish")
+                  : t("Closed Exam", "Closed Exam")}
             </p>
             <p className="text-sm text-slate-200">
               {exam.status === "published"
-                ? "Exam এখন Live আছে। Student-দের সাথে দুটি Code শেয়ার করুন:"
+                ? t(
+                    "Exam এখন Live আছে। Student-দের সাথে দুটি Code শেয়ার করুন:",
+                    "This exam is live. Share both codes with your students:",
+                  )
                 : exam.status === "draft"
                   ? exam.question_count === 0
-                    ? "Publish করার আগে অন্তত একটি প্রশ্ন যোগ করুন।"
-                    : "প্রশ্নগুলো Preview করুন অথবা নিচে Publish করুন যাতে Student-রা জয়েন করতে পারে।"
-                  : "নতুন এন্ট্রির জন্য Exam বন্ধ আছে। নিচে Result দেখুন বা Export করুন।"}
+                    ? t(
+                        "Publish করার আগে অন্তত একটি প্রশ্ন যোগ করুন।",
+                        "Add at least one question before publishing.",
+                      )
+                    : t(
+                        "প্রশ্নগুলো Preview করুন অথবা নিচে Publish করুন যাতে Student-রা জয়েন করতে পারে।",
+                        "Preview your questions or publish below so students can join.",
+                      )
+                  : t(
+                      "নতুন এন্ট্রির জন্য Exam বন্ধ আছে। নিচে Result দেখুন বা Export করুন।",
+                      "This exam is closed to new entries. View or export results below.",
+                    )}
             </p>
           </div>
 
@@ -130,9 +143,12 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
             </div>
             <div className="col-span-2 sm:col-span-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 [&>button]:w-full sm:[&>button]:w-auto">
               <TeacherCodeCopy
-                code={`📝 ProsnoPro Online Exam\nExam: ${exam.name}\nসময়: ${exam.duration_minutes} মিনিট\nলিংক: __STUDENT_URL__\nTeacher Code: ${teacherCode}\nExam Code: ${exam.code}`}
-                label="Invite Message Copy করুন"
-                copiedLabel="Invite Copy হয়েছে"
+                code={t(
+                  `📝 ProsnoPro Online Exam\nExam: ${exam.name}\nসময়: ${exam.duration_minutes} মিনিট\nলিংক: __STUDENT_URL__\nTeacher Code: ${teacherCode}\nExam Code: ${exam.code}`,
+                  `📝 ProsnoPro Online Exam\nExam: ${exam.name}\nDuration: ${exam.duration_minutes} min\nLink: __STUDENT_URL__\nTeacher Code: ${teacherCode}\nExam Code: ${exam.code}`,
+                )}
+                label={t("Invite Message Copy করুন", "Copy Invite Message")}
+                copiedLabel={t("Invite Copy হয়েছে", "Invite Copied")}
                 includeStudentUrl
                 studentPath={`/student?t=${encodeURIComponent(teacherCode)}&e=${encodeURIComponent(exam.code)}`}
               />
@@ -186,7 +202,7 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
               className="inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
             >
               <Printer className="h-3.5 w-3.5 shrink-0 text-slate-600" />
-              <span>Print ও Export</span>
+              <span>{t("Print ও Export", "Print & Export")}</span>
             </Link>
           </div>
 
@@ -205,21 +221,27 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
           <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
             <HelpCircle className="h-5 w-5 text-navy shrink-0" />
             <div>
-              <p className="text-[11px] sm:text-xs text-slate-500">মোট প্রশ্ন</p>
+              <p className="text-[11px] sm:text-xs text-slate-500">
+                {t("মোট প্রশ্ন", "Total Questions")}
+              </p>
               <p className="text-lg sm:text-xl font-bold text-slate-900">{exam.question_count}</p>
             </div>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
             <Clock className="h-5 w-5 text-amber-600 shrink-0" />
             <div>
-              <p className="text-[11px] sm:text-xs text-slate-500">সময়</p>
-              <p className="text-lg sm:text-xl font-bold text-slate-900">{exam.duration_minutes} মি.</p>
+              <p className="text-[11px] sm:text-xs text-slate-500">{t("সময়", "Duration")}</p>
+              <p className="text-lg sm:text-xl font-bold text-slate-900">
+                {t(`${exam.duration_minutes} মি.`, `${exam.duration_minutes} min`)}
+              </p>
             </div>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
             <Users className="h-5 w-5 text-emerald-600 shrink-0" />
             <div>
-              <p className="text-[11px] sm:text-xs text-slate-500">অংশগ্রহণ</p>
+              <p className="text-[11px] sm:text-xs text-slate-500">
+                {t("অংশগ্রহণ", "Participants")}
+              </p>
               <p className="text-lg sm:text-xl font-bold text-slate-900">{attemptList.length}</p>
             </div>
           </div>
@@ -228,17 +250,24 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
         {/* Attempts List Preview */}
         <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-base sm:text-lg font-bold text-navy">Student-দের অংশগ্রহণ</h2>
+            <h2 className="text-base sm:text-lg font-bold text-navy">
+              {t("Student-দের অংশগ্রহণ", "Student Attempts")}
+            </h2>
             <Link
               href={`/teacher/exams/${exam.id}/results`}
               className="text-xs font-semibold text-navy hover:underline"
             >
-              সম্পূর্ণ Result ও Export →
+              {t("সম্পূর্ণ Result ও Export →", "Full Results & Export →")}
             </Link>
           </div>
 
           {attemptList.length === 0 ? (
-            <p className="text-sm text-slate-500">এখনো কোনো Student এই Exam-এ অংশগ্রহণ করেনি।</p>
+            <p className="text-sm text-slate-500">
+              {t(
+                "এখনো কোনো Student এই Exam-এ অংশগ্রহণ করেনি।",
+                "No students have joined this exam yet.",
+              )}
+            </p>
           ) : (
             <>
               {/* Mobile Attempt Cards */}
@@ -248,7 +277,7 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-slate-900">{a.student_name}</p>
                       <p className="text-xs text-slate-500">
-                        {a.student_roll ? `Roll: ${a.student_roll}` : "Roll নেই"} •{" "}
+                        {a.student_roll ? `Roll: ${a.student_roll}` : t("Roll নেই", "No roll")} •{" "}
                         <span className="capitalize">{a.status.replace("_", " ")}</span>
                       </p>
                     </div>
@@ -256,7 +285,7 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
                       <span className="font-bold text-navy">
                         {a.score !== null && a.total_marks !== null
                           ? `${a.score}/${a.total_marks}`
-                          : "চলমান"}
+                          : t("চলমান", "In progress")}
                       </span>
                     </div>
                   </div>
@@ -287,7 +316,7 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
                         <td className="py-2.5 pr-4 font-semibold text-slate-900">
                           {a.score !== null && a.total_marks !== null
                             ? `${a.score} / ${a.total_marks}`
-                            : "চলমান"}
+                            : t("চলমান", "In progress")}
                         </td>
                       </tr>
                     ))}
