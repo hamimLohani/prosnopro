@@ -65,12 +65,12 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
   const analytics = mode === "results" ? computeExamAnalytics(qList, attemptList) : null;
 
   return (
-    <div className="min-h-screen bg-slate-100 py-8 px-4 print:bg-white print:p-0">
-      <div className="no-print mx-auto mb-6 flex max-w-4xl flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="min-h-screen bg-slate-100 py-4 px-3 sm:py-8 sm:px-4 print:bg-white print:p-0">
+      <div className="no-print mx-auto mb-4 sm:mb-6 flex max-w-4xl flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <Link
             href={`/teacher/exams/${exam.id}/print?mode=paper`}
-            className={`rounded-lg px-3 py-1.5 font-semibold ${
+            className={`inline-flex min-h-[34px] items-center rounded-lg px-3 py-1.5 font-semibold ${
               mode === "paper" ? "bg-navy text-white" : "bg-slate-100 text-slate-700"
             }`}
           >
@@ -78,7 +78,7 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
           </Link>
           <Link
             href={`/teacher/exams/${exam.id}/print?mode=key`}
-            className={`rounded-lg px-3 py-1.5 font-semibold ${
+            className={`inline-flex min-h-[34px] items-center rounded-lg px-3 py-1.5 font-semibold ${
               mode === "key" ? "bg-navy text-white" : "bg-slate-100 text-slate-700"
             }`}
           >
@@ -86,7 +86,7 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
           </Link>
           <Link
             href={`/teacher/exams/${exam.id}/print?mode=results`}
-            className={`rounded-lg px-3 py-1.5 font-semibold ${
+            className={`inline-flex min-h-[34px] items-center rounded-lg px-3 py-1.5 font-semibold ${
               mode === "results" ? "bg-navy text-white" : "bg-slate-100 text-slate-700"
             }`}
           >
@@ -94,7 +94,7 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
           </Link>
           <Link
             href={`/teacher/exams/${exam.id}/results`}
-            className="ml-2 font-semibold text-navy hover:underline"
+            className="inline-flex min-h-[34px] items-center ml-1 font-semibold text-navy hover:underline"
           >
             ← Result-এ ফিরে যান
           </Link>
@@ -103,11 +103,11 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
         <PrintTriggerButton />
       </div>
 
-      <article className="print-only-sheet mx-auto max-w-4xl rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <header className="border-b-2 border-slate-900 pb-4 mb-6 flex flex-wrap items-baseline justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">{exam.name}</h1>
-            <p className="text-sm text-slate-700">
+      <article className="print-only-sheet mx-auto max-w-4xl rounded-2xl border border-slate-200 bg-white p-4 sm:p-8 shadow-sm">
+        <header className="border-b-2 border-slate-900 pb-4 mb-5 sm:mb-6 flex flex-wrap items-baseline justify-between gap-3 sm:gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 break-words">{exam.name}</h1>
+            <p className="text-xs sm:text-sm text-slate-700">
               {exam.class ? `${exam.class} • ` : ""}
               {exam.subject || "General"} • {exam.medium === "bn" ? "বাংলা" : "English"} • Time:{" "}
               {exam.duration_minutes} min • Total Marks: {totalMarks}
@@ -118,15 +118,15 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
               {exam.code}
             </p>
           </div>
-          <span className="rounded border border-slate-400 px-2.5 py-1 font-mono text-xs font-bold uppercase text-slate-800">
+          <span className="shrink-0 rounded border border-slate-400 px-2.5 py-1 font-mono text-xs font-bold uppercase text-slate-800">
             {mode === "key" ? "ANSWER KEY" : mode === "results" ? "RESULTS" : "QUESTION PAPER"}
           </span>
         </header>
 
         {mode === "results" ? (
-          <div className="space-y-6">
+          <div className="space-y-5 sm:space-y-6">
             {analytics && (
-              <div className="grid grid-cols-4 gap-3 text-center text-xs">
+              <div className="grid grid-cols-2 sm:grid-cols-4 print:grid-cols-4 gap-2.5 sm:gap-3 text-center text-xs">
                 <div className="rounded border border-slate-300 p-2.5">
                   <div className="text-slate-500">Submitted</div>
                   <div className="text-base font-bold">{analytics.submittedCount}</div>
@@ -148,44 +148,87 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
               </div>
             )}
 
-            <table className="w-full border-collapse text-left text-xs">
-              <thead>
-                <tr className="border-b-2 border-slate-800">
-                  <th className="py-2 pr-3">#</th>
-                  <th className="py-2 pr-3">Name</th>
-                  <th className="py-2 pr-3">Roll / ID</th>
-                  <th className="py-2 pr-3">Status</th>
-                  <th className="py-2 pr-3">Score</th>
-                  <th className="py-2 pr-3">%</th>
-                  <th className="py-2 pr-3">Time</th>
-                  <th className="py-2">Switches</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                {attemptList.map((a, idx) => {
-                  const pct =
-                    a.score !== null && a.total_marks && a.total_marks > 0
-                      ? ((Number(a.score) / Number(a.total_marks)) * 100).toFixed(1)
-                      : "—";
-                  return (
-                    <tr key={a.id}>
-                      <td className="py-2 pr-3">{idx + 1}</td>
-                      <td className="py-2 pr-3 font-semibold">{a.student_name}</td>
-                      <td className="py-2 pr-3">{a.student_roll ?? "—"}</td>
-                      <td className="py-2 pr-3 capitalize">{a.status.replace("_", " ")}</td>
-                      <td className="py-2 pr-3 font-semibold">
-                        {a.score !== null && a.total_marks !== null
-                          ? `${a.score} / ${a.total_marks}`
-                          : "—"}
-                      </td>
-                      <td className="py-2 pr-3">{pct === "—" ? "—" : `${pct}%`}</td>
-                      <td className="py-2 pr-3">{formatTimeTaken(a.started_at, a.submitted_at)}</td>
-                      <td className="py-2">{a.violation_counts?.tab_switches ?? 0}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            {/* Mobile Card View */}
+            <div className="space-y-2.5 sm:hidden print:hidden">
+              {attemptList.map((a, idx) => {
+                const pct =
+                  a.score !== null && a.total_marks && a.total_marks > 0
+                    ? ((Number(a.score) / Number(a.total_marks)) * 100).toFixed(1)
+                    : "—";
+                return (
+                  <div
+                    key={a.id}
+                    className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 text-xs space-y-1.5"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-900 break-words">
+                          #{idx + 1} {a.student_name}
+                        </p>
+                        <p className="text-slate-500">
+                          Roll/ID: {a.student_roll ?? "—"} •{" "}
+                          <span className="capitalize">{a.status.replace("_", " ")}</span>
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="font-bold text-navy">
+                          {a.score !== null && a.total_marks !== null
+                            ? `${a.score} / ${a.total_marks}`
+                            : "—"}
+                        </p>
+                        <p className="text-slate-500">{pct === "—" ? "—" : `${pct}%`}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between border-t border-slate-200 pt-1.5 text-[11px] text-slate-500">
+                      <span>Time: {formatTimeTaken(a.started_at, a.submitted_at)}</span>
+                      <span>Switches: {a.violation_counts?.tab_switches ?? 0}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop & Print Table */}
+            <div className="hidden sm:block print:block overflow-x-auto">
+              <table className="w-full border-collapse text-left text-xs">
+                <thead>
+                  <tr className="border-b-2 border-slate-800">
+                    <th className="py-2 pr-3">#</th>
+                    <th className="py-2 pr-3">Name</th>
+                    <th className="py-2 pr-3">Roll / ID</th>
+                    <th className="py-2 pr-3">Status</th>
+                    <th className="py-2 pr-3">Score</th>
+                    <th className="py-2 pr-3">%</th>
+                    <th className="py-2 pr-3">Time</th>
+                    <th className="py-2">Switches</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {attemptList.map((a, idx) => {
+                    const pct =
+                      a.score !== null && a.total_marks && a.total_marks > 0
+                        ? ((Number(a.score) / Number(a.total_marks)) * 100).toFixed(1)
+                        : "—";
+                    return (
+                      <tr key={a.id}>
+                        <td className="py-2 pr-3">{idx + 1}</td>
+                        <td className="py-2 pr-3 font-semibold">{a.student_name}</td>
+                        <td className="py-2 pr-3">{a.student_roll ?? "—"}</td>
+                        <td className="py-2 pr-3 capitalize">{a.status.replace("_", " ")}</td>
+                        <td className="py-2 pr-3 font-semibold">
+                          {a.score !== null && a.total_marks !== null
+                            ? `${a.score} / ${a.total_marks}`
+                            : "—"}
+                        </td>
+                        <td className="py-2 pr-3">{pct === "—" ? "—" : `${pct}%`}</td>
+                        <td className="py-2 pr-3">{formatTimeTaken(a.started_at, a.submitted_at)}</td>
+                        <td className="py-2">{a.violation_counts?.tab_switches ?? 0}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : (
           <div className="space-y-5">
@@ -205,7 +248,7 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
                     <span className="shrink-0 text-xs text-slate-500">[{q.marks}]</span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 pl-4 text-slate-800">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-1.5 pl-4 text-slate-800">
                     {q.options.map((opt, optIdx) => {
                       const isCorrect = mode === "key" && optIdx === q.correct_index;
                       return (
