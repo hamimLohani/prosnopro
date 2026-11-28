@@ -101,8 +101,8 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
           </div>
         </div>
 
-        {/* Validation Checklist */}
-        {warnings.length > 0 ? (
+        {/* Validation Checklist (show issues at top if any) */}
+        {warnings.length > 0 && (
           <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 sm:p-5 space-y-2">
             <div className="flex items-center gap-2 font-bold text-amber-950">
               <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
@@ -115,28 +115,6 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
                 <li key={i}>{w}</li>
               ))}
             </ul>
-          </div>
-        ) : (
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:p-5">
-            <div className="flex items-center gap-2.5 text-emerald-950">
-              <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
-              <div>
-                <p className="font-bold">{t("Publish করার জন্য প্রস্তুত", "Ready to Publish")}</p>
-                <p className="text-xs text-emerald-800">
-                  {t(
-                    `${qList.length}টি প্রশ্ন • মোট ${totalMarks} নম্বর • ${exam.duration_minutes} মিনিট`,
-                    `${qList.length} questions • ${totalMarks} total marks • ${exam.duration_minutes} min`,
-                  )}
-                </p>
-              </div>
-            </div>
-
-            <ExamLifecycleActions
-              examId={exam.id}
-              status={exam.status}
-              canPublish={canPublish}
-              forceCloseDefault={exam.force_close_active}
-            />
           </div>
         )}
 
@@ -192,6 +170,31 @@ export default async function ExamReviewPage({ params }: ReviewPageProps) {
             ))}
           </div>
         </section>
+
+        {/* Ready to Publish (placed after all questions so the teacher reviews everything first) */}
+        {warnings.length === 0 && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:p-5">
+            <div className="flex items-center gap-2.5 text-emerald-950">
+              <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+              <div>
+                <p className="font-bold">{t("Publish করার জন্য প্রস্তুত", "Ready to Publish")}</p>
+                <p className="text-xs text-emerald-800">
+                  {t(
+                    `${qList.length}টি প্রশ্ন • মোট ${totalMarks} নম্বর • ${exam.duration_minutes} মিনিট`,
+                    `${qList.length} questions • ${totalMarks} total marks • ${exam.duration_minutes} min`,
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <ExamLifecycleActions
+              examId={exam.id}
+              status={exam.status}
+              canPublish={canPublish}
+              forceCloseDefault={exam.force_close_active}
+            />
+          </div>
+        )}
       </main>
     </div>
   );
