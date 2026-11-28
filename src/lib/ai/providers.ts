@@ -415,20 +415,23 @@ export async function generateMcqDrafts(params: {
 }): Promise<DraftMcqQuestion[]> {
   const languageLabel = params.medium === "bn" ? "Bangla (UTF-8 Bengali script)" : "English";
   const systemPrompt = [
-    "You are an expert exam question setter.",
+    "You are an expert exam question setter aligned with the Bangladesh NCTB curriculum.",
     "Return ONLY valid JSON matching this exact shape:",
     `{"questions":[{"text":"...","options":["..."],"correct_index":0,"explanation":"...","marks":${params.defaultMarks}}]}`,
-    `Every question MUST have exactly ${params.optionsPerQuestion} options.`,
+    `Every question MUST have exactly ${params.optionsPerQuestion} plausible, distinct options with only 1 unambiguously correct answer—avoid "All of the above" or "None of the above".`,
     `correct_index MUST be an integer from 0 to ${params.optionsPerQuestion - 1}.`,
+    "Test conceptual understanding and application, not just rote memorization.",
+    "Include a concise 1–2 line explanation for each question.",
     "Use inline KaTeX math ($...$) when writing mathematical equations.",
     "Do not include markdown commentary outside JSON.",
   ].join(" ");
 
   const userPrompt = [
-    `Generate ${params.count} original multiple-choice questions.`,
+    `Generate ${params.count} moderate-difficulty, original multiple-choice questions.`,
     `Language / Medium: ${languageLabel}.`,
     `Subject: ${params.subject || "General"}.`,
     `Class / Level: ${params.classLevel || "Secondary / Higher Secondary"}.`,
+    "Balance the questions evenly across any chapters or topics specified below.",
     params.notes.trim() ? `Teacher notes / syllabus focus:\n${params.notes.trim()}` : "",
   ]
     .filter(Boolean)
