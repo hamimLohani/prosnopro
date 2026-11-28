@@ -172,12 +172,13 @@ export function SearchableOptionSelect({
     }
     if (e.key === "Enter") {
       e.preventDefault();
-      const chosen =
-        activeIndex >= 0 && activeIndex < entries.length ? entries[activeIndex] : entries[0];
-      if (chosen) {
-        commitSelection(chosen.value);
-        triggerRef.current?.focus();
+      if (activeIndex >= 0 && activeIndex < entries.length) {
+        commitSelection(entries[activeIndex].value);
+      } else {
+        setOpen(false);
+        setActiveIndex(-1);
       }
+      triggerRef.current?.focus();
     }
   }
 

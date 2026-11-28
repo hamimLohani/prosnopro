@@ -49,6 +49,17 @@ export function StudentSettingsForm({
       return;
     }
 
+    const cleanRoll = roll.trim();
+    const cleanInstitution = institution.trim();
+    if (
+      cleanName === initialName.trim() &&
+      cleanRoll === initialRoll.trim() &&
+      cleanInstitution === initialInstitution.trim()
+    ) {
+      setStatus(t("কোনো পরিবর্তন করা হয়নি।", "No changes to save."));
+      return;
+    }
+
     setSaving(true);
     const {
       data: { user },

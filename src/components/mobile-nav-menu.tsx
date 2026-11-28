@@ -3,7 +3,7 @@
 import { Info, LogOut, Menu, Settings, ShieldCheck, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { useLang } from "@/components/language-provider";
 import { performSignOut } from "@/components/sign-out-button";
@@ -19,6 +19,7 @@ export function MobileNavMenu({ signedIn, role }: MobileNavMenuProps) {
   const router = useRouter();
   const { lang } = useLang();
   const t = (bn: string, en: string) => pickText(lang, bn, en);
+  const menuId = useId();
   const [open, setOpen] = useState(false);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -58,6 +59,8 @@ export function MobileNavMenu({ signedIn, role }: MobileNavMenuProps) {
         <button
           type="button"
           aria-expanded={open}
+          aria-haspopup="menu"
+          aria-controls={open ? menuId : undefined}
           aria-label={t("মেনু", "Menu")}
           onClick={() => setOpen((v) => !v)}
           className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 cursor-pointer"
@@ -66,10 +69,15 @@ export function MobileNavMenu({ signedIn, role }: MobileNavMenuProps) {
         </button>
 
         {open && (
-          <div className="absolute right-0 top-full z-40 mt-2 w-52 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl space-y-0.5 text-sm">
+          <div
+            id={menuId}
+            role="menu"
+            className="absolute right-0 top-full z-40 mt-2 w-52 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl space-y-0.5 text-sm"
+          >
             {signedIn && role === "student" && (
               <Link
                 href="/student/settings"
+                role="menuitem"
                 onClick={() => setOpen(false)}
                 className="flex min-h-[42px] items-center gap-2.5 rounded-xl px-3 py-2 font-medium text-slate-700 hover:bg-slate-50"
               >
@@ -80,6 +88,7 @@ export function MobileNavMenu({ signedIn, role }: MobileNavMenuProps) {
             {signedIn && role === "teacher" && (
               <Link
                 href="/teacher/settings"
+                role="menuitem"
                 onClick={() => setOpen(false)}
                 className="flex min-h-[42px] items-center gap-2.5 rounded-xl px-3 py-2 font-medium text-slate-700 hover:bg-slate-50"
               >
@@ -89,6 +98,7 @@ export function MobileNavMenu({ signedIn, role }: MobileNavMenuProps) {
             )}
             <Link
               href="/about"
+              role="menuitem"
               onClick={() => setOpen(false)}
               className="flex min-h-[42px] items-center gap-2.5 rounded-xl px-3 py-2 font-medium text-slate-700 hover:bg-slate-50"
             >
@@ -97,6 +107,7 @@ export function MobileNavMenu({ signedIn, role }: MobileNavMenuProps) {
             </Link>
             <Link
               href="/privacy"
+              role="menuitem"
               onClick={() => setOpen(false)}
               className="flex min-h-[42px] items-center gap-2.5 rounded-xl px-3 py-2 font-medium text-slate-700 hover:bg-slate-50"
             >
@@ -107,6 +118,7 @@ export function MobileNavMenu({ signedIn, role }: MobileNavMenuProps) {
               <div className="mt-1 border-t border-slate-100 pt-1">
                 <button
                   type="button"
+                  role="menuitem"
                   onClick={() => {
                     setOpen(false);
                     setConfirmSignOut(true);

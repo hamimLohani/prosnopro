@@ -20,7 +20,6 @@ interface QuestionBankFormProps {
   medium: ExamMedium;
   visibility: "private" | "shared";
   busy: boolean;
-  embedded?: boolean;
   onTextChange: (v: string) => void;
   onOptionsChange: (opts: string[]) => void;
   onCorrectIndexChange: (idx: number) => void;
@@ -46,7 +45,6 @@ export function QuestionBankForm({
   medium,
   visibility,
   busy,
-  embedded = false,
   onTextChange,
   onOptionsChange,
   onCorrectIndexChange,
@@ -63,14 +61,7 @@ export function QuestionBankForm({
   const t = (bn: string, en: string) => pickText(lang, bn, en);
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className={
-        embedded
-          ? "space-y-4"
-          : "rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm space-y-4"
-      }
-    >
+    <form onSubmit={onSubmit} className="space-y-4">
       <h2 className="text-base font-bold text-navy">
         {editingId
           ? t("Bank-এর প্রশ্ন Edit করুন", "Edit Question Bank Item")

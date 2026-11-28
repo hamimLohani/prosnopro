@@ -11,9 +11,13 @@ interface ExamTakeoverModalProps {
   open: boolean;
 }
 
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export function ExamTakeoverModal({ open }: ExamTakeoverModalProps) {
   const { lang } = useLang();
   const t = (bn: string, en: string) => pickText(lang, bn, en);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
   const linkRef = useRef<HTMLAnchorElement | null>(null);
 
   useEffect(() => {
@@ -23,9 +27,20 @@ export function ExamTakeoverModal({ open }: ExamTakeoverModalProps) {
     linkRef.current?.focus();
 
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Tab") {
-        e.preventDefault();
-        linkRef.current?.focus();
+      if (e.key === "Tab" && dialogRef.current) {
+        const focusables = Array.from(
+          dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+        ).filter((el) => el.offsetParent !== null);
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     }
     window.addEventListener("keydown", onKeyDown);
@@ -44,7 +59,10 @@ export function ExamTakeoverModal({ open }: ExamTakeoverModalProps) {
       aria-labelledby="takeover-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-4"
     >
-      <div className="w-full max-w-md rounded-2xl bg-white p-5 sm:p-6 shadow-xl space-y-4 text-center">
+      <div
+        ref={dialogRef}
+        className="w-full max-w-md rounded-2xl bg-white p-5 sm:p-6 shadow-xl space-y-4 text-center"
+      >
         <ShieldAlert className="mx-auto h-10 w-10 text-rose-600" />
         <h2 id="takeover-modal-title" className="text-xl font-bold text-slate-900">
           {t("অন্য জায়গায় Session চালু হয়েছে", "Session Active Elsewhere")}

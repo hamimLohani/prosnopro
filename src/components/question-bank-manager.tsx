@@ -607,7 +607,6 @@ export function QuestionBankManager({
           <div className="p-4 sm:p-6 space-y-4">
             {(activeTab === "manual" || editingId) && (
               <QuestionBankForm
-                embedded
                 editingId={editingId}
                 text={text}
                 options={options}
@@ -729,21 +728,30 @@ export function QuestionBankManager({
           <input
             type="text"
             value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
+            onChange={(e) => {
+              setKeyword(e.target.value);
+              setVisibleCount(BANK_PAGE_SIZE);
+            }}
             placeholder={t("কীওয়ার্ড দিয়ে খুঁজুন...", "Search keyword...")}
             className="h-11 w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-base sm:text-sm"
           />
         </div>
         <SearchableSubjectSelect
           value={subjectFilter}
-          onChange={setSubjectFilter}
+          onChange={(v) => {
+            setSubjectFilter(v);
+            setVisibleCount(BANK_PAGE_SIZE);
+          }}
           allowCustom={false}
           placeholder="All Subjects"
           searchPlaceholder="Search subject..."
         />
         <ClassSelect
           value={classFilter}
-          onChange={setClassFilter}
+          onChange={(v) => {
+            setClassFilter(v);
+            setVisibleCount(BANK_PAGE_SIZE);
+          }}
           allowCustom={false}
           placeholder="All Classes"
           searchPlaceholder="Search class..."
@@ -751,7 +759,10 @@ export function QuestionBankManager({
         <div className="grid grid-cols-2 gap-2">
           <select
             value={mediumFilter}
-            onChange={(e) => setMediumFilter(e.target.value as "all" | ExamMedium)}
+            onChange={(e) => {
+              setMediumFilter(e.target.value as "all" | ExamMedium);
+              setVisibleCount(BANK_PAGE_SIZE);
+            }}
             className="h-11 rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-base sm:text-sm"
           >
             <option value="all">{t("সব মাধ্যম", "All Media")}</option>
@@ -760,7 +771,10 @@ export function QuestionBankManager({
           </select>
           <select
             value={scope}
-            onChange={(e) => setScope(e.target.value as "all" | "mine" | "shared")}
+            onChange={(e) => {
+              setScope(e.target.value as "all" | "mine" | "shared");
+              setVisibleCount(BANK_PAGE_SIZE);
+            }}
             className="h-11 rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-base sm:text-sm"
           >
             <option value="all">{t("সব প্রশ্ন", "All")}</option>

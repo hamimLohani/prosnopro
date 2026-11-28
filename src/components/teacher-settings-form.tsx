@@ -17,6 +17,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { useLang } from "@/components/language-provider";
 import { StatusToast } from "@/components/status-toast";
 import { TeacherCodeInput } from "@/components/teacher-code-input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { getProviderUiMeta, PROVIDER_CATALOG, type AiProviderId } from "@/lib/ai/providers";
 import { pickText } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
@@ -451,18 +452,17 @@ export function TeacherSettingsForm({
             <label htmlFor="ai-key-input" className="block text-sm font-medium text-slate-700">
               {providerMeta.label} API Key
             </label>
-            <input
+            <PasswordInput
               id="ai-key-input"
-              type="password"
               autoComplete="off"
               value={apiKeyInput}
-              onChange={(e) => setApiKeyInput(e.target.value)}
+              onChange={setApiKeyInput}
               placeholder={
                 hasKey
                   ? t(`Saved (${keyHint}) — বদলাতে Paste করুন`, `Saved (${keyHint}) — paste to replace`)
                   : t("আপনার API Key Paste করুন", "Paste your API Key")
               }
-              className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 font-mono text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+              className="sm:h-[42px] font-mono"
             />
             <p className="text-xs text-slate-500">
               {t("Key প্রয়োজন?", "Need a key?")}{" "}

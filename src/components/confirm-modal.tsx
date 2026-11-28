@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 import { type ReactNode, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useLang } from "@/components/language-provider";
@@ -108,7 +108,7 @@ export function ConfirmModal({
       <div
         className="fixed inset-0"
         onClick={() => {
-          if (!busy) onCancel();
+          if (!busyRef.current) onCancelRef.current();
         }}
         aria-hidden="true"
       />
@@ -122,7 +122,11 @@ export function ConfirmModal({
               tone === "danger" ? "bg-rose-100 text-rose-600" : "bg-navy/10 text-navy"
             }`}
           >
-            <AlertTriangle className="h-5 w-5" />
+            {tone === "danger" ? (
+              <AlertTriangle className="h-5 w-5" />
+            ) : (
+              <CheckCircle2 className="h-5 w-5" />
+            )}
           </div>
           <div className="space-y-1">
             <h2 id="confirm-modal-title" className="text-base sm:text-lg font-bold text-slate-900">

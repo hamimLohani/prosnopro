@@ -72,6 +72,10 @@ export function ExamAttemptsPreview({ examId, attempts }: ExamAttemptsPreviewPro
                 type="text"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
+                aria-label={t(
+                  "Student-এর নাম বা Roll/ID দিয়ে খুঁজুন",
+                  "Search by student name or Roll/ID",
+                )}
                 placeholder={t(
                   "Student-এর নাম বা Roll/ID দিয়ে খুঁজুন...",
                   "Search by student name or Roll/ID...",

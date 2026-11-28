@@ -75,7 +75,7 @@ export function ExamRunnerHeader({
               {syncState === "synced" && (
                 <>
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                  <span>Synced</span>
+                  <span>{t("সংরক্ষিত", "Synced")}</span>
                 </>
               )}
               {syncState === "unsaved" && (

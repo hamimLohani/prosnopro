@@ -1,7 +1,7 @@
-import type { DraftMcqQuestion } from "@/lib/ai/schema";
-import { type AppLang, pickText } from "@/lib/i18n";
-import type { ExamMedium } from "@/lib/types";
-import { analyzeBanglaPdfText } from "@/lib/validation";
+import type { DraftMcqQuestion } from "./schema.ts";
+import { type AppLang, pickText } from "../i18n.ts";
+import type { ExamMedium } from "../types.ts";
+import { analyzeBanglaPdfText } from "../validation.ts";
 
 export interface GenerateAiDraftParams {
   examId?: string;

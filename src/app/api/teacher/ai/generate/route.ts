@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
       count,
       optionsPerQuestion,
       defaultMarks,
-      notes: body.notes ?? "",
+      notes: (body.notes ?? "").slice(0, 2000),
     });
 
     return NextResponse.json({
