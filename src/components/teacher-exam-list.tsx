@@ -161,14 +161,8 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
                   প্রশ্নসমূহ
                 </Link>
                 <Link
-                  href={`/teacher/exams/${exam.id}/results`}
-                  className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 whitespace-nowrap"
-                >
-                  Result ও Analytics
-                </Link>
-                <Link
                   href={`/teacher/exams/${exam.id}`}
-                  className="col-span-2 sm:col-span-1 inline-flex min-h-[40px] items-center justify-center rounded-xl bg-navy px-4 py-2 text-xs font-semibold text-white hover:bg-navy-strong"
+                  className="inline-flex min-h-[40px] items-center justify-center rounded-xl bg-navy px-4 py-2 text-xs font-semibold text-white hover:bg-navy-strong"
                 >
                   Manage করুন →
                 </Link>
