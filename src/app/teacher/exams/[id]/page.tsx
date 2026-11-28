@@ -4,6 +4,8 @@ import { notFound, redirect } from "next/navigation";
 import { ExamLifecycleActions } from "@/components/exam-lifecycle-actions";
 import { Navbar } from "@/components/navbar";
 import { TeacherCodeCopy } from "@/components/teacher-code-copy";
+import { pickText } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n-server";
 import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
 import type { AttemptStatus, Exam } from "@/lib/types";
 
@@ -23,7 +25,8 @@ interface AttemptSummaryRow {
 }
 
 export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
-  const ctx = await getCurrentUserContext();
+  const [ctx, lang] = await Promise.all([getCurrentUserContext(), getServerLang()]);
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
   if (!ctx.configured || !ctx.userId) redirect("/login");
   if (!ctx.profile) redirect("/onboarding");
   if (ctx.profile.role !== "teacher") redirect("/student");
@@ -85,7 +88,7 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
           </div>
 
           <Link href="/teacher" className="py-1 text-sm font-semibold text-navy hover:underline shrink-0">
-            ← Dashboard-এ ফিরে যান
+            {t("← Dashboard-এ ফিরে যান", "← Back to Dashboard")}
           </Link>
         </div>
 
@@ -145,7 +148,7 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
               className="inline-flex min-h-[44px] items-center justify-center sm:justify-start gap-1.5 rounded-xl bg-navy px-3 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-navy-strong"
             >
               <Edit3 className="h-4 w-4 shrink-0" />
-              <span>প্রশ্নসমূহ ({exam.question_count})</span>
+              <span>{t(`প্রশ্নসমূহ (${exam.question_count})`, `Questions (${exam.question_count})`)}</span>
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}/review`}
@@ -166,7 +169,7 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
               className="inline-flex min-h-[44px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               <BarChart3 className="h-4 w-4 shrink-0 text-navy" />
-              <span>Result ও Analytics</span>
+              <span>{t("Result ও Analytics", "Results & Analytics")}</span>
             </Link>
           </div>
 

@@ -3,6 +3,8 @@
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { useLang } from "@/components/language-provider";
+import { pickText } from "@/lib/i18n";
 
 interface ConfirmModalProps {
   open: boolean;
@@ -25,13 +27,16 @@ export function ConfirmModal({
   title,
   message,
   children,
-  confirmLabel = "নিশ্চিত করুন",
-  cancelLabel = "বাতিল",
+  confirmLabel,
+  cancelLabel,
   tone = "danger",
   busy = false,
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
+  const { lang } = useLang();
+  const resolvedConfirmLabel = confirmLabel ?? pickText(lang, "নিশ্চিত করুন", "Confirm");
+  const resolvedCancelLabel = cancelLabel ?? pickText(lang, "বাতিল", "Cancel");
   const cancelBtnRef = useRef<HTMLButtonElement | null>(null);
   const prevFocusRef = useRef<HTMLElement | null>(null);
 
@@ -97,7 +102,7 @@ export function ConfirmModal({
             onClick={onCancel}
             className="min-h-[44px] w-full sm:w-auto rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
           >
-            {cancelLabel}
+            {resolvedCancelLabel}
           </button>
           <button
             type="button"
@@ -110,7 +115,7 @@ export function ConfirmModal({
             }`}
           >
             {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-            <span>{confirmLabel}</span>
+            <span>{resolvedConfirmLabel}</span>
           </button>
         </div>
       </div>

@@ -3,6 +3,8 @@
 import { KeyRound, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useLang } from "@/components/language-provider";
+import { pickText } from "@/lib/i18n";
 import { normalizeExamCode, normalizeTeacherCode } from "@/lib/validation";
 
 interface StudentJoinFormProps {
@@ -15,6 +17,8 @@ export function StudentJoinForm({
   initialExamCode = "",
 }: StudentJoinFormProps) {
   const router = useRouter();
+  const { lang } = useLang();
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
   const [teacherCode, setTeacherCode] = useState(() => normalizeTeacherCode(initialTeacherCode));
   const [examCode, setExamCode] = useState(() => normalizeExamCode(initialExamCode));
   const [loading, setLoading] = useState(false);
@@ -101,10 +105,14 @@ export function StudentJoinForm({
             <KeyRound className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-slate-900">Exam-এ জয়েন করুন</h2>
+            <h2 className="text-lg font-bold text-slate-900">
+              {t("Exam-এ জয়েন করুন", "Join an Exam")}
+            </h2>
             <p className="text-sm text-slate-600">
-              আপনার Teacher-এর দেওয়া Teacher Code ও Exam Code লিখুন (অথবা পুরো Invite মেসেজ
-              পেস্ট করুন)।
+              {t(
+                "আপনার Teacher-এর দেওয়া Teacher Code ও Exam Code লিখুন (অথবা পুরো Invite মেসেজ পেস্ট করুন)।",
+                "Enter your Teacher Code and Exam Code (or paste the full invite message).",
+              )}
             </p>
           </div>
         </div>
@@ -170,7 +178,7 @@ export function StudentJoinForm({
             className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong active:scale-[0.99] disabled:opacity-60 cursor-pointer"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            <span>Exam-এ জয়েন</span>
+            <span>{t("Exam-এ জয়েন", "Join Exam")}</span>
           </button>
         </form>
       </div>

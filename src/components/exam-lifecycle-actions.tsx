@@ -4,6 +4,8 @@ import { CopyPlus, Loader2, Lock, Rocket, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { useLang } from "@/components/language-provider";
+import { pickText } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 import type { ExamStatus } from "@/lib/types";
 import { generateExamCode } from "@/lib/validation";
@@ -22,6 +24,8 @@ export function ExamLifecycleActions({
   forceCloseDefault,
 }: ExamLifecycleActionsProps) {
   const router = useRouter();
+  const { lang } = useLang();
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
   const [busy, setBusy] = useState<string | null>(null);
   const [confirmAction, setConfirmAction] = useState<"close" | "delete" | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -131,7 +135,11 @@ export function ExamLifecycleActions({
             ) : (
               <Rocket className="h-4 w-4" />
             )}
-            <span>{status === "closed" ? "পুনরায় Publish করুন" : "Exam Publish করুন"}</span>
+            <span>
+              {status === "closed"
+                ? t("পুনরায় Publish করুন", "Re-publish Exam")
+                : t("Exam Publish করুন", "Publish Exam")}
+            </span>
           </button>
         )}
 
@@ -147,7 +155,7 @@ export function ExamLifecycleActions({
             ) : (
               <Lock className="h-4 w-4" />
             )}
-            <span>Exam বন্ধ (Close) করুন</span>
+            <span>{t("Exam বন্ধ (Close) করুন", "Close Exam")}</span>
           </button>
         )}
 
@@ -176,22 +184,39 @@ export function ExamLifecycleActions({
           ) : (
             <Trash2 className="h-4 w-4" />
           )}
-          <span>মুছুন</span>
+          <span>{t("মুছুন", "Delete")}</span>
         </button>
       </div>
 
       <ConfirmModal
         open={confirmAction !== null}
         tone="danger"
-        title={confirmAction === "close" ? "Exam বন্ধ (Close) করবেন?" : "Exam মুছে ফেলবেন?"}
+        title={
+          confirmAction === "close"
+            ? t("Exam বন্ধ (Close) করবেন?", "Close Exam?")
+            : t("Exam মুছে ফেলবেন?", "Delete Exam?")
+        }
         message={
           confirmAction === "close"
             ? forceCloseDefault
-              ? "Exam বন্ধ করলে নতুন কোনো Student আর জয়েন করতে পারবে না এবং চলমান পরীক্ষাগুলো সাথে সাথে Submit হয়ে যাবে।"
-              : "Exam বন্ধ করলে নতুন কোনো Student আর জয়েন করতে পারবে না।"
-            : "এই Exam এবং এর সব প্রশ্ন ও Student-দের Attempt মুছে ফেলতে চান? এটি আর ফিরিয়ে আনা যাবে না।"
+              ? t(
+                  "Exam বন্ধ করলে নতুন কোনো Student আর জয়েন করতে পারবে না এবং চলমান পরীক্ষাগুলো সাথে সাথে Submit হয়ে যাবে।",
+                  "Closing this exam prevents new joins and immediately submits any in-progress attempts.",
+                )
+              : t(
+                  "Exam বন্ধ করলে নতুন কোনো Student আর জয়েন করতে পারবে না।",
+                  "Closing this exam prevents new students from joining.",
+                )
+            : t(
+                "এই Exam এবং এর সব প্রশ্ন ও Student-দের Attempt মুছে ফেলতে চান? এটি আর ফিরিয়ে আনা যাবে না।",
+                "Delete this exam along with all its questions and student attempts? This cannot be undone.",
+              )
         }
-        confirmLabel={confirmAction === "close" ? "হ্যাঁ, Exam বন্ধ করুন" : "Exam মুছুন"}
+        confirmLabel={
+          confirmAction === "close"
+            ? t("হ্যাঁ, Exam বন্ধ করুন", "Yes, Close Exam")
+            : t("Exam মুছুন", "Delete Exam")
+        }
         busy={busy === "close" || busy === "delete"}
         onCancel={() => setConfirmAction(null)}
         onConfirm={() => {

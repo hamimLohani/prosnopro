@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { TeacherQuestionEditor } from "@/components/teacher-question-editor";
+import { pickText } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n-server";
 import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
 import type { Exam, Question, QuestionBankItem } from "@/lib/types";
 
@@ -10,7 +12,8 @@ interface QuestionsPageProps {
 }
 
 export default async function ExamQuestionsPage({ params }: QuestionsPageProps) {
-  const ctx = await getCurrentUserContext();
+  const [ctx, lang] = await Promise.all([getCurrentUserContext(), getServerLang()]);
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
   if (!ctx.configured || !ctx.userId) redirect("/login");
   if (!ctx.profile) redirect("/onboarding");
   if (ctx.profile.role !== "teacher") redirect("/student");
@@ -68,13 +71,13 @@ export default async function ExamQuestionsPage({ params }: QuestionsPageProps) 
               href={`/teacher/exams/${exam.id}`}
               className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              Exam-এর বিস্তারিত
+              {t("Exam-এর বিস্তারিত", "Exam Details")}
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}/review`}
               className="inline-flex min-h-[42px] items-center justify-center rounded-xl bg-navy px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-navy-strong"
             >
-              Review ও Publish →
+              {t("Review ও Publish →", "Review & Publish →")}
             </Link>
           </div>
         </div>

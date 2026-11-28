@@ -3,7 +3,9 @@
 import { Clock, HelpCircle, Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useLang } from "@/components/language-provider";
 import { CLASS_OPTIONS } from "@/lib/academic-options";
+import { pickText } from "@/lib/i18n";
 import type { Exam, ExamStatus } from "@/lib/types";
 
 interface TeacherExamListProps {
@@ -13,6 +15,8 @@ interface TeacherExamListProps {
 const EXAM_PAGE_SIZE = 20;
 
 export function TeacherExamList({ exams }: TeacherExamListProps) {
+  const { lang } = useLang();
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
   const [keyword, setKeyword] = useState("");
   const [classFilter, setClassFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | ExamStatus>("all");
@@ -40,9 +44,14 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
   if (exams.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center space-y-2">
-        <p className="text-base font-semibold text-slate-800">এখনো কোনো Exam নেই</p>
+        <p className="text-base font-semibold text-slate-800">
+          {t("এখনো কোনো Exam নেই", "No exams yet")}
+        </p>
         <p className="text-sm text-slate-500">
-          আপনার প্রথম MCQ পরীক্ষা তৈরি করতে উপরের &ldquo;নতুন Exam তৈরি করুন&rdquo; বাটনে ট্যাপ করুন।
+          {t(
+            "আপনার প্রথম MCQ পরীক্ষা তৈরি করতে উপরের “নতুন Exam তৈরি করুন” বাটনে ট্যাপ করুন।",
+            "Tap “Create New Exam” above to create your first MCQ exam.",
+          )}
         </p>
       </div>
     );
@@ -103,7 +112,7 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
 
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-          আপনার সার্চ অনুযায়ী কোনো Exam পাওয়া যায়নি।
+          {t("আপনার সার্চ অনুযায়ী কোনো Exam পাওয়া যায়নি।", "No matching exams found.")}
         </div>
       ) : (
         <>
@@ -154,11 +163,11 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
                   <span>{exam.medium === "bn" ? "বাংলা" : "English"}</span>
                   <span className="inline-flex items-center gap-1">
                     <HelpCircle className="h-3.5 w-3.5" />
-                    {exam.question_count}টি প্রশ্ন
+                    {t(`${exam.question_count}টি প্রশ্ন`, `${exam.question_count} Qs`)}
                   </span>
                   <span className="inline-flex items-center gap-1">
                     <Clock className="h-3.5 w-3.5" />
-                    {exam.duration_minutes} মিনিট
+                    {t(`${exam.duration_minutes} মিনিট`, `${exam.duration_minutes} min`)}
                   </span>
                 </div>
               </div>
@@ -168,13 +177,13 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
                   href={`/teacher/exams/${exam.id}/questions`}
                   className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                 >
-                  প্রশ্নসমূহ
+                  {t("প্রশ্নসমূহ", "Questions")}
                 </Link>
                 <Link
                   href={`/teacher/exams/${exam.id}`}
                   className="inline-flex min-h-[40px] items-center justify-center rounded-xl bg-navy px-4 py-2 text-xs font-semibold text-white hover:bg-navy-strong"
                 >
-                  Manage করুন →
+                  {t("Manage করুন →", "Manage →")}
                 </Link>
               </div>
             </div>
@@ -187,7 +196,10 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
                 onClick={() => setVisibleCount((c) => c + EXAM_PAGE_SIZE)}
                 className="min-h-[40px] rounded-xl border border-slate-300 bg-white px-5 py-2 text-xs sm:text-sm font-semibold text-navy hover:bg-slate-50 cursor-pointer"
               >
-                আরও দেখুন ({filtered.length - visibleCount}টি বাকি)
+                {t(
+                  `আরও দেখুন (${filtered.length - visibleCount}টি বাকি)`,
+                  `Load more (${filtered.length - visibleCount} remaining)`,
+                )}
               </button>
             </div>
           )}

@@ -3,11 +3,14 @@ import { redirect } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { QuestionBankManager } from "@/components/question-bank-manager";
 import { SetupBanner } from "@/components/setup-banner";
+import { pickText } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n-server";
 import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
 import type { QuestionBankItem } from "@/lib/types";
 
 export default async function TeacherBankPage() {
-  const ctx = await getCurrentUserContext();
+  const [ctx, lang] = await Promise.all([getCurrentUserContext(), getServerLang()]);
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
 
   if (!ctx.configured) {
     return (
@@ -42,11 +45,14 @@ export default async function TeacherBankPage() {
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-navy">Question Bank</h1>
             <p className="text-sm text-slate-600">
-              আপনার সংরক্ষিত প্রশ্ন পরিচালনা করুন এবং অন্যান্য Teacher-দের শেয়ার করা প্রশ্ন দেখুন।
+              {t(
+                "আপনার সংরক্ষিত প্রশ্ন পরিচালনা করুন এবং অন্যান্য Teacher-দের শেয়ার করা প্রশ্ন দেখুন।",
+                "Manage your saved questions and browse questions shared by other teachers.",
+              )}
             </p>
           </div>
           <Link href="/teacher" className="py-1 text-sm font-semibold text-navy hover:underline shrink-0">
-            ← Dashboard-এ ফিরে যান
+            {t("← Dashboard-এ ফিরে যান", "← Back to Dashboard")}
           </Link>
         </div>
 

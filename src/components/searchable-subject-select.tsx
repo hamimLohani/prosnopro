@@ -2,7 +2,9 @@
 
 import { Check, ChevronDown, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useLang } from "@/components/language-provider";
 import { SUBJECT_OPTIONS } from "@/lib/academic-options";
+import { pickText } from "@/lib/i18n";
 
 interface SearchableSubjectSelectProps {
   id?: string;
@@ -18,11 +20,14 @@ export function SearchableSubjectSelect({
   id,
   value,
   onChange,
-  placeholder = "বিষয় নির্বাচন করুন",
+  placeholder,
   searchPlaceholder = "Search subject...",
   allowCustom = true,
   className = "",
 }: SearchableSubjectSelectProps) {
+  const { lang } = useLang();
+  const resolvedPlaceholder =
+    placeholder ?? pickText(lang, "বিষয় নির্বাচন করুন", "Select Subject");
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -91,7 +96,7 @@ export function SearchableSubjectSelect({
         className="flex h-11 sm:h-[42px] w-full items-center justify-between gap-2 rounded-lg border border-slate-300 bg-white px-3 text-left text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15 cursor-pointer"
       >
         <span className={`truncate ${selectedLabel ? "text-slate-900" : "text-slate-500"}`}>
-          {selectedLabel || placeholder}
+          {selectedLabel || resolvedPlaceholder}
         </span>
         <ChevronDown className="h-4 w-4 shrink-0 text-slate-500" />
       </button>
@@ -128,7 +133,7 @@ export function SearchableSubjectSelect({
                     : "text-slate-600 hover:bg-slate-50"
                 }`}
               >
-                <span className="truncate">{placeholder}</span>
+                <span className="truncate">{resolvedPlaceholder}</span>
                 {value === "" && <Check className="h-4 w-4 shrink-0 text-navy" />}
               </button>
             )}

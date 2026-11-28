@@ -7,6 +7,8 @@ import { SignOutButton } from "@/components/sign-out-button";
 import { TeacherSettingsForm } from "@/components/teacher-settings-form";
 import { isValidProvider } from "@/lib/ai/providers";
 import { isEncryptionConfigured } from "@/lib/crypto";
+import { pickText } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n-server";
 import { isAdminClientConfigured } from "@/lib/supabase/admin";
 import { getCurrentUserContext } from "@/lib/supabase/server";
 
@@ -15,7 +17,8 @@ interface TeacherSettingsPageProps {
 }
 
 export default async function TeacherSettingsPage({ searchParams }: TeacherSettingsPageProps) {
-  const ctx = await getCurrentUserContext();
+  const [ctx, lang] = await Promise.all([getCurrentUserContext(), getServerLang()]);
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
 
   if (!ctx.configured) {
     return (
@@ -45,14 +48,19 @@ export default async function TeacherSettingsPage({ searchParams }: TeacherSetti
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-navy">Settings</h1>
             <p className="text-sm text-slate-600">
-              আপনার Teacher Code এবং নিজস্ব BYOK AI API Key পরিচালনা করুন।
+              {t(
+                "আপনার Teacher Code এবং নিজস্ব BYOK AI API Key পরিচালনা করুন।",
+                "Manage your Teacher Code and personal BYOK AI API Key.",
+              )}
             </p>
           </div>
           <Link
             href={safeReturnTo ?? "/teacher"}
             className="py-1 text-sm font-semibold text-navy hover:underline shrink-0"
           >
-            {safeReturnTo ? "← Exam-এ ফিরে যান" : "← Dashboard-এ ফিরে যান"}
+            {safeReturnTo
+              ? t("← Exam-এ ফিরে যান", "← Back to Exam")
+              : t("← Dashboard-এ ফিরে যান", "← Back to Dashboard")}
           </Link>
         </div>
 
@@ -70,10 +78,14 @@ export default async function TeacherSettingsPage({ searchParams }: TeacherSetti
 
         <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-3">
           <div className="space-y-1">
-            <h2 className="text-base font-bold text-navy">About ও Privacy Notice</h2>
+            <h2 className="text-base font-bold text-navy">
+              {t("About ও Privacy Notice", "About & Privacy Notice")}
+            </h2>
             <p className="text-xs sm:text-sm text-slate-600">
-              ProsnoPro (প্রশ্নপ্রো) — বাংলাদেশি শিক্ষক ও শিক্ষার্থীদের জন্য মোবাইল-বান্ধব বাংলা ও English
-              অনলাইন MCQ Exam প্ল্যাটফর্ম। আপনার BYOK AI Key AES-256-GCM এনক্রিপশনে সুরক্ষিত থাকে।
+              {t(
+                "ProsnoPro (প্রশ্নপ্রো) — বাংলাদেশি শিক্ষক ও শিক্ষার্থীদের জন্য মোবাইল-বান্ধব বাংলা ও English অনলাইন MCQ Exam প্ল্যাটফর্ম। আপনার BYOK AI Key AES-256-GCM এনক্রিপশনে সুরক্ষিত থাকে।",
+                "ProsnoPro — Mobile-friendly Bangla & English online MCQ exam platform. Your BYOK AI Key is protected with AES-256-GCM encryption.",
+              )}
             </p>
           </div>
           <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5">

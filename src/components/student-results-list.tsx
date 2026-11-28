@@ -3,6 +3,8 @@
 import { ArrowRight, Clock, Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useLang } from "@/components/language-provider";
+import { pickText } from "@/lib/i18n";
 import type { AttemptStatus, ExamMedium, ResultReleaseMode } from "@/lib/types";
 
 export interface StudentHistoryItem {
@@ -28,6 +30,8 @@ interface StudentResultsListProps {
 const RESULTS_PAGE_SIZE = 15;
 
 export function StudentResultsList({ items }: StudentResultsListProps) {
+  const { lang } = useLang();
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
   const [keyword, setKeyword] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "submitted" | "in_progress">("all");
   const [visibleCount, setVisibleCount] = useState(RESULTS_PAGE_SIZE);
@@ -84,7 +88,7 @@ export function StudentResultsList({ items }: StudentResultsListProps) {
 
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-          আপনার সার্চ অনুযায়ী কোনো Result পাওয়া যায়নি।
+          {t("আপনার সার্চ অনুযায়ী কোনো Result পাওয়া যায়নি।", "No matching results found.")}
         </div>
       ) : (
         <div className="space-y-3">
@@ -112,8 +116,8 @@ export function StudentResultsList({ items }: StudentResultsListProps) {
                   <p className="text-xs text-slate-500">
                     {item.subject || "General"} • {item.medium === "bn" ? "বাংলা" : "English"} •{" "}
                     {item.submitted_at
-                      ? `Submit: ${new Date(item.submitted_at).toLocaleString()}`
-                      : `শুরু: ${new Date(item.started_at).toLocaleString()}`}
+                      ? `${t("Submit", "Submitted")}: ${new Date(item.submitted_at).toLocaleString()}`
+                      : `${t("শুরু", "Started")}: ${new Date(item.started_at).toLocaleString()}`}
                   </p>
                 </div>
 
@@ -123,7 +127,7 @@ export function StudentResultsList({ items }: StudentResultsListProps) {
                       href={`/student/exams/${item.exam_id}/take`}
                       className="inline-flex min-h-[40px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-xs font-semibold text-white hover:bg-navy-strong"
                     >
-                      <span>Exam চালিয়ে যান</span>
+                      <span>{t("Exam চালিয়ে যান", "Resume Exam")}</span>
                       <ArrowRight className="h-3.5 w-3.5" />
                     </Link>
                   ) : (
@@ -140,7 +144,7 @@ export function StudentResultsList({ items }: StudentResultsListProps) {
                       ) : (
                         <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800">
                           <Clock className="h-3.5 w-3.5" />
-                          <span>অপেক্ষমাণ</span>
+                          <span>{t("অপেক্ষমাণ", "Pending")}</span>
                         </span>
                       )}
 
@@ -148,7 +152,7 @@ export function StudentResultsList({ items }: StudentResultsListProps) {
                         href={`/student/results/${item.attempt_id}`}
                         className="inline-flex min-h-[40px] items-center justify-center rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                       >
-                        বিস্তারিত দেখুন
+                        {t("বিস্তারিত দেখুন", "View Details")}
                       </Link>
                     </>
                   )}
@@ -164,7 +168,10 @@ export function StudentResultsList({ items }: StudentResultsListProps) {
                 onClick={() => setVisibleCount((c) => c + RESULTS_PAGE_SIZE)}
                 className="min-h-[40px] rounded-xl border border-slate-300 bg-white px-5 py-2 text-xs sm:text-sm font-semibold text-navy hover:bg-slate-50 cursor-pointer"
               >
-                আরও দেখুন ({filtered.length - visibleCount}টি বাকি)
+                {t(
+                  `আরও দেখুন (${filtered.length - visibleCount}টি বাকি)`,
+                  `Load more (${filtered.length - visibleCount} remaining)`,
+                )}
               </button>
             </div>
           )}

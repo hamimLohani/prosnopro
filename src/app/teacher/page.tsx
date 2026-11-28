@@ -9,11 +9,14 @@ import { Navbar } from "@/components/navbar";
 import { SetupBanner } from "@/components/setup-banner";
 import { TeacherCodeCopy } from "@/components/teacher-code-copy";
 import { TeacherExamList } from "@/components/teacher-exam-list";
+import { pickText } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n-server";
 import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
 import type { Exam } from "@/lib/types";
 
 export default async function TeacherDashboardPage() {
-  const ctx = await getCurrentUserContext();
+  const [ctx, lang] = await Promise.all([getCurrentUserContext(), getServerLang()]);
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
 
   if (!ctx.configured) {
     return (
@@ -76,13 +79,13 @@ export default async function TeacherDashboardPage() {
           className="flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl bg-navy px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-navy-strong active:scale-[0.99]"
         >
           <PlusCircle className="h-4 w-4" />
-          <span>নতুন Exam তৈরি করুন</span>
+          <span>{t("নতুন Exam তৈরি করুন", "Create New Exam")}</span>
         </Link>
 
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-base sm:text-lg font-bold text-navy">
-              আমার Exam ({examList.length})
+              {t(`আমার Exam (${examList.length})`, `My Exams (${examList.length})`)}
             </h2>
           </div>
 
@@ -90,25 +93,33 @@ export default async function TeacherDashboardPage() {
             <div className="space-y-4">
               <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-3">
                 <h3 className="text-sm sm:text-base font-bold text-navy">
-                  নতুন Teacher? ৩ ধাপে প্রথম Exam শুরু করুন
+                  {t("নতুন Teacher? ৩ ধাপে প্রথম Exam শুরু করুন", "New Teacher? Start your first exam in 3 steps")}
                 </h3>
                 <ol className="list-decimal pl-5 space-y-1.5 text-xs sm:text-sm text-slate-600">
                   <li>
-                    উপরের <strong className="text-slate-800">নতুন Exam তৈরি করুন</strong> বাটনে
-                    ট্যাপ করে নাম, Class ও সময় দিন।
+                    {t("উপরের", "Tap")}{" "}
+                    <strong className="text-slate-800">
+                      {t("নতুন Exam তৈরি করুন", "Create New Exam")}
+                    </strong>{" "}
+                    {t(
+                      "বাটনে ট্যাপ করে নাম, Class ও সময় দিন।",
+                      "above and set the title, Class/Level, and duration.",
+                    )}
                   </li>
                   <li>
                     <strong className="text-slate-800">Manual</strong>,{" "}
-                    <strong className="text-slate-800">Bulk Paste</strong>, অথবা{" "}
+                    <strong className="text-slate-800">Bulk Paste</strong>,{" "}
+                    {t("অথবা", "or")}{" "}
                     <Link href="/teacher/settings#ai-key" className="font-semibold text-navy underline">
-                      Settings-এ ফ্রি Gemini/Groq Key
+                      {t("Settings-এ ফ্রি Gemini/Groq Key", "add a free Gemini/Groq key in Settings")}
                     </Link>{" "}
-                    যোগ করে AI/PDF দিয়ে প্রশ্ন তৈরি করুন।
+                    {t("যোগ করে AI/PDF দিয়ে প্রশ্ন তৈরি করুন।", "to generate questions via AI/PDF.")}
                   </li>
                   <li>
-                    Exam <strong className="text-slate-800">Publish</strong> করে আপনার{" "}
-                    <span className="font-mono font-semibold text-navy">{teacherCode}</span> ও Exam
-                    Code Student-দের সাথে শেয়ার করুন।
+                    Exam <strong className="text-slate-800">Publish</strong>{" "}
+                    {t("করে আপনার", "and share your")}{" "}
+                    <span className="font-mono font-semibold text-navy">{teacherCode}</span>{" "}
+                    {t("ও Exam Code Student-দের সাথে শেয়ার করুন।", "& Exam Code with students.")}
                   </li>
                 </ol>
               </div>

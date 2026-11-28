@@ -6,10 +6,13 @@ import {
   StudentPracticeClient,
   type PracticeQuestionItem,
 } from "@/components/student-practice-client";
+import { pickText } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n-server";
 import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
 
 export default async function StudentPracticePage() {
-  const ctx = await getCurrentUserContext();
+  const [ctx, lang] = await Promise.all([getCurrentUserContext(), getServerLang()]);
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
 
   if (!ctx.configured) {
     return (
@@ -54,13 +57,18 @@ export default async function StudentPracticePage() {
       <main className="mx-auto w-full max-w-4xl flex-1 space-y-5 sm:space-y-6 px-3 py-5 sm:px-4 sm:py-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-navy">Practice খুঁজুন</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-navy">
+              {t("Practice খুঁজুন", "Practice Search")}
+            </h1>
             <p className="text-sm text-slate-600">
-              Teacher-দের শেয়ার করা প্রশ্ন এবং সমাপ্ত Exam-এর প্রশ্ন দিয়ে Practice করুন।
+              {t(
+                "Teacher-দের শেয়ার করা প্রশ্ন এবং সমাপ্ত Exam-এর প্রশ্ন দিয়ে Practice করুন।",
+                "Practice with shared Teacher Bank questions and completed exams.",
+              )}
             </p>
           </div>
           <Link href="/student" className="text-sm font-semibold text-navy hover:underline">
-            ← Student Home-এ ফিরে যান
+            {t("← Student Home-এ ফিরে যান", "← Back to Student Home")}
           </Link>
         </div>
 

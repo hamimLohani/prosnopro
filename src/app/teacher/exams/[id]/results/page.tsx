@@ -3,6 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { ExamResultsClient } from "@/components/exam-results-client";
 import { Navbar } from "@/components/navbar";
 import { computeExamAnalytics } from "@/lib/analytics";
+import { pickText } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n-server";
 import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
 import type { AttemptDetail, Exam, Question } from "@/lib/types";
 
@@ -11,7 +13,8 @@ interface ResultsPageProps {
 }
 
 export default async function ExamResultsPage({ params }: ResultsPageProps) {
-  const ctx = await getCurrentUserContext();
+  const [ctx, lang] = await Promise.all([getCurrentUserContext(), getServerLang()]);
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
   if (!ctx.configured || !ctx.userId) redirect("/login");
   if (!ctx.profile) redirect("/onboarding");
   if (ctx.profile.role !== "teacher") redirect("/student");
@@ -59,7 +62,7 @@ export default async function ExamResultsPage({ params }: ResultsPageProps) {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Result, Analytics ও Export • {exam.code}
+              {t(`Result ও Analytics • ${exam.code}`, `Results & Analytics • ${exam.code}`)}
             </p>
             <h1 className="text-xl sm:text-2xl font-bold text-navy break-words">{exam.name}</h1>
           </div>
@@ -74,7 +77,7 @@ export default async function ExamResultsPage({ params }: ResultsPageProps) {
               href={`/teacher/exams/${exam.id}`}
               className="py-1 text-sm font-semibold text-navy hover:underline"
             >
-              ← Exam-এ ফিরে যান
+              {t("← Exam-এ ফিরে যান", "← Back to Exam")}
             </Link>
           </div>
         </div>
