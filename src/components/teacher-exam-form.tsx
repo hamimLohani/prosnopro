@@ -37,9 +37,6 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
   const [medium, setMedium] = useState<ExamMedium>(exam?.medium ?? "bn");
   const [code, setCode] = useState(() => exam?.code ?? generateExamCode());
   const [durationMinutes, setDurationMinutes] = useState(String(exam?.duration_minutes ?? 30));
-  const [optionsPerQuestion, setOptionsPerQuestion] = useState(
-    String(exam?.options_per_question ?? 4),
-  );
   const [defaultMarks, setDefaultMarks] = useState(String(exam?.default_marks ?? 1));
   const [negativeMarking, setNegativeMarking] = useState(exam?.negative_marking ?? false);
   const [negativeValue, setNegativeValue] = useState(String(exam?.negative_value ?? 0.25));
@@ -74,7 +71,6 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
     const cleanClass = classLevel.trim();
     const cleanCode = normalizeExamCode(code);
     const parsedDuration = Number(durationMinutes);
-    const parsedOptions = Number(optionsPerQuestion);
     const parsedMarks = Number(defaultMarks);
     const parsedNeg = negativeMarking ? Number(negativeValue) : 0;
 
@@ -100,15 +96,6 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
         t(
           "সময়সীমা ১ থেকে ৬০০ মিনিটের মধ্যে হতে হবে।",
           "Duration must be between 1 and 600 minutes.",
-        ),
-      );
-      return;
-    }
-    if (!Number.isInteger(parsedOptions) || parsedOptions < 2 || parsedOptions > 6) {
-      setError(
-        t(
-          "প্রতি প্রশ্নে Option ২ থেকে ৬টির মধ্যে হতে হবে।",
-          "Options per question must be between 2 and 6.",
         ),
       );
       return;
@@ -166,7 +153,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
       medium,
       code: cleanCode,
       duration_minutes: parsedDuration,
-      options_per_question: parsedOptions,
+      options_per_question: exam?.options_per_question ?? 4,
       default_marks: parsedMarks,
       negative_marking: negativeMarking,
       negative_value: parsedNeg,
@@ -229,8 +216,8 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
           <Lock className="h-4 w-4 shrink-0 text-amber-600 mt-0.5" />
           <span>
             {t(
-              "Student-রা ইতিমধ্যে এই Exam শুরু করেছে, তাই সময়সীমা, Option সংখ্যা, Negative marking ও Shuffle সেটিংস লক করা আছে।",
-              "Students have already started this exam, so duration, option count, negative marking, and shuffle settings are locked.",
+              "Student-রা ইতিমধ্যে এই Exam শুরু করেছে, তাই সময়সীমা, Negative marking ও Shuffle সেটিংস লক করা আছে।",
+              "Students have already started this exam, so duration, negative marking, and shuffle settings are locked.",
             )}
           </span>
         </div>
@@ -377,25 +364,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
               {t("Marking ও Randomization", "Marking & Randomization")}
             </h2>
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="space-y-1.5">
-                <label htmlFor="exam-options" className="block text-sm font-medium text-slate-700">
-                  {t("প্রতি প্রশ্নে Option সংখ্যা", "Options per Question")}
-                </label>
-                <select
-                  id="exam-options"
-                  disabled={hasAttempts || Boolean(exam && exam.question_count > 0)}
-                  value={optionsPerQuestion}
-                  onChange={(e) => setOptionsPerQuestion(e.target.value)}
-                  className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15 disabled:bg-slate-100"
-                >
-                  <option value="2">{t("২টি Option", "2 Options")}</option>
-                  <option value="3">{t("৩টি Option", "3 Options")}</option>
-                  <option value="4">{t("৪টি Option (Standard)", "4 Options (Standard)")}</option>
-                  <option value="5">{t("৫টি Option", "5 Options")}</option>
-                </select>
-              </div>
-
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <label htmlFor="exam-marks" className="block text-sm font-medium text-slate-700">
                   {t("প্রতি প্রশ্নের Default নম্বর", "Default Marks per Question")}
