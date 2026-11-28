@@ -50,7 +50,7 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
     exam?.result_release ?? "after_submit",
   );
   const [showAnswers, setShowAnswers] = useState(exam?.show_answers ?? true);
-  const [practiceSharing, setPracticeSharing] = useState(exam?.practice_sharing ?? false);
+  const [practiceSharing, setPracticeSharing] = useState(exam?.practice_sharing ?? true);
   const [showAdvanced, setShowAdvanced] = useState(isEdit);
 
   const [saving, setSaving] = useState(false);
