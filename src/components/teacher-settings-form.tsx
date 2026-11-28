@@ -298,17 +298,6 @@ export function TeacherSettingsForm({
           </p>
         </div>
 
-        {status && (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800">
-            {status}
-          </div>
-        )}
-        {error && (
-          <div className="rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-sm text-rose-800">
-            {error}
-          </div>
-        )}
-
         <div className="space-y-1.5">
           <label htmlFor="settings-name" className="block text-sm font-medium text-slate-700">
             {t("প্রদর্শিত নাম (Display Name)", "Display Name")}
@@ -397,17 +386,6 @@ export function TeacherSettingsForm({
               <code className="font-mono">.env.local</code> or Vercel before saving teacher API
               keys.
             </span>
-          </div>
-        )}
-
-        {aiStatus && (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800">
-            {aiStatus}
-          </div>
-        )}
-        {aiError && (
-          <div className="rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-sm text-rose-800">
-            {aiError}
           </div>
         )}
 

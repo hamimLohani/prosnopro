@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ClassSelect } from "@/components/class-select";
 import { useLang } from "@/components/language-provider";
+import { ExamStatusBadge } from "@/components/ui/primitives";
 import { pickText } from "@/lib/i18n";
 import type { Exam, ExamStatus } from "@/lib/types";
 
@@ -67,8 +68,11 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
               type="text"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              placeholder="Search by exam name, subject, or code..."
-              className="h-10 w-full rounded-lg border border-slate-300 pl-9 pr-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+              placeholder={t(
+                "Exam-এর নাম, বিষয় বা Code দিয়ে খুঁজুন...",
+                "Search by exam name, subject, or code...",
+              )}
+              className="h-10 w-full rounded-lg border border-slate-300 pl-9 pr-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
           </div>
           <ClassSelect
@@ -84,17 +88,17 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
         <div className="flex flex-wrap items-center gap-1.5">
           {(
             [
-              { value: "all", label: "All" },
-              { value: "published", label: "Published" },
-              { value: "draft", label: "Draft" },
-              { value: "closed", label: "Closed" },
+              { value: "all", label: t("সব", "All") },
+              { value: "published", label: t("প্রকাশিত", "Published") },
+              { value: "draft", label: t("খসড়া", "Draft") },
+              { value: "closed", label: t("বন্ধ", "Closed") },
             ] as const
           ).map((tab) => (
             <button
               key={tab.value}
               type="button"
               onClick={() => setStatusFilter(tab.value)}
-              className={`min-h-[32px] rounded-lg px-3 py-1 text-xs font-semibold transition cursor-pointer ${
+              className={`min-h-[38px] sm:min-h-[32px] rounded-lg px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
                 statusFilter === tab.value
                   ? "bg-navy text-white"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -126,21 +130,7 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
                   >
                     {exam.name}
                   </Link>
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                      exam.status === "published"
-                        ? "bg-emerald-100 text-emerald-800"
-                        : exam.status === "closed"
-                          ? "bg-slate-200 text-slate-700"
-                          : "bg-amber-100 text-amber-900"
-                    }`}
-                  >
-                    {exam.status === "published"
-                      ? "Published"
-                      : exam.status === "closed"
-                        ? "Closed"
-                        : "Draft"}
-                  </span>
+                  <ExamStatusBadge status={exam.status} lang={lang} />
                   <span className="rounded bg-slate-100 px-2 py-0.5 font-mono text-xs font-semibold text-navy">
                     {exam.code}
                   </span>

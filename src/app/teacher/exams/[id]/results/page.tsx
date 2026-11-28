@@ -71,7 +71,7 @@ export default async function ExamResultsPage({ params }: ResultsPageProps) {
               href={`/teacher/exams/${exam.id}/monitor`}
               className="inline-flex min-h-[40px] items-center rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              Live Monitor
+              {t("লাইভ মনিটর", "Live Monitor")}
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}`}

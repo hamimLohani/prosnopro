@@ -1,39 +1,30 @@
 "use client";
 
 import {
-  AlertTriangle,
-  ArrowDown,
-  ArrowUp,
   BookOpen,
-  Check,
-  CheckCircle2,
   ClipboardPaste,
-  Copy,
   FileUp,
-  KeyRound,
   Loader2,
-  Pencil,
   Plus,
   RefreshCw,
-  Search,
   Sparkles,
-  Trash2,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-import { ClassSelect } from "@/components/class-select";
+import { useState } from "react";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { useLang } from "@/components/language-provider";
-import { MathText } from "@/components/math-text";
-import { SearchableSubjectSelect } from "@/components/searchable-subject-select";
+import { AiGeneratorTab, PdfImportTab } from "@/components/question-editor/ai-pdf-tabs";
+import { BankImportTab } from "@/components/question-editor/bank-import-tab";
+import { BulkPasteTab } from "@/components/question-editor/bulk-paste-tab";
+import { DraftReviewQueue } from "@/components/question-editor/draft-review-queue";
+import { ExamQuestionList } from "@/components/question-editor/exam-question-list";
+import { ManualQuestionForm } from "@/components/question-editor/manual-question-form";
 import { StatusToast } from "@/components/status-toast";
+import { generateAiDraftBatches, importPdfDraftsFromFile } from "@/lib/ai/client-drafts";
 import type { DraftMcqQuestion } from "@/lib/ai/schema";
-import { parseBulkMcqText } from "@/lib/bulk-mcq";
 import { pickText } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 import type { Exam, Question, QuestionBankItem } from "@/lib/types";
-import { analyzeBanglaPdfText } from "@/lib/validation";
 
 interface TeacherQuestionEditorProps {
   exam: Exam;
@@ -45,13 +36,6 @@ interface TeacherQuestionEditorProps {
 }
 
 type SourceTab = "manual" | "paste" | "bank" | "ai" | "pdf";
-
-function optionLabel(index: number, medium: "bn" | "en"): string {
-  if (medium === "bn") {
-    return ["ক", "খ", "গ", "ঘ", "ঙ", "চ"][index] ?? String(index + 1);
-  }
-  return String.fromCharCode(65 + index);
-}
 
 export function TeacherQuestionEditor({
   exam,
@@ -70,15 +54,6 @@ export function TeacherQuestionEditor({
   const [activeTab, setActiveTab] = useState<SourceTab>("manual");
   const [composerOpen, setComposerOpen] = useState(initialQuestions.length === 0);
 
-  // Bulk Paste state (no AI key needed)
-  const [bulkText, setBulkText] = useState("");
-  const [bulkPromptCopied, setBulkPromptCopied] = useState(false);
-
-  // Question Bank import state
-  const [bankKeyword, setBankKeyword] = useState("");
-  const [bankSubject, setBankSubject] = useState("");
-  const [bankClass, setBankClass] = useState("");
-  const [selectedBankIds, setSelectedBankIds] = useState<string[]>([]);
   const [importingBank, setImportingBank] = useState(false);
   const [savingToBankKey, setSavingToBankKey] = useState<string | null>(null);
 
@@ -91,19 +66,17 @@ export function TeacherQuestionEditor({
   const [marks, setMarks] = useState<string>(String(exam.default_marks));
   const [saveToBank, setSaveToBank] = useState(true);
 
-  // AI Generation state (uses teacher's saved BYOK API key)
+  // AI & PDF generation state (BYOK)
   const [aiClassLevel, setAiClassLevel] = useState(exam.class ?? "");
   const [aiSubject, setAiSubject] = useState(exam.subject);
   const [aiCount, setAiCount] = useState("5");
   const [aiNotes, setAiNotes] = useState("");
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiProgress, setAiProgress] = useState<string | null>(null);
-
-  // Zero-storage PDF Import state
   const [pdfProgress, setPdfProgress] = useState<string | null>(null);
   const [pdfImporting, setPdfImporting] = useState(false);
 
-  // Draft Review Queue (shared by With AI & PDF Import)
+  // Shared draft queue (Bulk Paste, AI, PDF)
   const [drafts, setDrafts] = useState<DraftMcqQuestion[]>([]);
   const [editingDraftIdx, setEditingDraftIdx] = useState<number | null>(null);
   const [saveDraftsToBank, setSaveDraftsToBank] = useState(true);
@@ -115,62 +88,6 @@ export function TeacherQuestionEditor({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  function buildBulkFormatPrompt(): string {
-    const contextParts = [exam.subject, exam.class].filter(Boolean).join(" • ");
-    const targetLangBn = exam.medium === "bn" ? "বাংলায় (UTF-8)" : "English-এ";
-    const targetLangEn = exam.medium === "bn" ? "Bangla (UTF-8 Bengali script)" : "English";
-
-    if (lang === "bn") {
-      const sampleOptions = Array.from(
-        { length: optionCount },
-        (_, i) => `${optionLabel(i, exam.medium)}) বিকল্প ${i + 1}`,
-      ).join("\n");
-      const sampleAns = optionLabel(Math.min(1, optionCount - 1), exam.medium);
-
-      return [
-        `[বিষয়/Topic লিখুন] বিষয়ের উপর ${targetLangBn} ১০টি মানসম্মত MCQ প্রশ্ন তৈরি করুন${contextParts ? ` (${contextParts})` : ""}।`,
-        `প্রতিটি প্রশ্নে ঠিক ${optionCount}টি Option থাকতে হবে। Markdown বা Code block (***, \`\`\`) ছাড়া হুবহু নিচের ফরম্যাটে লিখুন এবং প্রতিটি প্রশ্নের মাঝে একটি ফাঁকা লাইন দিন (গণিতের সূত্রের জন্য $...$ ব্যবহার করুন):`,
-        "",
-        `1. এখানে প্রথম প্রশ্ন লিখুন?`,
-        sampleOptions,
-        `Ans: ${sampleAns}`,
-        `Ex: সংক্ষিপ্ত ব্যাখ্যা (ঐচ্ছিক)।`,
-      ].join("\n");
-    }
-
-    const sampleOptionsEn = Array.from(
-      { length: optionCount },
-      (_, i) => `${String.fromCharCode(65 + i)}) Option ${i + 1}`,
-    ).join("\n");
-    const sampleAnsEn = String.fromCharCode(65 + Math.min(1, optionCount - 1));
-
-    return [
-      `Create 10 high-quality MCQ questions in ${targetLangEn} on [TOPIC / CHAPTERS]${contextParts ? ` (${contextParts})` : ""}.`,
-      `Each question MUST have exactly ${optionCount} options. Return plain text in this EXACT format with no markdown bolding or code blocks, leaving one blank line between questions (use $...$ for math formulas):`,
-      "",
-      `1. Question text here?`,
-      sampleOptionsEn,
-      `Ans: ${sampleAnsEn}`,
-      `Ex: Brief explanation (optional).`,
-    ].join("\n");
-  }
-
-  async function handleCopyBulkPrompt() {
-    setError(null);
-    try {
-      await navigator.clipboard.writeText(buildBulkFormatPrompt());
-      setBulkPromptCopied(true);
-      setTimeout(() => setBulkPromptCopied(false), 2000);
-    } catch {
-      setError(
-        t(
-          "Clipboard-এ Copy করা যায়নি। অনুগ্রহ করে Browser permission চেক করুন।",
-          "Could not copy to clipboard. Please check browser permissions.",
-        ),
-      );
-    }
-  }
-
   function resetForm() {
     setEditingId(null);
     setText("");
@@ -178,7 +95,7 @@ export function TeacherQuestionEditor({
     setCorrectIndex(0);
     setExplanation("");
     setMarks(String(exam.default_marks));
-    setSaveToBank(false);
+    setSaveToBank(true);
   }
 
   function startEdit(q: Question) {
@@ -187,8 +104,7 @@ export function TeacherQuestionEditor({
     setActiveTab("manual");
     setEditingId(q.id);
     setText(q.text);
-    const padded = Array.from({ length: optionCount }, (_, i) => q.options[i] ?? "");
-    setOptions(padded);
+    setOptions(Array.from({ length: optionCount }, (_, i) => q.options[i] ?? ""));
     setCorrectIndex(Math.min(q.correct_index, optionCount - 1));
     setExplanation(q.explanation ?? "");
     setMarks(String(q.marks));
@@ -209,15 +125,17 @@ export function TeacherQuestionEditor({
     const parsedMarks = Number(marks);
 
     if (!cleanText) {
-      setError("Question text is required.");
+      setError(t("প্রশ্নের লেখা দেওয়া আবশ্যক।", "Question text is required."));
       return;
     }
     if (cleanOptions.some((o) => !o)) {
-      setError(`Please fill in all ${optionCount} options.`);
+      setError(
+        t(`দয়া করে সব ${optionCount}টি Option পূরণ করুন।`, `Please fill in all ${optionCount} options.`),
+      );
       return;
     }
     if (!Number.isFinite(parsedMarks) || parsedMarks <= 0) {
-      setError("Marks must be greater than 0.");
+      setError(t("নম্বর ০-এর চেয়ে বেশি হতে হবে।", "Marks must be greater than 0."));
       return;
     }
 
@@ -239,15 +157,20 @@ export function TeacherQuestionEditor({
 
       setBusy(false);
       if (updateErr || !updated) {
-        setError(updateErr?.message ?? "Failed to update question.");
+        setError(
+          updateErr?.message ?? t("প্রশ্ন আপডেট করা যায়নি।", "Failed to update question."),
+        );
         return;
       }
 
       setQuestions((prev) => prev.map((q) => (q.id === updated.id ? updated : q)));
       setMessage(
         hasAttempts
-          ? "Question updated. Click 'Re-grade Submitted Attempts' if you changed the answer key or marks."
-          : "Question updated.",
+          ? t(
+              "প্রশ্ন আপডেট হয়েছে। উত্তর বা নম্বর বদলালে 'Submit করা উত্তর Re-grade করুন' চাপুন।",
+              "Question updated. Click 'Re-grade Submitted Attempts' if you changed the answer key or marks.",
+            )
+          : t("প্রশ্ন আপডেট হয়েছে।", "Question updated."),
       );
       resetForm();
       router.refresh();
@@ -300,12 +223,19 @@ export function TeacherQuestionEditor({
 
     setBusy(false);
     if (insertErr || !inserted) {
-      setError(insertErr?.message ?? "Failed to add question.");
+      setError(insertErr?.message ?? t("প্রশ্ন যোগ করা যায়নি।", "Failed to add question."));
       return;
     }
 
     setQuestions((prev) => [...prev, inserted]);
-    setMessage(saveToBank ? "Question added and saved to your Question Bank." : "Question added.");
+    setMessage(
+      saveToBank
+        ? t(
+            "প্রশ্ন যোগ হয়েছে এবং Question Bank-এ Save হয়েছে।",
+            "Question added and saved to your Question Bank.",
+          )
+        : t("প্রশ্ন যোগ হয়েছে।", "Question added."),
+    );
     resetForm();
     router.refresh();
   }
@@ -315,81 +245,24 @@ export function TeacherQuestionEditor({
     setError(null);
     setMessage(null);
     setAiGenerating(true);
-    setAiProgress(null);
 
-    const requestedTotal = Math.min(100, Math.max(1, Math.floor(Number(aiCount) || 5)));
-    const batchSize = 20;
-    const batches: number[] = [];
-    for (let left = requestedTotal; left > 0; left -= batchSize) {
-      batches.push(Math.min(batchSize, left));
-    }
+    const result = await generateAiDraftBatches({
+      examId: exam.id,
+      classLevel: aiClassLevel,
+      subject: aiSubject,
+      requestedCount: Number(aiCount) || 5,
+      notes: aiNotes,
+      aiProvider,
+      lang,
+      onProgress: setAiProgress,
+      onBatchDrafts: (batch) => setDrafts((prev) => [...prev, ...batch]),
+    });
 
-    let generatedTotal = 0;
-    const seenStems: string[] = [];
-
-    try {
-      for (let i = 0; i < batches.length; i += 1) {
-        const count = batches[i];
-        setAiProgress(
-          batches.length > 1
-            ? `Generating batch ${i + 1} of ${batches.length} (${generatedTotal}/${requestedTotal})...`
-            : "Generating drafts...",
-        );
-
-        const avoidNote =
-          seenStems.length > 0
-            ? `\n\nDo NOT repeat these already-generated questions:\n${seenStems
-                .slice(-25)
-                .map((s) => `- ${s}`)
-                .join("\n")}`
-            : "";
-
-        const res = await fetch("/api/teacher/ai/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            examId: exam.id,
-            classLevel: aiClassLevel.trim(),
-            subject: aiSubject.trim(),
-            count,
-            notes: `${aiNotes.trim()}${avoidNote}`,
-          }),
-        });
-
-        const data = (await res.json()) as {
-          ok?: boolean;
-          drafts?: DraftMcqQuestion[];
-          message?: string;
-        };
-
-        if (!res.ok || !data.ok || !data.drafts) {
-          if (generatedTotal > 0) {
-            setError(
-              `Stopped after generating ${generatedTotal} drafts: ${data.message ?? "AI generation failed."}`,
-            );
-          } else {
-            setError(data.message ?? "AI generation failed.");
-          }
-          return;
-        }
-
-        generatedTotal += data.drafts.length;
-        seenStems.push(...data.drafts.map((d) => d.text.slice(0, 80)));
-        setDrafts((prev) => [...prev, ...data.drafts!]);
-      }
-
-      setMessage(
-        `Generated ${generatedTotal} draft question(s) using your ${aiProvider ?? "AI"} key. Review and confirm answers below before saving.`,
-      );
-    } catch {
-      setError(
-        generatedTotal > 0
-          ? `Network interrupted after generating ${generatedTotal} drafts.`
-          : "Network error while calling your AI provider.",
-      );
-    } finally {
-      setAiGenerating(false);
-      setAiProgress(null);
+    setAiGenerating(false);
+    if (result.ok) {
+      setMessage(result.message);
+    } else {
+      setError(result.error);
     }
   }
 
@@ -400,117 +273,21 @@ export function TeacherQuestionEditor({
 
     setError(null);
     setMessage(null);
-
-    if (file.size > 10 * 1024 * 1024) {
-      setError("PDF file must be 10 MB or smaller.");
-      return;
-    }
-
     setPdfImporting(true);
-    setPdfProgress("Reading PDF in browser (0 bytes stored on server)...");
 
-    try {
-      const pdfjs = await import("pdfjs-dist");
-      pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+    const result = await importPdfDraftsFromFile({
+      file,
+      examId: exam.id,
+      lang,
+      onProgress: setPdfProgress,
+    });
 
-      const buffer = await file.arrayBuffer();
-      const doc = await pdfjs.getDocument({ data: buffer }).promise;
-      const pagesToProcess = Math.min(doc.numPages, 10);
-
-      const textPages: string[] = [];
-      const visionImages: string[] = [];
-
-      for (let p = 1; p <= pagesToProcess; p += 1) {
-        setPdfProgress(`Inspecting page ${p} of ${pagesToProcess}...`);
-        const page = await doc.getPage(p);
-        const textContent = await page.getTextContent();
-        const extracted = textContent.items
-          .map((item) => ("str" in item ? item.str : ""))
-          .join(" ")
-          .replace(/\s+/g, " ")
-          .trim();
-
-        const analysis = analyzeBanglaPdfText(extracted);
-        if (
-          analysis.classification === "unicode-bangla" ||
-          analysis.classification === "english-or-numeric"
-        ) {
-          textPages.push(`[Page ${p}]\n${extracted}`);
-        } else {
-          // Scanned or legacy Bijoy PDF page: render JPEG in browser for Vision OCR
-          const viewport = page.getViewport({ scale: 1.5 });
-          const canvas = document.createElement("canvas");
-          canvas.width = Math.floor(viewport.width);
-          canvas.height = Math.floor(viewport.height);
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            await page.render({ canvas, canvasContext: ctx, viewport }).promise;
-            visionImages.push(canvas.toDataURL("image/jpeg", 0.78));
-          }
-        }
-      }
-
-      const collected: DraftMcqQuestion[] = [];
-
-      if (textPages.length > 0) {
-        setPdfProgress(`Parsing ${textPages.length} Unicode text page(s) with your AI key...`);
-        const res = await fetch("/api/teacher/ai/import-pdf", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            examId: exam.id,
-            extractedText: textPages.join("\n\n"),
-          }),
-        });
-        const data = (await res.json()) as {
-          ok?: boolean;
-          drafts?: DraftMcqQuestion[];
-          message?: string;
-        };
-        if (!res.ok || !data.ok) {
-          throw new Error(data.message ?? "Failed to parse PDF text.");
-        }
-        collected.push(...(data.drafts ?? []));
-      }
-
-      // Batch vision images 2 per request to respect serverless payload & timeout limits
-      for (let i = 0; i < visionImages.length; i += 2) {
-        const batch = visionImages.slice(i, i + 2);
-        setPdfProgress(
-          `OCR scanning image batch ${Math.floor(i / 2) + 1} of ${Math.ceil(visionImages.length / 2)}...`,
-        );
-        const res = await fetch("/api/teacher/ai/import-pdf", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            examId: exam.id,
-            imageDataUrls: batch,
-          }),
-        });
-        const data = (await res.json()) as {
-          ok?: boolean;
-          drafts?: DraftMcqQuestion[];
-          message?: string;
-        };
-        if (!res.ok || !data.ok) {
-          throw new Error(data.message ?? "Failed to extract questions from scanned PDF page.");
-        }
-        collected.push(...(data.drafts ?? []));
-      }
-
-      if (collected.length === 0) {
-        setError("No MCQs were extracted from that PDF.");
-      } else {
-        setDrafts((prev) => [...prev, ...collected]);
-        setMessage(
-          `Extracted ${collected.length} draft question(s) from ${pagesToProcess} page(s). Review and confirm answers below before saving.`,
-        );
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "PDF import failed.");
-    } finally {
-      setPdfImporting(false);
-      setPdfProgress(null);
+    setPdfImporting(false);
+    if (result.ok) {
+      setDrafts((prev) => [...prev, ...result.drafts]);
+      setMessage(result.message);
+    } else {
+      setError(result.error);
     }
   }
 
@@ -522,7 +299,12 @@ export function TeacherQuestionEditor({
     for (let i = 0; i < drafts.length; i += 1) {
       const d = drafts[i];
       if (!d.text.trim() || d.options.some((o) => !o.trim())) {
-        setError(`Draft #${i + 1} has blank question or option text.`);
+        setError(
+          t(
+            `Draft #${i + 1}-এ প্রশ্ন বা Option ফাঁকা রয়েছে।`,
+            `Draft #${i + 1} has blank question or option text.`,
+          ),
+        );
         return;
       }
     }
@@ -535,7 +317,7 @@ export function TeacherQuestionEditor({
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
-      setError("Session expired. Please sign in again.");
+      setError(t("Session শেষ হয়ে গেছে। আবার Sign in করুন।", "Session expired. Please sign in again."));
       setSavingDrafts(false);
       return;
     }
@@ -588,13 +370,21 @@ export function TeacherQuestionEditor({
 
     setSavingDrafts(false);
     if (insertErr || !inserted) {
-      setError(insertErr?.message ?? "Failed to save approved drafts.");
+      setError(
+        insertErr?.message ?? t("অনুমোদিত Draft-গুলো Save করা যায়নি।", "Failed to save approved drafts."),
+      );
       return;
     }
 
     setQuestions((prev) => [...prev, ...inserted]);
     setDrafts([]);
-    setMessage(`Saved ${inserted.length} confirmed question(s) to the exam.`);
+    setEditingDraftIdx(null);
+    setMessage(
+      t(
+        `${inserted.length}টি অনুমোদিত প্রশ্ন Exam-এ যুক্ত হয়েছে।`,
+        `Saved ${inserted.length} confirmed question(s) to the exam.`,
+      ),
+    );
     router.refresh();
   }
 
@@ -663,6 +453,7 @@ export function TeacherQuestionEditor({
 
     setQuestions((prev) => prev.filter((item) => item.id !== q.id));
     if (editingId === q.id) resetForm();
+    setMessage(t("প্রশ্নটি Exam থেকে সরানো হয়েছে।", "Question removed from exam."));
     router.refresh();
   }
 
@@ -682,7 +473,13 @@ export function TeacherQuestionEditor({
       setError(regradeErr.message);
       return;
     }
-    setMessage(`Re-graded ${Number(data ?? 0)} submitted attempt(s).`);
+    const count = Number(data ?? 0);
+    setMessage(
+      t(
+        `${count}টি Submit করা Attempt পুনরায় মূল্যায়ন (Re-grade) করা হয়েছে।`,
+        `Re-graded ${count} submitted attempt(s).`,
+      ),
+    );
     router.refresh();
   }
 
@@ -702,9 +499,7 @@ export function TeacherQuestionEditor({
     } = await supabase.auth.getUser();
     if (!user) {
       setSavingToBankKey(null);
-      setError(
-        t("Session শেষ হয়ে গেছে। আবার Sign in করুন।", "Session expired. Please sign in again."),
-      );
+      setError(t("Session শেষ হয়ে গেছে। আবার Sign in করুন।", "Session expired. Please sign in again."));
       return;
     }
 
@@ -744,10 +539,7 @@ export function TeacherQuestionEditor({
     if (!hasAttempts) {
       await Promise.all(
         unsaved.map((q, idx) =>
-          supabase
-            .from("questions")
-            .update({ bank_id: insertedBank[idx].id })
-            .eq("id", q.id),
+          supabase.from("questions").update({ bank_id: insertedBank[idx].id }).eq("id", q.id),
         ),
       );
     }
@@ -765,29 +557,12 @@ export function TeacherQuestionEditor({
     router.refresh();
   }
 
-  const filteredBank = useMemo(() => {
-    const kw = bankKeyword.trim().toLowerCase();
-    const subj = bankSubject.trim().toLowerCase();
-    const cls = bankClass.trim().toLowerCase();
-    return initialBankItems.filter((item) => {
-      if (item.medium !== exam.medium) return false;
-      if (item.options.length !== optionCount) return false;
-      if (subj && !item.subject.toLowerCase().includes(subj)) return false;
-      if (cls && !item.class.toLowerCase().includes(cls)) return false;
-      if (kw) {
-        const hay = `${item.text} ${item.subject} ${item.class} ${item.tags.join(" ")}`.toLowerCase();
-        if (!hay.includes(kw)) return false;
-      }
-      return true;
-    });
-  }, [bankClass, bankKeyword, bankSubject, exam.medium, initialBankItems, optionCount]);
-
-  async function handleImportFromBank() {
-    if (selectedBankIds.length === 0) return;
+  async function handleImportFromBank(selectedIds: string[], onDone: () => void) {
+    if (selectedIds.length === 0) return;
     const supabase = createClient();
     if (!supabase) return;
 
-    const chosen = initialBankItems.filter((b) => selectedBankIds.includes(b.id));
+    const chosen = initialBankItems.filter((b) => selectedIds.includes(b.id));
     if (chosen.length === 0) return;
 
     const startPos =
@@ -816,15 +591,47 @@ export function TeacherQuestionEditor({
 
     setImportingBank(false);
     if (insertErr || !inserted) {
-      setError(insertErr?.message ?? "Failed to add selected bank questions.");
+      setError(
+        insertErr?.message ??
+          t("নির্বাচিত প্রশ্নগুলো যোগ করা যায়নি।", "Failed to add selected bank questions."),
+      );
       return;
     }
 
     setQuestions((prev) => [...prev, ...inserted]);
-    setSelectedBankIds([]);
-    setMessage(`Added ${inserted.length} question(s) from Question Bank.`);
+    onDone();
+    setMessage(
+      t(
+        `Question Bank থেকে ${inserted.length}টি প্রশ্ন যোগ হয়েছে।`,
+        `Added ${inserted.length} question(s) from Question Bank.`,
+      ),
+    );
     router.refresh();
   }
+
+  const tabs: Array<{ id: SourceTab; label: string; icon?: React.ReactNode }> = [
+    { id: "manual", label: t("Manual", "Manual") },
+    {
+      id: "paste",
+      label: t("Bulk Paste", "Bulk Paste"),
+      icon: <ClipboardPaste className="h-3.5 w-3.5 text-navy shrink-0" />,
+    },
+    {
+      id: "bank",
+      label: t("Question Bank", "Question Bank"),
+      icon: <BookOpen className="h-3.5 w-3.5 text-emerald-700 shrink-0" />,
+    },
+    {
+      id: "ai",
+      label: t("AI দিয়ে", "With AI"),
+      icon: <Sparkles className="h-3.5 w-3.5 text-amber shrink-0" />,
+    },
+    {
+      id: "pdf",
+      label: t("PDF Import", "PDF Import"),
+      icon: <FileUp className="h-3.5 w-3.5 text-navy shrink-0" />,
+    },
+  ];
 
   return (
     <div className="space-y-5 sm:space-y-6">
@@ -852,17 +659,6 @@ export function TeacherQuestionEditor({
         </div>
       )}
 
-      {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-          {error}
-        </div>
-      )}
-      {message && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          {message}
-        </div>
-      )}
-
       {/* Collapsible Add Question Launcher when questions already exist */}
       {!hasAttempts && !editingId && !composerOpen && (
         <section className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm space-y-2.5">
@@ -872,61 +668,24 @@ export function TeacherQuestionEditor({
             </span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("manual");
-                setComposerOpen(true);
-              }}
-              className="inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl bg-navy px-3 py-2 text-xs font-semibold text-white hover:bg-navy-strong cursor-pointer"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              <span>Manual</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("paste");
-                setComposerOpen(true);
-              }}
-              className="inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-            >
-              <ClipboardPaste className="h-3.5 w-3.5 text-navy" />
-              <span>Bulk Paste</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("bank");
-                setComposerOpen(true);
-              }}
-              className="inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-            >
-              <BookOpen className="h-3.5 w-3.5 text-emerald-700" />
-              <span>Bank</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("ai");
-                setComposerOpen(true);
-              }}
-              className="inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-            >
-              <Sparkles className="h-3.5 w-3.5 text-amber" />
-              <span>{t("AI দিয়ে", "With AI")}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("pdf");
-                setComposerOpen(true);
-              }}
-              className="col-span-2 sm:col-span-1 inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-            >
-              <FileUp className="h-3.5 w-3.5 text-navy" />
-              <span>PDF Import</span>
-            </button>
+            {tabs.map((tab, idx) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setComposerOpen(true);
+                }}
+                className={`${idx === tabs.length - 1 ? "col-span-2 sm:col-span-1 " : ""}inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold cursor-pointer ${
+                  tab.id === "manual"
+                    ? "bg-navy text-white hover:bg-navy-strong"
+                    : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                {tab.id === "manual" ? <Plus className="h-3.5 w-3.5" /> : tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            ))}
           </div>
         </section>
       )}
@@ -944,77 +703,33 @@ export function TeacherQuestionEditor({
                   <button
                     type="button"
                     onClick={() => setComposerOpen(false)}
-                    className="text-xs font-semibold text-navy hover:underline cursor-pointer"
+                    className="min-h-[34px] px-1 text-xs font-semibold text-navy hover:underline cursor-pointer"
                   >
                     {t("Form লুকান", "Hide Form")}
                   </button>
                 </div>
               )}
-              <div className="grid grid-cols-2 sm:flex items-center gap-1.5 sm:gap-1">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("manual")}
-                  className={`inline-flex min-h-[42px] items-center justify-center rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
-                    activeTab === "manual"
-                      ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
-                      : "text-slate-600 hover:text-slate-900"
-                  }`}
-                >
-                  Manual
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("paste")}
-                  className={`inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
-                    activeTab === "paste"
-                      ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
-                      : "text-slate-600 hover:text-slate-900"
-                  }`}
-                >
-                  <ClipboardPaste className="h-3.5 w-3.5 text-navy shrink-0" />
-                  <span>Bulk Paste</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("bank")}
-                  className={`inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
-                    activeTab === "bank"
-                      ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
-                      : "text-slate-600 hover:text-slate-900"
-                  }`}
-                >
-                  <BookOpen className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
-                  <span>Question Bank</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("ai")}
-                  className={`inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
-                    activeTab === "ai"
-                      ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
-                      : "text-slate-600 hover:text-slate-900"
-                  }`}
-                >
-                  <Sparkles className="h-3.5 w-3.5 text-amber shrink-0" />
-                  <span>{t("AI দিয়ে", "With AI")}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("pdf")}
-                  className={`col-span-2 sm:col-span-1 inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer ${
-                    activeTab === "pdf"
-                      ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-sm sm:shadow-none sm:-mb-px"
-                      : "text-slate-600 hover:text-slate-900"
-                  }`}
-                >
-                  <FileUp className="h-3.5 w-3.5 text-navy shrink-0" />
-                  <span>PDF Import</span>
-                </button>
+              <div className="flex items-center gap-1.5 sm:gap-1 overflow-x-auto no-scrollbar pb-0.5 sm:pb-0">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`inline-flex min-h-[40px] sm:min-h-[42px] shrink-0 items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap cursor-pointer ${
+                      activeTab === tab.id
+                        ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-xs sm:shadow-none sm:-mb-px"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    {tab.icon}
+                    <span>{tab.label}</span>
+                  </button>
+                ))}
                 {questions.length > 0 && (
                   <button
                     type="button"
                     onClick={() => setComposerOpen(false)}
-                    className="hidden sm:inline-flex ml-auto px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 cursor-pointer"
+                    className="hidden sm:inline-flex ml-auto shrink-0 px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 cursor-pointer"
                   >
                     {t("Form লুকান", "Hide Form")}
                   </button>
@@ -1024,963 +739,126 @@ export function TeacherQuestionEditor({
           )}
 
           <div className="p-4 sm:p-6">
-            {/* TAB: Bulk Paste (No AI Key Needed) */}
             {activeTab === "paste" && !editingId && (
-              <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2.5">
-                  <div>
-                    <h2 className="text-base font-bold text-navy">
-                      {t(
-                        "Bulk Paste (কোনো AI Key ছাড়াই একসাথে প্রশ্ন যোগ করুন)",
-                        "Bulk Paste (Add multiple questions without an AI key)",
-                      )}
-                    </h2>
-                    <p className="text-xs text-slate-500">
-                      {t(
-                        `Word, Notepad বা WhatsApp থেকে ${optionCount}-option MCQ কপি-পেস্ট করুন। প্রতিটি প্রশ্নের মাঝে একটি ফাঁকা লাইন দিন (ব্যাখ্যার জন্য ঐচ্ছিক`,
-                        `Copy and paste ${optionCount}-option MCQs from Word, Notepad, or WhatsApp. Leave a blank line between questions (optional`,
-                      )}{" "}
-                      <span className="font-mono font-semibold text-slate-700">Ex: ...</span>
-                      {t(" লিখুন)।", " for explanations).")}
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => void handleCopyBulkPrompt()}
-                    className="inline-flex min-h-[38px] w-full sm:w-auto shrink-0 items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50 active:scale-[0.99] cursor-pointer"
-                  >
-                    {bulkPromptCopied ? (
-                      <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                    ) : (
-                      <Copy className="h-3.5 w-3.5 shrink-0" />
-                    )}
-                    <span>
-                      {bulkPromptCopied
-                        ? t("ফরম্যাট Prompt কপি হয়েছে", "Format Prompt Copied")
-                        : t("ফরম্যাট Prompt কপি করুন", "Copy Format Prompt")}
-                    </span>
-                  </button>
-                </div>
-
-                <textarea
-                  rows={8}
-                  value={bulkText}
-                  onChange={(e) => setBulkText(e.target.value)}
-                  placeholder={t(
-                    `1. বাংলাদেশের রাজধানী কোথায়?\nক) চট্টগ্রাম\nখ) ঢাকা\nগ) খুলনা\nঘ) রাজশাহী\nAns: খ\nEx: ঢাকা বাংলাদেশের রাজধানী ও বৃহত্তম শহর।`,
-                    `1. What is the capital of Bangladesh?\nA) Chattogram\nB) Dhaka\nC) Khulna\nD) Rajshahi\nAns: B\nEx: Dhaka is the capital and largest city of Bangladesh.`,
-                  )}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2.5 font-mono text-xs sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-                />
-
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setBulkText(
-                        t(
-                          `1. বাংলাদেশের রাজধানী কোথায়?\nক) চট্টগ্রাম\nখ) ঢাকা\nগ) খুলনা\nঘ) রাজশাহী\nAns: খ\nEx: ঢাকা বাংলাদেশের রাজধানী।\n\n2. নিউটনের গতির দ্বিতীয় সূত্র কোনটি?\nক) F = ma\nখ) E = mc²\nগ) V = IR\nঘ) PV = nRT\nAns: ক`,
-                          `1. What is the capital of Bangladesh?\nA) Chattogram\nB) Dhaka\nC) Khulna\nD) Rajshahi\nAns: B\nEx: Dhaka is the capital of Bangladesh.\n\n2. Which is Newton's second law of motion?\nA) F = ma\nB) E = mc²\nC) V = IR\nD) PV = nRT\nAns: A`,
-                        ),
-                      )
-                    }
-                    className="text-xs font-semibold text-navy hover:underline cursor-pointer"
-                  >
-                    {t("উদাহরণ বসান (Sample)", "Insert Sample")}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setError(null);
-                      const parsed = parseBulkMcqText(
-                        bulkText,
-                        optionCount,
-                        Number(exam.default_marks),
-                      );
-                      if (parsed.length === 0) {
-                        setError(
-                          t(
-                            `কোনো বৈধ ${optionCount}-option প্রশ্ন পাওয়া যায়নি। প্রতিটি প্রশ্নের নিচে ${optionCount}টি Option ও মাঝে একটি ফাঁকা লাইন আছে কি না দেখুন।`,
-                            `No valid ${optionCount}-option questions found. Make sure each question has ${optionCount} options and a blank line between questions.`,
-                          ),
-                        );
-                        return;
-                      }
-                      setDrafts((prev) => [...prev, ...parsed]);
-                      setBulkText("");
-                      setMessage(
-                        t(
-                          `${parsed.length}টি Draft তৈরি হয়েছে — নিচে যাচাই করে Save করুন।`,
-                          `Created ${parsed.length} draft(s) — review and save below.`,
-                        ),
-                      );
-                    }}
-                    className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong cursor-pointer"
-                  >
-                    <ClipboardPaste className="h-4 w-4" />
-                    <span>{t("Draft তৈরি করুন", "Create Drafts")}</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 2: Question Bank Snapshot Import */}
-            {activeTab === "bank" && !editingId && (
-              <div className="space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <h2 className="text-base font-bold text-navy">
-                      {t("Question Bank থেকে যোগ করুন", "Import from Question Bank")}
-                    </h2>
-                    <p className="text-xs text-slate-500">
-                      {t(
-                        `আপনার ও Shared Bank-এর ${exam.medium === "bn" ? "বাংলা" : "English"} ${optionCount}-option প্রশ্ন দেখানো হচ্ছে। নির্বাচিত প্রশ্নের কপি এই Exam-এ যুক্ত হবে।`,
-                        `Showing ${exam.medium === "bn" ? "Bangla" : "English"} ${optionCount}-option questions from your bank and shared bank. Selected questions will be copied into this exam.`,
-                      )}
-                    </p>
-                  </div>
-                  <Link href="/teacher/bank" className="text-xs font-semibold text-navy hover:underline">
-                    {t("Question Bank পরিচালনা →", "Manage Question Bank →")}
-                  </Link>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="relative">
-                    <Search className="pointer-events-none absolute left-3 top-3.5 sm:top-3 h-4 w-4 text-slate-400" />
-                    <input
-                      type="text"
-                      value={bankKeyword}
-                      onChange={(e) => setBankKeyword(e.target.value)}
-                      placeholder="Search keyword or tag..."
-                      className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-base sm:text-sm"
-                    />
-                  </div>
-                  <SearchableSubjectSelect
-                    value={bankSubject}
-                    onChange={setBankSubject}
-                    allowCustom={false}
-                    placeholder="All Subjects"
-                    searchPlaceholder="Search subject..."
-                  />
-                  <ClassSelect
-                    value={bankClass}
-                    onChange={setBankClass}
-                    allowCustom={false}
-                    placeholder="All Classes"
-                    searchPlaceholder="Search class..."
-                  />
-                </div>
-
-                {filteredBank.length === 0 ? (
-                  <p className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-xs text-slate-500">
-                    {t(
-                      `আপনার Question Bank-এ মিলে যায় এমন ${optionCount}-option ${exam.medium === "bn" ? "বাংলা" : "English"} প্রশ্ন পাওয়া যায়নি।`,
-                      `No matching ${exam.medium === "bn" ? "Bangla" : "English"} ${optionCount}-option questions found in the Question Bank.`,
-                    )}
-                  </p>
-                ) : (
-                  <div className="max-h-80 overflow-y-auto space-y-2 pr-1">
-                    {filteredBank.map((b) => {
-                      const checked = selectedBankIds.includes(b.id);
-                      return (
-                        <label
-                          key={b.id}
-                          className={`flex items-start gap-3 rounded-xl border p-3 cursor-pointer ${
-                            checked ? "border-navy bg-navy/5" : "border-slate-200 hover:bg-slate-50"
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={(e) => {
-                              setSelectedBankIds((prev) =>
-                                e.target.checked
-                                  ? [...prev, b.id]
-                                  : prev.filter((id) => id !== b.id),
-                              );
-                            }}
-                            className="mt-0.5 h-5 w-5 sm:h-4 sm:w-4 shrink-0 rounded border-slate-300 text-navy"
-                          />
-                          <div className="min-w-0 space-y-1 text-xs">
-                            <p className="font-semibold text-slate-900 break-words">
-                              <MathText text={b.text} />
-                            </p>
-                            <p className="text-slate-500">
-                              {b.subject || "General"} {b.class ? `• ${b.class}` : ""} •{" "}
-                              {b.visibility}
-                            </p>
-                          </div>
-                        </label>
-                      );
-                    })}
-                  </div>
-                )}
-
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    disabled={selectedBankIds.length === 0 || importingBank}
-                    onClick={handleImportFromBank}
-                    className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-50 cursor-pointer"
-                  >
-                    {importingBank ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Plus className="h-4 w-4" />
-                    )}
-                    <span>
-                      {t(
-                        `নির্বাচিত (${selectedBankIds.length}টি) যোগ করুন`,
-                        `Add Selected (${selectedBankIds.length})`,
-                      )}
-                    </span>
-                  </button>
-                </div>
-              </div>
-            )}
-            {/* TAB 1: Manual Entry (or Edit) */}
-            {(activeTab === "manual" || editingId) && (
-              <form onSubmit={handleSaveQuestion} className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-base font-bold text-navy">
-                    {editingId
-                      ? t("প্রশ্ন Edit করুন", "Edit Question")
-                      : t("Manual প্রশ্ন যোগ করুন", "Add Manual Question")}
-                  </h2>
-                  {editingId && (
-                    <button
-                      type="button"
-                      onClick={resetForm}
-                      className="min-h-[36px] px-2 text-xs font-semibold text-slate-500 hover:text-slate-800 cursor-pointer"
-                    >
-                      {t("Edit বাতিল", "Cancel Edit")}
-                    </button>
-                  )}
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="q-text" className="block text-sm font-medium text-slate-700">
-                    {t("প্রশ্নের লেখা", "Question Text")}{" "}
-                    <span className="text-xs font-normal text-slate-400">
-                      {t("($x^2 + y^2$ দিয়ে গণিতের সূত্র লেখা যাবে)", "(use $x^2 + y^2$ for math formulas)")}
-                    </span>
-                  </label>
-                  <textarea
-                    id="q-text"
-                    rows={3}
-                    required
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder={
-                      exam.medium === "bn"
-                        ? t("এখানে বাংলা বা ইংরেজিতে প্রশ্ন লিখুন...", "Enter question in Bangla or English...")
-                        : t("এখানে প্রশ্ন লিখুন...", "Enter question here...")
-                    }
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-                  />
-                  {text.includes("$") && (
-                    <div className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-800 border border-slate-200">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mr-2">
-                        Preview:
-                      </span>
-                      <MathText text={text} />
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-2.5">
-                  <span className="block text-sm font-medium text-slate-700">
-                    {t("Options (সঠিক উত্তরটি সিলেক্ট করুন)", "Options (select the correct answer)")}
-                  </span>
-                  <div className="grid gap-2.5 sm:grid-cols-2">
-                    {options.map((opt, idx) => (
-                      <div
-                        key={idx}
-                        className={`flex min-h-[44px] items-center gap-2 rounded-lg border px-2.5 py-2 ${
-                          correctIndex === idx
-                            ? "border-emerald-400 bg-emerald-50/50"
-                            : "border-slate-300 bg-white"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="correct-option"
-                          aria-label={t(
-                            `Option ${optionLabel(idx, exam.medium)} সঠিক`,
-                            `Option ${idx + 1} correct`,
-                          )}
-                          checked={correctIndex === idx}
-                          onChange={() => setCorrectIndex(idx)}
-                          className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 text-emerald-600 cursor-pointer"
-                        />
-                        <span className="font-semibold text-xs text-slate-600 w-5 text-center shrink-0">
-                          {optionLabel(idx, exam.medium)}
-                        </span>
-                        <input
-                          type="text"
-                          required
-                          value={opt}
-                          onChange={(e) => {
-                            const next = [...options];
-                            next[idx] = e.target.value;
-                            setOptions(next);
-                          }}
-                          placeholder={t(
-                            `Option ${optionLabel(idx, exam.medium)}`,
-                            `Option ${idx + 1}`,
-                          )}
-                          className="w-full bg-transparent text-base sm:text-sm text-slate-900 focus:outline-none"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <label htmlFor="q-expl" className="block text-sm font-medium text-slate-700">
-                      {t("ব্যাখ্যা / Explanation", "Explanation")}{" "}
-                      <span className="text-xs font-normal text-slate-400">
-                        ({t("ঐচ্ছিক", "optional")})
-                      </span>
-                    </label>
-                    <input
-                      id="q-expl"
-                      type="text"
-                      value={explanation}
-                      onChange={(e) => setExplanation(e.target.value)}
-                      placeholder={t(
-                        "Result প্রকাশের পর সঠিক উত্তরের নিচে দেখা যাবে",
-                        "Shown below the correct answer after results are released",
-                      )}
-                      className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label htmlFor="q-marks" className="block text-sm font-medium text-slate-700">
-                      {t("নম্বর (Marks)", "Marks")}
-                    </label>
-                    <input
-                      id="q-marks"
-                      type="number"
-                      step="0.25"
-                      min="0.25"
-                      value={marks}
-                      onChange={(e) => setMarks(e.target.value)}
-                      className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-                    />
-                  </div>
-                </div>
-
-                {!editingId && (
-                  <label className="flex min-h-[40px] items-center gap-2.5 text-xs text-slate-600 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={saveToBank}
-                      onChange={(e) => setSaveToBank(e.target.checked)}
-                      className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 rounded border-slate-300 text-navy"
-                    />
-                    <span>{t("আমার Question Bank-এও একটি কপি Save করুন", "Also save a copy to my Question Bank")}</span>
-                  </label>
-                )}
-
-                <div className="flex justify-end">
-                  <button
-                    type="submit"
-                    disabled={busy}
-                    className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
-                  >
-                    {busy ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Plus className="h-4 w-4" />
-                    )}
-                    <span>
-                      {editingId
-                        ? t("প্রশ্ন Update করুন", "Update Question")
-                        : t("প্রশ্ন যোগ করুন", "Add Question")}
-                    </span>
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* TAB 2: With AI (Teacher's Own Key) */}
-            {activeTab === "ai" && !editingId && (
-              <div className="space-y-4">
-                {!hasAiKey ? (
-                  <div className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-start gap-2.5 text-sm text-amber-950">
-                      <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-semibold">
-                          {t("প্রথমে আপনার নিজস্ব AI API Key যোগ করুন", "Add Your Own AI API Key First")}
-                        </p>
-                        <p className="text-xs text-amber-900">
-                          {t(
-                            "প্রতিটি Teacher Settings-এ গিয়ে নিজস্ব Gemini (Free tier), Groq (Free tier), OpenAI বা Anthropic Key সংরক্ষণ করতে পারেন।",
-                            "Teachers can save their own Gemini (Free tier), Groq (Free tier), OpenAI, or Anthropic API key in Settings.",
-                          )}
-                        </p>
-                      </div>
-                    </div>
-                    <Link
-                      href={`/teacher/settings?returnTo=${encodeURIComponent(`/teacher/exams/${exam.id}/questions`)}#ai-key`}
-                      className="inline-flex min-h-[40px] w-full sm:w-auto shrink-0 items-center justify-center gap-1.5 rounded-lg bg-navy px-3.5 py-2 text-xs font-semibold text-white hover:bg-navy-strong"
-                    >
-                      <KeyRound className="h-3.5 w-3.5" />
-                      <span>{t("Settings-এ API Key যোগ করুন", "Add API Key in Settings")}</span>
-                    </Link>
-                  </div>
-                ) : (
-                  <form onSubmit={handleGenerateWithAi} className="space-y-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div>
-                        <h2 className="text-base font-bold text-navy">
-                          {t(
-                            `আপনার ${aiProvider?.toUpperCase()} Key দিয়ে MCQ Draft তৈরি করুন`,
-                            `Draft MCQs Using Your ${aiProvider?.toUpperCase()} Key`,
-                          )}
-                        </h2>
-                        <p className="text-xs text-slate-500">
-                          {t(
-                            `সেটিংস: ${exam.medium === "bn" ? "বাংলা" : "English"} • ${exam.options_per_question}টি Option • প্রতিটি ${exam.default_marks} নম্বর`,
-                            `Settings: ${exam.medium === "bn" ? "Bangla" : "English"} • ${exam.options_per_question} options • ${exam.default_marks} mark(s) each`,
-                          )}
-                        </p>
-                      </div>
-                      <Link
-                        href={`/teacher/settings?returnTo=${encodeURIComponent(`/teacher/exams/${exam.id}/questions`)}#ai-key`}
-                        className="text-xs font-semibold text-navy hover:underline"
-                      >
-                        {t("API Key পরিবর্তন করুন", "Change API Key")}
-                      </Link>
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-3">
-                      <div className="space-y-1.5">
-                        <label htmlFor="ai-class" className="block text-sm font-medium text-slate-700">
-                          {t("Class / Level (শ্রেণি / লেভেল)", "Class / Level")}
-                        </label>
-                        <ClassSelect
-                          id="ai-class"
-                          value={aiClassLevel}
-                          onChange={setAiClassLevel}
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label htmlFor="ai-subj" className="block text-sm font-medium text-slate-700">
-                          {t("Subject (বিষয়)", "Subject")}
-                        </label>
-                        <SearchableSubjectSelect
-                          id="ai-subj"
-                          value={aiSubject}
-                          onChange={setAiSubject}
-                          placeholder={t("বিষয় নির্বাচন করুন", "Select Subject")}
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label htmlFor="ai-count" className="block text-sm font-medium text-slate-700">
-                          {t("কতটি প্রশ্ন তৈরি হবে (সর্বোচ্চ ১০০)", "Questions to Generate (max 100)")}
-                        </label>
-                        <input
-                          id="ai-count"
-                          type="number"
-                          min={1}
-                          max={100}
-                          value={aiCount}
-                          onChange={(e) => setAiCount(e.target.value)}
-                          className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <label htmlFor="ai-notes" className="block text-sm font-medium text-slate-700">
-                          {t("অধ্যায়, সিলেবাস বা নির্দেশনা (Prompt)", "Chapters, Syllabus, or Prompt")}
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setAiNotes(
-                              `Create ${aiCount || "10"} MCQ questions on chapters 1, 2 according to the syllabus. Difficulty: moderate.`,
-                            )
-                          }
-                          className="inline-flex min-h-[30px] items-center rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-navy hover:bg-navy/5 active:scale-95 transition cursor-pointer"
-                        >
-                          {t("Sample Prompt ব্যবহার করুন", "Use Sample Prompt")}
-                        </button>
-                      </div>
-
-                      <textarea
-                        id="ai-notes"
-                        rows={3}
-                        required
-                        value={aiNotes}
-                        onChange={(e) => setAiNotes(e.target.value)}
-                        placeholder="Create <number> MCQ questions on chapters/topics <list>. Difficulty: <easy/medium/moderate/hard>."
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-                      />
-                    </div>
-
-                    <div className="flex justify-end">
-                      <button
-                        type="submit"
-                        disabled={aiGenerating}
-                        className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
-                      >
-                        {aiGenerating ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Sparkles className="h-4 w-4 text-amber" />
-                        )}
-                        <span>
-                          {aiGenerating
-                            ? (aiProgress ?? t("Draft তৈরি হচ্ছে...", "Generating drafts..."))
-                            : t("Draft তৈরি করুন", "Generate Drafts")}
-                        </span>
-                      </button>
-                    </div>
-                  </form>
-                )}
-              </div>
-            )}
-
-            {/* TAB 3: Zero-Storage PDF Import */}
-            {activeTab === "pdf" && !editingId && (
-              <div className="space-y-4">
-                {!hasAiKey ? (
-                  <div className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-start gap-2.5 text-sm text-amber-950">
-                      <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-semibold">
-                          {t("PDF Import করতে আপনার AI API Key যোগ করুন", "Add Your AI API Key to Import PDFs")}
-                        </p>
-                        <p className="text-xs text-amber-900">
-                          {t(
-                            "PDF-এর পৃষ্ঠা আপনার Browser-এ প্রক্রিয়াজাত হয়ে সরাসরি আপনার Key দিয়ে স্ক্যান হয় (Gemini Free tier বাংলা লেখা ও Scanned/Bijoy PDF সাপোর্ট করে)।",
-                            "PDF pages are processed in your browser and scanned directly using your AI key (Gemini free tier supports both Bangla text and scanned PDFs).",
-                          )}
-                        </p>
-                      </div>
-                    </div>
-                    <Link
-                      href={`/teacher/settings?returnTo=${encodeURIComponent(`/teacher/exams/${exam.id}/questions`)}#ai-key`}
-                      className="inline-flex min-h-[40px] w-full sm:w-auto shrink-0 items-center justify-center gap-1.5 rounded-lg bg-navy px-3.5 py-2 text-xs font-semibold text-white hover:bg-navy-strong"
-                    >
-                      <KeyRound className="h-3.5 w-3.5" />
-                      <span>{t("API Key যোগ করুন", "Add API Key")}</span>
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div>
-                      <h2 className="text-base font-bold text-navy">
-                        {t(
-                          "Zero-Storage PDF Import (সর্বোচ্চ ১০ পৃষ্ঠা / ১০ MB)",
-                          "Zero-Storage PDF Import (Max 10 pages / 10 MB)",
-                        )}
-                      </h2>
-                      <p className="text-xs text-slate-600">
-                        {t(
-                          `Unicode বাংলা/English PDF সরাসরি Text হিসেবে এবং Scanned বা Bijoy PDF Image হিসেবে আপনার ${aiProvider?.toUpperCase()} Key দিয়ে পড়া হয়। কোনো PDF Server-এ Save থাকে না।`,
-                          `Unicode PDFs are parsed as text and scanned/legacy PDFs are read as images using your ${aiProvider?.toUpperCase()} key. Zero PDFs are stored on our server.`,
-                        )}
-                      </p>
-                    </div>
-
-                    <label className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-5 sm:p-6 text-center hover:border-navy hover:bg-slate-100/70 cursor-pointer">
-                      <FileUp className="h-6 w-6 text-navy" />
-                      <span className="text-sm font-semibold text-slate-800">
-                        {pdfImporting
-                          ? (pdfProgress ?? t("PDF প্রসেস হচ্ছে...", "Processing PDF..."))
-                          : t("প্রশ্নের PDF ফাইল বাছাই করুন", "Choose a Question PDF File")}
-                      </span>
-                      <span className="text-xs text-slate-500">
-                        {t(
-                          "Exam-এ Save করার আগে সব Draft আপনি যাচাই করতে পারবেন",
-                          "You can review and edit all drafts before saving them to the exam",
-                        )}
-                      </span>
-                      <input
-                        type="file"
-                        accept="application/pdf"
-                        disabled={pdfImporting}
-                        onChange={handlePdfImport}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* Draft Review Queue */}
-      {drafts.length > 0 && (
-        <section className="rounded-2xl border-2 border-amber-300 bg-amber-50/40 p-4 sm:p-6 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 className="text-lg font-bold text-navy">
-                {t(`Draft প্রশ্ন যাচাই করুন (${drafts.length}টি)`, `Review Draft Questions (${drafts.length})`)}
-              </h2>
-              <p className="text-xs text-slate-600">
-                {t(
-                  "Save করার আগে প্রতিটি প্রশ্ন ও সঠিক উত্তর যাচাই করে নিন।",
-                  "Verify each question and its correct answer before saving.",
-                )}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setDrafts([]);
-                  setEditingDraftIdx(null);
+              <BulkPasteTab
+                medium={exam.medium}
+                optionCount={optionCount}
+                defaultMarks={Number(exam.default_marks)}
+                subject={exam.subject}
+                classLevel={exam.class}
+                onError={(msg) => {
+                  setMessage(null);
+                  setError(msg);
                 }}
-                className="min-h-[36px] text-xs font-semibold text-rose-700 hover:underline cursor-pointer"
-              >
-                {t("সব Draft বাতিল করুন", "Discard All Drafts")}
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            {drafts.map((draft, dIdx) => {
-              const isEditingDraft = editingDraftIdx === dIdx;
-              return (
-                <div
-                  key={dIdx}
-                  className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 space-y-3"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold text-amber-700">Draft #{dIdx + 1}</span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setEditingDraftIdx(isEditingDraft ? null : dIdx)}
-                        className="inline-flex min-h-[32px] items-center gap-1 rounded-lg px-2.5 text-xs font-semibold text-navy hover:bg-slate-100 cursor-pointer"
-                      >
-                        <Pencil className="h-3 w-3" />
-                        <span>{isEditingDraft ? t("সম্পন্ন", "Done") : "Edit"}</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setDrafts((prev) => prev.filter((_, idx) => idx !== dIdx));
-                          setEditingDraftIdx((prev) =>
-                            prev === dIdx ? null : prev !== null && prev > dIdx ? prev - 1 : prev,
-                          );
-                        }}
-                        className="min-h-[32px] px-2 text-xs text-rose-600 hover:underline cursor-pointer"
-                      >
-                        {t("মুছুন", "Remove")}
-                      </button>
-                    </div>
-                  </div>
-
-                  {isEditingDraft ? (
-                    <>
-                      <textarea
-                        rows={3}
-                        value={draft.text}
-                        onChange={(e) => {
-                          const next = [...drafts];
-                          next[dIdx] = { ...draft, text: e.target.value };
-                          setDrafts(next);
-                        }}
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
-                      />
-
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        {draft.options.map((opt, optIdx) => (
-                          <div
-                            key={optIdx}
-                            className={`flex min-h-[44px] items-center gap-2 rounded-lg border px-2.5 py-2 ${
-                              draft.correct_index === optIdx
-                                ? "border-emerald-400 bg-emerald-50/60"
-                                : "border-slate-200"
-                            }`}
-                          >
-                            <input
-                              type="radio"
-                              name={`draft-correct-${dIdx}`}
-                              checked={draft.correct_index === optIdx}
-                              onChange={() => {
-                                const next = [...drafts];
-                                next[dIdx] = { ...draft, correct_index: optIdx };
-                                setDrafts(next);
-                              }}
-                              className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 text-emerald-600 cursor-pointer"
-                            />
-                            <span className="text-xs font-semibold text-slate-600 shrink-0">
-                              {optionLabel(optIdx, exam.medium)}
-                            </span>
-                            <input
-                              type="text"
-                              value={opt}
-                              onChange={(e) => {
-                                const next = [...drafts];
-                                const nextOpts = [...draft.options];
-                                nextOpts[optIdx] = e.target.value;
-                                next[dIdx] = { ...draft, options: nextOpts };
-                                setDrafts(next);
-                              }}
-                              className="w-full bg-transparent text-base sm:text-xs text-slate-900 focus:outline-none"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-[15px] sm:text-sm font-semibold leading-relaxed text-slate-900 break-words">
-                        <MathText text={draft.text} />
-                      </p>
-
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        {draft.options.map((opt, optIdx) => {
-                          const isCorrect = draft.correct_index === optIdx;
-                          return (
-                            <label
-                              key={optIdx}
-                              className={`flex min-h-[44px] items-center gap-2.5 rounded-lg border px-3 py-2 text-[14px] sm:text-xs cursor-pointer ${
-                                isCorrect
-                                  ? "border-emerald-400 bg-emerald-50/60 font-semibold text-emerald-950"
-                                  : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
-                              }`}
-                            >
-                              <input
-                                type="radio"
-                                name={`draft-correct-${dIdx}`}
-                                checked={isCorrect}
-                                onChange={() => {
-                                  const next = [...drafts];
-                                  next[dIdx] = { ...draft, correct_index: optIdx };
-                                  setDrafts(next);
-                                }}
-                                className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 text-emerald-600 cursor-pointer"
-                              />
-                              <span className="font-semibold text-slate-600 shrink-0">
-                                {optionLabel(optIdx, exam.medium)}
-                              </span>
-                              <span className="min-w-0 flex-1 break-words leading-relaxed">
-                                <MathText text={opt} />
-                              </span>
-                            </label>
-                          );
-                        })}
-                      </div>
-                    </>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
-            <label className="flex min-h-[40px] items-center gap-2.5 text-xs text-slate-700 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={saveDraftsToBank}
-                onChange={(e) => setSaveDraftsToBank(e.target.checked)}
-                className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 rounded border-slate-300 text-navy"
+                onDraftsAdded={(parsed) => {
+                  setError(null);
+                  setDrafts((prev) => [...prev, ...parsed]);
+                  setMessage(
+                    t(
+                      `${parsed.length}টি Draft তৈরি হয়েছে — নিচে যাচাই করে Save করুন।`,
+                      `Created ${parsed.length} draft(s) — review and save below.`,
+                    ),
+                  );
+                }}
               />
-              <span>
-                {t(
-                  "অনুমোদিত Draft-গুলো Question Bank-এও Save করুন",
-                  "Also save approved drafts to Question Bank",
-                )}
-              </span>
-            </label>
+            )}
 
-            <button
-              type="button"
-              disabled={savingDrafts}
-              onClick={handleSaveAllDrafts}
-              className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60 cursor-pointer"
-            >
-              {savingDrafts ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <CheckCircle2 className="h-4 w-4" />
-              )}
-              <span>
-                {t(
-                  `নিশ্চিত করে ${drafts.length}টি Draft Save করুন`,
-                  `Confirm & Save ${drafts.length} Draft(s)`,
-                )}
-              </span>
-            </button>
+            {activeTab === "bank" && !editingId && (
+              <BankImportTab
+                bankItems={initialBankItems}
+                examMedium={exam.medium}
+                optionCount={optionCount}
+                importingBank={importingBank}
+                onImport={(selectedIds, onDone) => void handleImportFromBank(selectedIds, onDone)}
+              />
+            )}
+
+            {(activeTab === "manual" || editingId) && (
+              <ManualQuestionForm
+                medium={exam.medium}
+                optionCount={optionCount}
+                editingId={editingId}
+                text={text}
+                options={options}
+                correctIndex={correctIndex}
+                explanation={explanation}
+                marks={marks}
+                saveToBank={saveToBank}
+                busy={busy}
+                onTextChange={setText}
+                onOptionsChange={setOptions}
+                onCorrectIndexChange={setCorrectIndex}
+                onExplanationChange={setExplanation}
+                onMarksChange={setMarks}
+                onSaveToBankChange={setSaveToBank}
+                onCancelEdit={resetForm}
+                onSubmit={handleSaveQuestion}
+              />
+            )}
+
+            {activeTab === "ai" && !editingId && (
+              <AiGeneratorTab
+                returnToPath={`/teacher/exams/${exam.id}/questions`}
+                medium={exam.medium}
+                optionCount={optionCount}
+                defaultMarks={Number(exam.default_marks)}
+                hasAiKey={hasAiKey}
+                aiProvider={aiProvider}
+                aiClassLevel={aiClassLevel}
+                aiSubject={aiSubject}
+                aiCount={aiCount}
+                aiNotes={aiNotes}
+                aiGenerating={aiGenerating}
+                aiProgress={aiProgress}
+                onClassChange={setAiClassLevel}
+                onSubjectChange={setAiSubject}
+                onCountChange={setAiCount}
+                onNotesChange={setAiNotes}
+                onGenerate={handleGenerateWithAi}
+              />
+            )}
+
+            {activeTab === "pdf" && !editingId && (
+              <PdfImportTab
+                returnToPath={`/teacher/exams/${exam.id}/questions`}
+                hasAiKey={hasAiKey}
+                aiProvider={aiProvider}
+                pdfImporting={pdfImporting}
+                pdfProgress={pdfProgress}
+                onPdfSelect={handlePdfImport}
+              />
+            )}
           </div>
         </section>
       )}
 
-      {/* Existing Question List */}
-      <section className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-base font-bold text-slate-900">
-            {t(`প্রশ্নসমূহ (${questions.length}টি)`, `Questions (${questions.length})`)}
-          </h2>
-          {questions.some((q) => !q.bank_id) && (
-            <button
-              type="button"
-              disabled={savingToBankKey !== null || busy}
-              onClick={() => void handleSaveQuestionsToBank(questions, "all")}
-              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
-            >
-              {savingToBankKey === "all" ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <BookOpen className="h-3.5 w-3.5" />
-              )}
-              <span>
-                {t(
-                  `সবগুলো Bank-এ Save করুন (${questions.filter((q) => !q.bank_id).length})`,
-                  `Save All to Bank (${questions.filter((q) => !q.bank_id).length})`,
-                )}
-              </span>
-            </button>
-          )}
-        </div>
+      <DraftReviewQueue
+        drafts={drafts}
+        medium={exam.medium}
+        editingDraftIdx={editingDraftIdx}
+        saveDraftsToBank={saveDraftsToBank}
+        savingDrafts={savingDrafts}
+        onSetDrafts={setDrafts}
+        onSetEditingDraftIdx={setEditingDraftIdx}
+        onSaveDraftsToBankChange={setSaveDraftsToBank}
+        onSaveAllDrafts={() => void handleSaveAllDrafts()}
+        onDiscardAll={() => {
+          setDrafts([]);
+          setEditingDraftIdx(null);
+        }}
+      />
 
-        {questions.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-            {t(
-              "এখনো কোনো প্রশ্ন যোগ করা হয়নি। Manual, AI Key অথবা PDF Import দিয়ে প্রশ্ন যোগ করুন।",
-              "No questions added yet. Add questions using Manual entry, AI Key, or PDF Import.",
-            )}
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {questions.map((q, idx) => (
-              <div
-                key={q.id}
-                className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 space-y-3"
-              >
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-semibold text-slate-500">
-                      {t(`প্রশ্ন ${idx + 1} • ${q.marks} নম্বর`, `Question ${idx + 1} • ${q.marks} pt(s)`)}
-                    </span>
-
-                    <div className="flex items-center gap-1 shrink-0">
-                      {q.bank_id ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 mr-1">
-                          <BookOpen className="h-3 w-3" />
-                          <span>{t("Bank-এ আছে", "In Bank")}</span>
-                        </span>
-                      ) : (
-                        <button
-                          type="button"
-                          disabled={savingToBankKey !== null || busy}
-                          onClick={() => void handleSaveQuestionsToBank([q], q.id)}
-                          title={t("Question Bank-এ Save করুন", "Save to Question Bank")}
-                          className="inline-flex h-8 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 text-[11px] font-semibold text-navy hover:bg-slate-50 disabled:opacity-40 cursor-pointer mr-1"
-                        >
-                          {savingToBankKey === q.id ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <BookOpen className="h-3 w-3" />
-                          )}
-                          <span className="hidden sm:inline">
-                            {t("Bank-এ Save", "Save to Bank")}
-                          </span>
-                        </button>
-                      )}
-                      {!hasAttempts && (
-                        <>
-                          <button
-                            type="button"
-                            disabled={idx === 0 || busy}
-                            onClick={() => handleMove(idx, -1)}
-                            title="Move up"
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
-                          >
-                            <ArrowUp className="h-4 w-4" />
-                          </button>
-                          <button
-                            type="button"
-                            disabled={idx === questions.length - 1 || busy}
-                            onClick={() => handleMove(idx, 1)}
-                            title="Move down"
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
-                          >
-                            <ArrowDown className="h-4 w-4" />
-                          </button>
-                        </>
-                      )}
-                      <button
-                        type="button"
-                        disabled={busy}
-                        onClick={() => startEdit(q)}
-                        title="Edit"
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 cursor-pointer"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </button>
-                      {!hasAttempts && (
-                        <button
-                          type="button"
-                          disabled={busy}
-                          onClick={() => setPendingDeleteQuestion(q)}
-                          title="Delete"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-rose-600 hover:bg-rose-50 cursor-pointer"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <p className="text-[15px] sm:text-sm font-semibold text-slate-900 leading-relaxed break-words">
-                    <MathText text={q.text} />
-                  </p>
-                </div>
-
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {q.options.map((opt, optIdx) => {
-                    const isCorrect = optIdx === q.correct_index;
-                    return (
-                      <div
-                        key={optIdx}
-                        className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 sm:py-2 text-[13px] sm:text-xs ${
-                          isCorrect
-                            ? "border-emerald-300 bg-emerald-50 font-semibold text-emerald-900"
-                            : "border-slate-200 bg-slate-50 text-slate-700"
-                        }`}
-                      >
-                        {isCorrect && (
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                        )}
-                        <span className="min-w-0 break-words">
-                          {optionLabel(optIdx, exam.medium)}) <MathText text={opt} />
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {q.explanation && (
-                  <p className="text-xs text-slate-500">
-                    <span className="font-semibold">Explanation:</span>{" "}
-                    <MathText text={q.explanation} />
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+      <ExamQuestionList
+        questions={questions}
+        medium={exam.medium}
+        hasAttempts={hasAttempts}
+        busy={busy}
+        savingToBankKey={savingToBankKey}
+        onSaveToBank={(targets, key) => void handleSaveQuestionsToBank(targets, key)}
+        onMove={(idx, dir) => void handleMove(idx, dir)}
+        onEdit={startEdit}
+        onRequestDelete={setPendingDeleteQuestion}
+      />
 
       <ConfirmModal
         open={pendingDeleteQuestion !== null}

@@ -6,18 +6,12 @@ import { MathText } from "@/components/math-text";
 import { Navbar } from "@/components/navbar";
 import { pickText } from "@/lib/i18n";
 import { getServerLang } from "@/lib/i18n-server";
+import { optionLabel } from "@/lib/mcq";
 import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
 import type { Exam, Question } from "@/lib/types";
 
 interface ReviewPageProps {
   params: Promise<{ id: string }>;
-}
-
-function optionLabel(index: number, medium: "bn" | "en"): string {
-  if (medium === "bn") {
-    return ["ক", "খ", "গ", "ঘ", "ঙ", "চ"][index] ?? String(index + 1);
-  }
-  return String.fromCharCode(65 + index);
 }
 
 export default async function ExamReviewPage({ params }: ReviewPageProps) {

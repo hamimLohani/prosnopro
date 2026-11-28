@@ -1,6 +1,7 @@
 "use client";
 
 import { formatTimeTaken } from "@/lib/analytics";
+import { optionLabel } from "@/lib/mcq";
 import type { AttemptDetail, Exam, Question } from "@/lib/types";
 
 function triggerDownload(blob: Blob, fileName: string) {
@@ -21,13 +22,6 @@ function safeSlug(text: string): string {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "") || "exam"
   );
-}
-
-function optionLabel(index: number, medium: "bn" | "en"): string {
-  if (medium === "bn") {
-    return ["ক", "খ", "গ", "ঘ", "ঙ", "চ"][index] ?? String(index + 1);
-  }
-  return String.fromCharCode(65 + index);
 }
 
 function csvCell(value: string | number | null | undefined): string {

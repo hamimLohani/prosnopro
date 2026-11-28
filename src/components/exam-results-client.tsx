@@ -17,6 +17,7 @@ import { MathText } from "@/components/math-text";
 import { StatusToast } from "@/components/status-toast";
 import { formatTimeTaken, type ExamAnalyticsSummary } from "@/lib/analytics";
 import { pickText } from "@/lib/i18n";
+import { formatAttemptStatus, optionLabel } from "@/lib/mcq";
 import { createClient } from "@/lib/supabase/client";
 import type { AttemptDetail, Exam, Question } from "@/lib/types";
 
@@ -25,13 +26,6 @@ interface ExamResultsClientProps {
   questions: Question[];
   attempts: AttemptDetail[];
   analytics: ExamAnalyticsSummary;
-}
-
-function optionLabel(index: number, medium: "bn" | "en"): string {
-  if (medium === "bn") {
-    return ["ক", "খ", "গ", "ঘ", "ঙ", "চ"][index] ?? String(index + 1);
-  }
-  return String.fromCharCode(65 + index);
 }
 
 export function ExamResultsClient({
@@ -105,12 +99,6 @@ export function ExamResultsClient({
 
   return (
     <div className="space-y-5 sm:space-y-6">
-      {statusMessage && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          {statusMessage}
-        </div>
-      )}
-
       {/* Manual Release Banner */}
       {exam.result_release === "manual" && (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
@@ -270,7 +258,7 @@ export function ExamResultsClient({
                         <p className="text-xs text-slate-500">
                           {a.student_roll ? `Roll: ${a.student_roll}` : t("Roll নেই", "No roll")} •{" "}
                           {formatTimeTaken(a.started_at, a.submitted_at)} •{" "}
-                          <span className="capitalize">{a.status.replace("_", " ")}</span>
+                          <span>{formatAttemptStatus(a.status, lang)}</span>
                         </p>
                       </div>
                       <div className="shrink-0 text-right">
@@ -399,8 +387,8 @@ export function ExamResultsClient({
                             {formatTimeTaken(a.started_at, a.submitted_at)}
                           </td>
                           <td className="py-3 pr-4">
-                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs capitalize text-slate-700">
-                              {a.status.replace("_", " ")}
+                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700">
+                              {formatAttemptStatus(a.status, lang)}
                             </span>
                           </td>
                           <td className="py-3 pr-4 text-xs text-slate-600">

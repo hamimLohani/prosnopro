@@ -3,7 +3,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { SetupBanner } from "@/components/setup-banner";
-import { SignOutButton } from "@/components/sign-out-button";
 import { TeacherSettingsForm } from "@/components/teacher-settings-form";
 import { isValidProvider } from "@/lib/ai/providers";
 import { isEncryptionConfigured } from "@/lib/crypto";
@@ -103,9 +102,6 @@ export default async function TeacherSettingsPage({ searchParams }: TeacherSetti
               <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-700" />
               <span>Privacy Notice</span>
             </Link>
-            <div className="col-span-2 sm:hidden">
-              <SignOutButton className="w-full min-h-[42px] rounded-xl border-rose-200 text-rose-700 hover:bg-rose-50" />
-            </div>
           </div>
         </section>
       </main>

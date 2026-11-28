@@ -5,19 +5,13 @@ import { PrintExportActions } from "@/components/print-export-actions";
 import { computeExamAnalytics, formatTimeTaken } from "@/lib/analytics";
 import { pickText } from "@/lib/i18n";
 import { getServerLang } from "@/lib/i18n-server";
+import { formatAttemptStatus, optionLabel } from "@/lib/mcq";
 import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
 import type { AttemptDetail, Exam, Question } from "@/lib/types";
 
 interface PrintPageProps {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ mode?: string }>;
-}
-
-function optionLabel(index: number, medium: "bn" | "en"): string {
-  if (medium === "bn") {
-    return ["ক", "খ", "গ", "ঘ", "ঙ", "চ"][index] ?? String(index + 1);
-  }
-  return String.fromCharCode(65 + index);
 }
 
 export default async function ExamPrintPage({ params, searchParams }: PrintPageProps) {
@@ -72,27 +66,27 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
           <div className="flex flex-wrap items-center gap-2">
             <Link
               href={`/teacher/exams/${exam.id}/print?mode=paper`}
-              className={`inline-flex min-h-[34px] items-center rounded-lg px-3 py-1.5 font-semibold ${
+              className={`inline-flex min-h-[38px] sm:min-h-[34px] items-center rounded-lg px-3 py-1.5 font-semibold ${
                 mode === "paper" ? "bg-navy text-white" : "bg-slate-100 text-slate-700"
               }`}
             >
-              Question Paper
+              {t("প্রশ্নপত্র", "Question Paper")}
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}/print?mode=key`}
-              className={`inline-flex min-h-[34px] items-center rounded-lg px-3 py-1.5 font-semibold ${
+              className={`inline-flex min-h-[38px] sm:min-h-[34px] items-center rounded-lg px-3 py-1.5 font-semibold ${
                 mode === "key" ? "bg-navy text-white" : "bg-slate-100 text-slate-700"
               }`}
             >
-              Answer Key
+              {t("উত্তরপত্র", "Answer Key")}
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}/print?mode=results`}
-              className={`inline-flex min-h-[34px] items-center rounded-lg px-3 py-1.5 font-semibold ${
+              className={`inline-flex min-h-[38px] sm:min-h-[34px] items-center rounded-lg px-3 py-1.5 font-semibold ${
                 mode === "results" ? "bg-navy text-white" : "bg-slate-100 text-slate-700"
               }`}
             >
-              Results Sheet
+              {t("Result শিট", "Results Sheet")}
             </Link>
           </div>
           <Link
@@ -115,17 +109,24 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
             <p className="text-xs sm:text-sm text-slate-700">
               {exam.class ? `${exam.class} • ` : ""}
               {exam.subject || "General"} •{" "}
-              {exam.medium === "bn" ? t("বাংলা", "Bangla") : "English"} • Time:{" "}
-              {exam.duration_minutes} min • Total Marks: {totalMarks}
-              {exam.negative_marking ? ` • Negative: -${exam.negative_value}` : ""}
+              {exam.medium === "bn" ? t("বাংলা", "Bangla") : "English"} •{" "}
+              {t(`সময়: ${exam.duration_minutes} মি.`, `Time: ${exam.duration_minutes} min`)} •{" "}
+              {t(`মোট নম্বর: ${totalMarks}`, `Total Marks: ${totalMarks}`)}
+              {exam.negative_marking
+                ? t(` • নেগেটিভ: -${exam.negative_value}`, ` • Negative: -${exam.negative_value}`)
+                : ""}
             </p>
             <p className="text-xs text-slate-500 mt-0.5">
-              Teacher: {ctx.profile.name} ({ctx.teacherProfile?.teacher_code ?? ""}) • Exam Code:{" "}
-              {exam.code}
+              {t("শিক্ষক:", "Teacher:")} {ctx.profile.name} ({ctx.teacherProfile?.teacher_code ?? ""}) •{" "}
+              {t("Exam Code:", "Exam Code:")} {exam.code}
             </p>
           </div>
           <span className="shrink-0 rounded border border-slate-400 px-2.5 py-1 font-mono text-xs font-bold uppercase text-slate-800">
-            {mode === "key" ? "ANSWER KEY" : mode === "results" ? "RESULTS" : "QUESTION PAPER"}
+            {mode === "key"
+              ? t("উত্তরপত্র", "ANSWER KEY")
+              : mode === "results"
+                ? t("ফলাফল", "RESULTS")
+                : t("প্রশ্নপত্র", "QUESTION PAPER")}
           </span>
         </header>
 
@@ -134,21 +135,21 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
             {analytics && (
               <div className="grid grid-cols-2 sm:grid-cols-4 print:grid-cols-4 gap-2.5 sm:gap-3 text-center text-xs">
                 <div className="rounded border border-slate-300 p-2.5">
-                  <div className="text-slate-500">Submitted</div>
+                  <div className="text-slate-500">{t("জমা হয়েছে", "Submitted")}</div>
                   <div className="text-base font-bold">{analytics.submittedCount}</div>
                 </div>
                 <div className="rounded border border-slate-300 p-2.5">
-                  <div className="text-slate-500">Average</div>
+                  <div className="text-slate-500">{t("গড়", "Average")}</div>
                   <div className="text-base font-bold">
                     {analytics.averageScore ?? "—"} ({analytics.averagePercentage ?? 0}%)
                   </div>
                 </div>
                 <div className="rounded border border-slate-300 p-2.5">
-                  <div className="text-slate-500">Highest</div>
+                  <div className="text-slate-500">{t("সর্বোচ্চ", "Highest")}</div>
                   <div className="text-base font-bold">{analytics.highestScore ?? "—"}</div>
                 </div>
                 <div className="rounded border border-slate-300 p-2.5">
-                  <div className="text-slate-500">Lowest</div>
+                  <div className="text-slate-500">{t("সর্বনিম্ন", "Lowest")}</div>
                   <div className="text-base font-bold">{analytics.lowestScore ?? "—"}</div>
                 </div>
               </div>
@@ -172,8 +173,7 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
                           #{idx + 1} {a.student_name}
                         </p>
                         <p className="text-slate-500">
-                          Roll/ID: {a.student_roll ?? "—"} •{" "}
-                          <span className="capitalize">{a.status.replace("_", " ")}</span>
+                          Roll/ID: {a.student_roll ?? "—"} • {formatAttemptStatus(a.status, lang)}
                         </p>
                       </div>
                       <div className="text-right shrink-0">
@@ -186,8 +186,12 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
                       </div>
                     </div>
                     <div className="flex items-center justify-between border-t border-slate-200 pt-1.5 text-[11px] text-slate-500">
-                      <span>Time: {formatTimeTaken(a.started_at, a.submitted_at)}</span>
-                      <span>Switches: {a.violation_counts?.tab_switches ?? 0}</span>
+                      <span>
+                        {t("সময়:", "Time:")} {formatTimeTaken(a.started_at, a.submitted_at)}
+                      </span>
+                      <span>
+                        {t("ট্যাব সুইচ:", "Switches:")} {a.violation_counts?.tab_switches ?? 0}
+                      </span>
                     </div>
                   </div>
                 );
@@ -200,13 +204,13 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
                 <thead>
                   <tr className="border-b-2 border-slate-800">
                     <th className="py-2 pr-3">#</th>
-                    <th className="py-2 pr-3">Name</th>
-                    <th className="py-2 pr-3">Roll / ID</th>
-                    <th className="py-2 pr-3">Status</th>
-                    <th className="py-2 pr-3">Score</th>
+                    <th className="py-2 pr-3">{t("নাম", "Name")}</th>
+                    <th className="py-2 pr-3">{t("রোল / আইডি", "Roll / ID")}</th>
+                    <th className="py-2 pr-3">{t("অবস্থা", "Status")}</th>
+                    <th className="py-2 pr-3">{t("স্কোর", "Score")}</th>
                     <th className="py-2 pr-3">%</th>
-                    <th className="py-2 pr-3">Time</th>
-                    <th className="py-2">Switches</th>
+                    <th className="py-2 pr-3">{t("সময়", "Time")}</th>
+                    <th className="py-2">{t("ট্যাব সুইচ", "Switches")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
@@ -220,7 +224,7 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
                         <td className="py-2 pr-3">{idx + 1}</td>
                         <td className="py-2 pr-3 font-semibold">{a.student_name}</td>
                         <td className="py-2 pr-3">{a.student_roll ?? "—"}</td>
-                        <td className="py-2 pr-3 capitalize">{a.status.replace("_", " ")}</td>
+                        <td className="py-2 pr-3">{formatAttemptStatus(a.status, lang)}</td>
                         <td className="py-2 pr-3 font-semibold">
                           {a.score !== null && a.total_marks !== null
                             ? `${a.score} / ${a.total_marks}`
@@ -240,7 +244,8 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
           <div className="space-y-5">
             {exam.instructions && mode === "paper" && (
               <p className="rounded border border-slate-300 bg-slate-50 p-3 text-xs text-slate-700">
-                <span className="font-bold">Instructions:</span> {exam.instructions}
+                <span className="font-bold">{t("নির্দেশনা:", "Instructions:")}</span>{" "}
+                {exam.instructions}
               </p>
             )}
 
@@ -271,11 +276,11 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
                   {mode === "key" && (
                     <div className="pl-4 text-xs text-emerald-800 space-y-0.5">
                       <p className="font-semibold">
-                        Correct: {optionLabel(q.correct_index, exam.medium)}
+                        {t("সঠিক উত্তর:", "Correct:")} {optionLabel(q.correct_index, exam.medium)}
                       </p>
                       {q.explanation && (
                         <p className="text-slate-600">
-                          Explanation: <MathText text={q.explanation} />
+                          {t("ব্যাখ্যা:", "Explanation:")} <MathText text={q.explanation} />
                         </p>
                       )}
                     </div>
@@ -287,7 +292,7 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
         )}
 
         <footer className="mt-8 border-t border-slate-300 pt-3 text-center text-xs font-medium text-slate-500">
-          Prepared by ProsnoPro
+          {t("ProsnoPro দ্বারা প্রস্তুতকৃত", "Prepared by ProsnoPro")}
         </footer>
       </article>
     </div>

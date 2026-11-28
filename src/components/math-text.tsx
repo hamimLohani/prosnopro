@@ -59,7 +59,7 @@ export function MathText({ text, className = "" }: MathTextProps) {
           return (
             <span
               key={idx}
-              className="inline-block max-w-full overflow-x-auto align-middle"
+              className={part.displayMode ? "my-1 block max-w-full overflow-x-auto" : "inline"}
               dangerouslySetInnerHTML={{ __html: html }}
             />
           );

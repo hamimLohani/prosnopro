@@ -5,6 +5,7 @@ import { MathText } from "@/components/math-text";
 import { Navbar } from "@/components/navbar";
 import { pickText } from "@/lib/i18n";
 import { getServerLang } from "@/lib/i18n-server";
+import { formatAttemptStatus, optionLabel } from "@/lib/mcq";
 import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
 import type { AttemptStatus, ExamMedium, ResultReleaseMode } from "@/lib/types";
 
@@ -20,13 +21,6 @@ interface ResultQuestionDetail {
   chosen_index: number | null;
   correct_index: number | null;
   explanation: string | null;
-}
-
-function optionLabel(index: number, medium: ExamMedium): string {
-  if (medium === "bn") {
-    return ["ক", "খ", "গ", "ঘ", "ঙ", "চ"][index] ?? String(index + 1);
-  }
-  return String.fromCharCode(65 + index);
 }
 
 export default async function StudentResultDetailPage({ params }: ResultDetailPageProps) {
@@ -113,7 +107,7 @@ export default async function StudentResultDetailPage({ params }: ResultDetailPa
                 <span className="text-lg font-semibold text-white">/ {attempt.total_marks}</span>
               </p>
               <p className="mt-1 text-xs text-slate-300">
-                Status: {attempt.status.replace("_", " ")}
+                {t("অবস্থা:", "Status:")} {formatAttemptStatus(attempt.status, lang)}
                 {attempt.submitted_at
                   ? ` • ${t("Submit:", "Submitted:")} ${new Date(attempt.submitted_at).toLocaleString()}`
                   : ""}

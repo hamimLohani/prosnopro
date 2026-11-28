@@ -28,14 +28,19 @@ export default async function TeacherBankPage() {
   if (ctx.profile.role !== "teacher") redirect("/student");
 
   const supabase = await createClient();
-  const { data: items } = supabase
-    ? await supabase
-        .from("question_bank")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(1000)
-        .returns<QuestionBankItem[]>()
-    : { data: [] };
+  const [{ data: items }, { data: aiStatusRaw }] = supabase
+    ? await Promise.all([
+        supabase
+          .from("question_bank")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(1000)
+          .returns<QuestionBankItem[]>(),
+        supabase.rpc("get_teacher_ai_status"),
+      ])
+    : [{ data: [] }, { data: null }];
+
+  const aiStatus = (aiStatusRaw ?? {}) as { ai_provider?: string | null; has_key?: boolean };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -56,7 +61,12 @@ export default async function TeacherBankPage() {
           </Link>
         </div>
 
-        <QuestionBankManager teacherId={ctx.userId} initialItems={items ?? []} />
+        <QuestionBankManager
+          teacherId={ctx.userId}
+          initialItems={items ?? []}
+          hasAiKey={Boolean(aiStatus.has_key)}
+          aiProvider={aiStatus.ai_provider ?? null}
+        />
       </main>
     </div>
   );

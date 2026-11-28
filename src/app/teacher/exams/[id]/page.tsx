@@ -1,27 +1,18 @@
 import { BarChart3, Clock, Edit3, Eye, HelpCircle, Printer, Radio, Settings2, Users } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { ExamAttemptsPreview, type ExamAttemptPreviewRow } from "@/components/exam-attempts-preview";
 import { ExamLifecycleActions } from "@/components/exam-lifecycle-actions";
 import { Navbar } from "@/components/navbar";
 import { TeacherCodeCopy } from "@/components/teacher-code-copy";
+import { ExamStatusBadge } from "@/components/ui/primitives";
 import { pickText } from "@/lib/i18n";
 import { getServerLang } from "@/lib/i18n-server";
 import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
-import type { AttemptStatus, Exam } from "@/lib/types";
+import type { Exam } from "@/lib/types";
 
 interface ExamDetailPageProps {
   params: Promise<{ id: string }>;
-}
-
-interface AttemptSummaryRow {
-  id: string;
-  student_name: string;
-  student_roll: string | null;
-  status: AttemptStatus;
-  started_at: string;
-  submitted_at: string | null;
-  score: number | null;
-  total_marks: number | null;
 }
 
 export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
@@ -52,7 +43,7 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
     .select("id, student_name, student_roll, status, started_at, submitted_at, score, total_marks")
     .eq("exam_id", exam.id)
     .order("started_at", { ascending: false })
-    .returns<AttemptSummaryRow[]>();
+    .returns<ExamAttemptPreviewRow[]>();
 
   const attemptList = attempts ?? [];
   const teacherCode = ctx.teacherProfile?.teacher_code ?? "";
@@ -64,21 +55,7 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span
-                className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                  exam.status === "published"
-                    ? "bg-emerald-100 text-emerald-800"
-                    : exam.status === "closed"
-                      ? "bg-slate-200 text-slate-700"
-                      : "bg-amber-100 text-amber-900"
-                }`}
-              >
-                {exam.status === "published"
-                  ? "Published"
-                  : exam.status === "closed"
-                    ? "Closed"
-                    : "Draft"}
-              </span>
+              <ExamStatusBadge status={exam.status} lang={lang} />
               <span className="text-xs text-slate-500">
                 {exam.class ? `${exam.class} • ` : ""}
                 {exam.subject || "General"} •{" "}
@@ -171,14 +148,14 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
               className="inline-flex min-h-[44px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               <Eye className="h-4 w-4 shrink-0" />
-              <span>Preview</span>
+              <span>{t("প্রিভিউ", "Preview")}</span>
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}/monitor`}
               className="inline-flex min-h-[44px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               <Radio className="h-4 w-4 shrink-0 text-emerald-600" />
-              <span>Monitor</span>
+              <span>{t("লাইভ মনিটর", "Monitor")}</span>
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}/results`}
@@ -195,7 +172,7 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
               className="inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
             >
               <Settings2 className="h-3.5 w-3.5 shrink-0" />
-              <span>Exam Settings</span>
+              <span>{t("Exam সেটিংস", "Exam Settings")}</span>
             </Link>
             <Link
               href={`/teacher/exams/${exam.id}/print?mode=paper`}
@@ -248,84 +225,7 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
         </section>
 
         {/* Attempts List Preview */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-base sm:text-lg font-bold text-navy">
-              {t("Student-দের অংশগ্রহণ", "Student Attempts")}
-            </h2>
-            <Link
-              href={`/teacher/exams/${exam.id}/results`}
-              className="text-xs font-semibold text-navy hover:underline"
-            >
-              {t("সম্পূর্ণ Result ও Export →", "Full Results & Export →")}
-            </Link>
-          </div>
-
-          {attemptList.length === 0 ? (
-            <p className="text-sm text-slate-500">
-              {t(
-                "এখনো কোনো Student এই Exam-এ অংশগ্রহণ করেনি।",
-                "No students have joined this exam yet.",
-              )}
-            </p>
-          ) : (
-            <>
-              {/* Mobile Attempt Cards */}
-              <div className="divide-y divide-slate-100 sm:hidden">
-                {attemptList.map((a) => (
-                  <div key={a.id} className="flex items-center justify-between gap-3 py-3 text-sm">
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold text-slate-900">{a.student_name}</p>
-                      <p className="text-xs text-slate-500">
-                        {a.student_roll ? `Roll: ${a.student_roll}` : t("Roll নেই", "No roll")} •{" "}
-                        <span className="capitalize">{a.status.replace("_", " ")}</span>
-                      </p>
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <span className="font-bold text-navy">
-                        {a.score !== null && a.total_marks !== null
-                          ? `${a.score}/${a.total_marks}`
-                          : t("চলমান", "In progress")}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Desktop Attempts Table */}
-              <div className="hidden sm:block overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-200 text-xs uppercase text-slate-500">
-                      <th className="py-2 pr-4">Student</th>
-                      <th className="py-2 pr-4">Roll / ID</th>
-                      <th className="py-2 pr-4">Status</th>
-                      <th className="py-2 pr-4">Score</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {attemptList.map((a) => (
-                      <tr key={a.id}>
-                        <td className="py-2.5 pr-4 font-medium text-slate-900">{a.student_name}</td>
-                        <td className="py-2.5 pr-4 text-slate-600">{a.student_roll ?? "—"}</td>
-                        <td className="py-2.5 pr-4">
-                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium capitalize text-slate-700">
-                            {a.status.replace("_", " ")}
-                          </span>
-                        </td>
-                        <td className="py-2.5 pr-4 font-semibold text-slate-900">
-                          {a.score !== null && a.total_marks !== null
-                            ? `${a.score} / ${a.total_marks}`
-                            : t("চলমান", "In progress")}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          )}
-        </section>
+        <ExamAttemptsPreview examId={exam.id} attempts={attemptList} />
       </main>
     </div>
   );

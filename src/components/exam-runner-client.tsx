@@ -1,24 +1,15 @@
 "use client";
 
-import {
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
-  CloudOff,
-  CloudUpload,
-  Flag,
-  Grid,
-  Loader2,
-  Send,
-  ShieldAlert,
-} from "lucide-react";
+import { AlertTriangle, Flag, Loader2, Send } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ConfirmModal } from "@/components/confirm-modal";
+import { ExamRunnerHeader, type RunnerSyncState } from "@/components/exam-runner/exam-runner-header";
+import { ExamSubmitModal, ExamTakeoverModal } from "@/components/exam-runner/exam-runner-modals";
 import { useLang } from "@/components/language-provider";
 import { MathText } from "@/components/math-text";
 import { pickText } from "@/lib/i18n";
+import { optionLabel } from "@/lib/mcq";
 import type { ExamMedium, StudentExamQuestion, ViolationCounts } from "@/lib/types";
 
 interface LocalizedMsg {
@@ -56,20 +47,13 @@ interface ExamRunnerClientProps {
   examId: string;
 }
 
-function optionLabel(index: number, medium: ExamMedium): string {
-  if (medium === "bn") {
-    return ["ক", "খ", "গ", "ঘ", "ঙ", "চ"][index] ?? String(index + 1);
-  }
-  return String.fromCharCode(65 + index);
-}
-
-function formatRemaining(totalSec: number): string {
-  const s = Math.max(0, totalSec);
-  const hrs = Math.floor(s / 3600);
-  const mins = Math.floor((s % 3600) / 60);
-  const secs = s % 60;
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return hrs > 0 ? `${hrs}:${pad(mins)}:${pad(secs)}` : `${pad(mins)}:${pad(secs)}`;
+function escapeXml(raw: string): string {
+  return raw
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
@@ -90,7 +74,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [flaggedIds, setFlaggedIds] = useState<Record<string, boolean>>({});
   const [remainingSeconds, setRemainingSeconds] = useState<number>(0);
-  const [syncState, setSyncState] = useState<"synced" | "unsaved" | "syncing" | "offline">("synced");
+  const [syncState, setSyncState] = useState<RunnerSyncState>("synced");
   const [showNavDrawer, setShowNavDrawer] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -513,10 +497,21 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
     [answers, questions],
   );
 
-  const watermarkText = useMemo(() => {
+  const watermarkBg = useMemo(() => {
     const rollPart = studentRoll ? ` • ${studentRoll}` : "";
-    return `${studentName}${rollPart}`;
+    const label = escapeXml(`${studentName}${rollPart}`.slice(0, 42));
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="230" height="145" viewBox="0 0 230 145"><g transform="translate(115 72) rotate(-18)" fill="#162456" text-anchor="middle" font-family="system-ui, sans-serif"><text y="-4" font-size="11" font-weight="800" letter-spacing="1.4">PROSNOPRO</text><text y="12" font-size="10" font-weight="600">${label}</text></g></svg>`;
+    return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
   }, [studentName, studentRoll]);
+
+  useEffect(() => {
+    if (!showNavDrawer) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setShowNavDrawer(false);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [showNavDrawer]);
 
   if (loading) {
     return (
@@ -576,235 +571,45 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
       </div>
 
       <div className="no-print relative min-h-screen select-none [-webkit-touch-callout:none] pb-32 sm:pb-12">
-        {/* Dense repeating ProsnoPro + student identity watermark */}
+        {/* Lightweight CSS repeating ProsnoPro + student identity watermark */}
         <div
           aria-hidden="true"
-          className="pointer-events-none fixed inset-0 z-10 overflow-hidden opacity-[0.07]"
-        >
-          <div className="grid h-full w-full -rotate-12 scale-125 grid-cols-3 sm:grid-cols-5 gap-x-3 gap-y-5 sm:gap-x-5 sm:gap-y-7 p-2">
-            {Array.from({ length: 60 }).map((_, i) => (
-              <div
-                key={i}
-                className={`flex flex-col items-center justify-center text-center leading-tight ${
-                  i % 2 === 1 ? "translate-x-3" : ""
-                }`}
-              >
-                <span className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-navy">
-                  ProsnoPro
-                </span>
-                <span className="max-w-[125px] sm:max-w-[165px] truncate text-[9px] sm:text-[11px] font-semibold text-navy">
-                  {watermarkText}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+          style={{ backgroundImage: watermarkBg, backgroundRepeat: "repeat" }}
+          className="pointer-events-none fixed inset-0 z-10 opacity-[0.07]"
+        />
 
-        {/* Session Takeover Modal */}
-        {takenOver && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-4">
-            <div className="w-full max-w-md rounded-2xl bg-white p-5 sm:p-6 shadow-xl space-y-4 text-center">
-              <ShieldAlert className="mx-auto h-10 w-10 text-rose-600" />
-              <h2 className="text-xl font-bold text-slate-900">
-                {t("অন্য জায়গায় Session চালু হয়েছে", "Session Active Elsewhere")}
-              </h2>
-              <p className="text-sm text-slate-600">
-                {t(
-                  "এই Exam-টি অন্য একটি Browser tab বা ডিভাইসে খোলা হয়েছে, তাই এই উইন্ডোটি লক করা হয়েছে।",
-                  "This exam was opened in another browser tab or device, so this window has been locked.",
-                )}
-              </p>
-              <Link
-                href="/student"
-                className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center rounded-xl bg-navy px-5 py-2.5 text-sm font-semibold text-white"
-              >
-                {t("Student Dashboard-এ ফিরে যান", "Back to Student Dashboard")}
-              </Link>
-            </div>
-          </div>
-        )}
+        <ExamTakeoverModal open={takenOver} />
 
-        {/* Submit Confirmation Modal */}
-        <ConfirmModal
+        <ExamSubmitModal
           open={showConfirmModal}
-          tone="primary"
-          title={t("Exam Submit করবেন?", "Submit Exam?")}
-          message={t(
-            "একবার Submit করলে আর উত্তর পরিবর্তন করা যাবে না।",
-            "Once submitted, you can no longer change your answers.",
-          )}
-          confirmLabel={t("Submit নিশ্চিত করুন", "Confirm Submit")}
-          cancelLabel={t("উত্তরগুলো দেখুন", "Review Answers")}
-          busy={submitting}
+          submitting={submitting}
+          answeredCount={answeredCount}
+          totalQuestions={questions.length}
+          flaggedCount={Object.keys(flaggedIds).length}
+          isOffline={syncState === "offline"}
           onConfirm={() => void submitExam()}
           onCancel={() => setShowConfirmModal(false)}
-        >
-          <div className="rounded-xl bg-slate-50 p-4 text-sm space-y-1">
-            <p>
-              {t("উত্তর দিয়েছেন:", "Answered:")}{" "}
-              <span className="font-bold text-emerald-700">
-                {answeredCount} / {questions.length}
-              </span>
-            </p>
-            <p>
-              {t("উত্তর বাকি:", "Remaining:")}{" "}
-              <span className="font-bold text-slate-800">
-                {questions.length - answeredCount}
-              </span>
-            </p>
-            {Object.keys(flaggedIds).length > 0 && (
-              <p>
-                {t("পুনরায় দেখার জন্য চিহ্নিত:", "Flagged for review:")}{" "}
-                <span className="font-bold text-amber-800">
-                  {t(`${Object.keys(flaggedIds).length}টি`, `${Object.keys(flaggedIds).length}`)}
-                </span>
-              </p>
-            )}
-          </div>
-        </ConfirmModal>
+        />
 
-        {/* Sticky Top Exam Bar */}
-        <header ref={headerRef} className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
-          <div className="mx-auto flex max-w-5xl items-center justify-between gap-2.5 px-3 py-2.5 sm:px-4 sm:py-3">
-            <div className="min-w-0">
-              <h1 className="truncate text-sm font-bold text-navy sm:text-base">
-                {examInfo?.name}
-              </h1>
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] sm:text-xs text-slate-500">
-                <span>
-                  {t(
-                    `${answeredCount}/${questions.length}টি উত্তর`,
-                    `${answeredCount}/${questions.length} answered`,
-                  )}
-                </span>
-                <span>•</span>
-                <span className="inline-flex items-center gap-1 whitespace-nowrap">
-                  {syncState === "synced" && (
-                    <>
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                      <span>Synced</span>
-                    </>
-                  )}
-                  {syncState === "unsaved" && (
-                    <>
-                      <CloudUpload className="h-3.5 w-3.5 text-amber-600" />
-                      <span>{t("ফোনে Save আছে", "Saved locally")}</span>
-                    </>
-                  )}
-                  {syncState === "syncing" && (
-                    <>
-                      <Loader2 className="h-3.5 w-3.5 animate-spin text-navy" />
-                      <span>{t("ব্যাকআপ হচ্ছে...", "Backing up...")}</span>
-                    </>
-                  )}
-                  {syncState === "offline" && (
-                    <>
-                      <CloudOff className="h-3.5 w-3.5 text-rose-600" />
-                      <span>{t("Offline — ফোনে Save আছে", "Offline — saved locally")}</span>
-                    </>
-                  )}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <div
-                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 sm:px-3 font-mono text-sm font-bold tabular-nums ${
-                  isLowTime
-                    ? "border border-rose-300 bg-rose-100 text-rose-800"
-                    : "bg-navy/10 text-navy"
-                }`}
-              >
-                <Clock className="h-4 w-4 shrink-0" />
-                <span>{formatRemaining(remainingSeconds)}</span>
-              </div>
-
-              <button
-                type="button"
-                aria-expanded={showNavDrawer}
-                onClick={() => setShowNavDrawer((v) => !v)}
-                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 active:bg-slate-100 lg:hidden cursor-pointer"
-              >
-                <Grid className="h-4 w-4" />
-                <span>Map</span>
-              </button>
-
-              <button
-                type="button"
-                disabled={submitting}
-                onClick={() => setShowConfirmModal(true)}
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-navy px-3.5 py-1.5 text-sm font-semibold text-white hover:bg-navy-strong cursor-pointer"
-              >
-                <Send className="h-3.5 w-3.5" />
-                <span>Submit</span>
-              </button>
-            </div>
-          </div>
-
-          {showNavDrawer && (
-            <div className="max-h-[55vh] overflow-y-auto overscroll-contain border-t border-slate-200 bg-slate-50 px-3 py-3 sm:px-4 lg:hidden">
-              <div className="mb-2.5 flex items-center justify-between gap-2 text-xs">
-                <span className="font-semibold text-slate-700">
-                  {t(
-                    `প্রশ্ন (${answeredCount}/${questions.length}টি উত্তর)`,
-                    `Questions (${answeredCount}/${questions.length} answered)`,
-                  )}
-                </span>
-                {nextUnansweredQuestion && (
-                  <button
-                    type="button"
-                    onClick={() => jumpToQuestion(nextUnansweredQuestion.id)}
-                    className="rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 font-semibold text-amber-900 active:bg-amber-100 cursor-pointer"
-                  >
-                    {t(`পরবর্তী #${nextUnansweredIdx + 1} →`, `Next #${nextUnansweredIdx + 1} →`)}
-                  </button>
-                )}
-              </div>
-              <div className="grid grid-cols-6 gap-2 sm:grid-cols-10">
-                {questions.map((q, idx) => {
-                  const answered = typeof answers[q.id] === "number";
-                  const flagged = Boolean(flaggedIds[q.id]);
-                  return (
-                    <button
-                      key={q.id}
-                      type="button"
-                      onClick={() => jumpToQuestion(q.id)}
-                      className={`h-10 rounded-lg text-xs font-semibold transition active:scale-95 cursor-pointer ${
-                        answered && flagged
-                          ? "border-2 border-amber-400 bg-navy text-white"
-                          : flagged
-                            ? "border border-amber-400 bg-amber-100 text-amber-900"
-                            : answered
-                              ? "bg-navy text-white"
-                              : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
-                      }`}
-                    >
-                      {idx + 1}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Slim Live Progress Bar */}
-          <div className="h-1 w-full bg-slate-100" aria-hidden="true">
-            <div
-              className={`h-full transition-all duration-300 ${
-                questions.length > 0 && answeredCount === questions.length
-                  ? "bg-emerald-600"
-                  : "bg-navy"
-              }`}
-              style={{
-                width: `${
-                  questions.length > 0
-                    ? Math.round((answeredCount / questions.length) * 100)
-                    : 0
-                }%`,
-              }}
-            />
-          </div>
-        </header>
+        <ExamRunnerHeader
+          headerRef={headerRef}
+          examName={examInfo?.name ?? ""}
+          answeredCount={answeredCount}
+          questions={questions}
+          answers={answers}
+          flaggedIds={flaggedIds}
+          nextUnansweredQuestion={nextUnansweredQuestion}
+          nextUnansweredIdx={nextUnansweredIdx}
+          syncState={syncState}
+          remainingSeconds={remainingSeconds}
+          isLowTime={isLowTime}
+          showNavDrawer={showNavDrawer}
+          submitting={submitting}
+          onToggleDrawer={() => setShowNavDrawer((v) => !v)}
+          onCloseDrawer={() => setShowNavDrawer(false)}
+          onJumpToQuestion={jumpToQuestion}
+          onOpenSubmit={() => setShowConfirmModal(true)}
+        />
 
         {fatalError && (
           <div className="mx-auto mt-4 max-w-5xl px-3 sm:px-4">
@@ -850,7 +655,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                         onClick={() => toggleFlag(q.id)}
                         aria-pressed={Boolean(flaggedIds[q.id])}
                         title={t("পুনরায় দেখার জন্য চিহ্নিত করুন", "Flag for review")}
-                        className={`inline-flex min-h-[32px] items-center gap-1 rounded-lg border px-2 py-1 text-xs font-medium transition cursor-pointer ${
+                        className={`inline-flex min-h-[38px] min-w-[38px] sm:min-h-[32px] sm:min-w-0 items-center justify-center gap-1 rounded-lg border px-2.5 sm:px-2 py-1 text-xs font-medium transition cursor-pointer ${
                           flaggedIds[q.id]
                             ? "border-amber-300 bg-amber-50 text-amber-900"
                             : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-800"
@@ -903,7 +708,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                       <button
                         type="button"
                         onClick={() => clearOption(q.id)}
-                        className="min-h-[36px] rounded-lg px-2.5 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 cursor-pointer"
+                        className="min-h-[40px] sm:min-h-[36px] rounded-lg px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 cursor-pointer"
                       >
                         {t("উত্তর মুছুন", "Clear Answer")}
                       </button>
@@ -973,7 +778,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
         {/* Mobile Bottom Submit Bar */}
         <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-3 pt-2.5 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur sm:hidden">
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5 min-w-0">
               <span className="text-xs font-semibold text-slate-700 whitespace-nowrap">
                 {t(
                   `${answeredCount}/${questions.length}টি উত্তর`,
@@ -984,7 +789,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
                 <button
                   type="button"
                   onClick={() => jumpToQuestion(nextUnansweredQuestion.id)}
-                  className="inline-flex min-h-[36px] items-center rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-900 active:bg-amber-100 cursor-pointer"
+                  className="inline-flex min-h-[38px] items-center rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-900 active:bg-amber-100 cursor-pointer"
                 >
                   {t(`পরবর্তী #${nextUnansweredIdx + 1}`, `Next #${nextUnansweredIdx + 1}`)}
                 </button>
@@ -1001,7 +806,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
               className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white active:scale-[0.99] cursor-pointer"
             >
               <Send className="h-4 w-4" />
-              <span>Submit</span>
+              <span>{t("জমা দিন", "Submit")}</span>
             </button>
           </div>
         </div>

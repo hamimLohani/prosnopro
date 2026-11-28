@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useLang } from "@/components/language-provider";
+import { PasswordInput } from "@/components/ui/password-input";
 import { pickText } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 
@@ -131,10 +132,11 @@ export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
               id="reset-email"
               type="email"
               required
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+              className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
           </div>
         ) : (
@@ -143,28 +145,26 @@ export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
               <label htmlFor="new-password" className="block text-sm font-medium text-slate-700">
                 {t("নতুন Password", "New Password")}
               </label>
-              <input
+              <PasswordInput
                 id="new-password"
-                type="password"
                 required
                 minLength={8}
+                autoComplete="new-password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+                onChange={setPassword}
               />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="confirm-password" className="block text-sm font-medium text-slate-700">
                 {t("Password নিশ্চিত করুন", "Confirm Password")}
               </label>
-              <input
+              <PasswordInput
                 id="confirm-password"
-                type="password"
                 required
                 minLength={8}
+                autoComplete="new-password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+                onChange={setConfirmPassword}
               />
             </div>
           </>
@@ -173,7 +173,7 @@ export function ResetPasswordForm({ mode }: ResetPasswordFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
+          className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           <span>

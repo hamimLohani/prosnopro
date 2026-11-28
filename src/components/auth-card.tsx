@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useLang } from "@/components/language-provider";
 import { TeacherCodeInput } from "@/components/teacher-code-input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { pickText } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 import type { UserRole } from "@/lib/types";
@@ -330,21 +331,19 @@ export function AuthCard({
               </Link>
             )}
           </div>
-          <input
+          <PasswordInput
             id="password"
-            type="password"
             required
             minLength={isLogin ? 1 : 8}
             autoComplete={isLogin ? "current-password" : "new-password"}
             enterKeyHint={isLogin ? "go" : "next"}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={setPassword}
             placeholder={
               isLogin
                 ? t("আপনার Password", "Your password")
                 : t("কমপক্ষে ৮ অক্ষর", "At least 8 characters")
             }
-            className="h-11 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm text-slate-900 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
           />
         </div>
 

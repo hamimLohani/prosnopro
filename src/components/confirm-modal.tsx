@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, Loader2 } from "lucide-react";
-import { useEffect, useRef, type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useLang } from "@/components/language-provider";
 import { pickText } from "@/lib/i18n";
@@ -10,52 +10,89 @@ interface ConfirmModalProps {
   open: boolean;
   title: string;
   message: string;
-  children?: ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
   tone?: "danger" | "primary";
   busy?: boolean;
+  children?: ReactNode;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-/**
- * Mobile-friendly confirmation dialog rendered via portal to avoid native window.confirm popups.
- */
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export function ConfirmModal({
   open,
   title,
   message,
-  children,
   confirmLabel,
   cancelLabel,
   tone = "danger",
   busy = false,
+  children,
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
   const { lang } = useLang();
   const resolvedConfirmLabel = confirmLabel ?? pickText(lang, "নিশ্চিত করুন", "Confirm");
   const resolvedCancelLabel = cancelLabel ?? pickText(lang, "বাতিল", "Cancel");
+
+  const dialogRef = useRef<HTMLDivElement | null>(null);
   const cancelBtnRef = useRef<HTMLButtonElement | null>(null);
   const prevFocusRef = useRef<HTMLElement | null>(null);
+  const wasOpenRef = useRef(false);
+  const onCancelRef = useRef(onCancel);
+  const busyRef = useRef(busy);
 
   useEffect(() => {
-    if (!open) return;
-    prevFocusRef.current = document.activeElement as HTMLElement | null;
-    cancelBtnRef.current?.focus();
+    onCancelRef.current = onCancel;
+    busyRef.current = busy;
+  }, [onCancel, busy]);
 
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape" && !busy) {
-        onCancel();
+  useEffect(() => {
+    if (open) {
+      wasOpenRef.current = true;
+      prevFocusRef.current = document.activeElement as HTMLElement | null;
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      cancelBtnRef.current?.focus();
+
+      function onKeyDown(e: KeyboardEvent) {
+        if (e.key === "Escape" && !busyRef.current) {
+          e.preventDefault();
+          onCancelRef.current();
+          return;
+        }
+        if (e.key === "Tab" && dialogRef.current) {
+          const focusables = Array.from(
+            dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+          ).filter((el) => el.offsetParent !== null);
+          if (focusables.length === 0) return;
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
       }
+
+      window.addEventListener("keydown", onKeyDown);
+      return () => {
+        window.removeEventListener("keydown", onKeyDown);
+        document.body.style.overflow = prevOverflow;
+      };
     }
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
+
+    if (wasOpenRef.current) {
+      wasOpenRef.current = false;
       prevFocusRef.current?.focus?.();
-    };
-  }, [busy, onCancel, open]);
+    }
+  }, [open]);
 
   if (!open || typeof document === "undefined") {
     return null;
@@ -75,7 +112,10 @@ export function ConfirmModal({
         }}
         aria-hidden="true"
       />
-      <div className="relative z-10 w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:p-6 shadow-xl space-y-4">
+      <div
+        ref={dialogRef}
+        className="relative z-10 w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:p-6 shadow-xl space-y-4"
+      >
         <div className="flex items-start gap-3">
           <div
             className={`rounded-xl p-2.5 shrink-0 ${

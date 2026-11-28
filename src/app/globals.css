@@ -78,6 +78,13 @@
   scrollbar-width: none;
 }
 
+.katex-display {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+}
+
 /* Clean browser print-to-PDF defaults for Bangla & English exam papers */
 @media print {
   @page {

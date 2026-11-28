@@ -87,7 +87,7 @@ export function ExamLifecycleActions({
 
     setBusy(null);
     if (err || !newId) {
-      setError(err?.message ?? "Could not duplicate exam.");
+      setError(err?.message ?? t("Exam ডুপ্লিকেট করা যায়নি।", "Could not duplicate exam."));
       return;
     }
     router.push(`/teacher/exams/${newId as string}`);
@@ -189,7 +189,7 @@ export function ExamLifecycleActions({
           ) : (
             <CopyPlus className="h-4 w-4" />
           )}
-          <span>Duplicate</span>
+          <span>{t("ডুপ্লিকেট করুন", "Duplicate")}</span>
         </button>
 
         <button

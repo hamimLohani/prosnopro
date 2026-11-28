@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useLang } from "@/components/language-provider";
 import { pickText } from "@/lib/i18n";
+import { formatAttemptStatus } from "@/lib/mcq";
 import type { AttemptStatus, ExamMedium, ResultReleaseMode } from "@/lib/types";
 
 export interface StudentHistoryItem {
@@ -58,23 +59,26 @@ export function StudentResultsList({ items }: StudentResultsListProps) {
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Search by exam name or subject..."
-            className="h-10 w-full rounded-lg border border-slate-300 pl-9 pr-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+            placeholder={t(
+              "Exam-এর নাম বা বিষয় দিয়ে খুঁজুন...",
+              "Search by exam name or subject...",
+            )}
+            className="h-10 w-full rounded-lg border border-slate-300 pl-9 pr-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
           />
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           {(
             [
-              { value: "all", label: "All" },
-              { value: "submitted", label: "Submitted" },
-              { value: "in_progress", label: "In Progress" },
+              { value: "all", label: t("সব", "All") },
+              { value: "submitted", label: t("জমা হয়েছে", "Submitted") },
+              { value: "in_progress", label: t("চলমান", "In Progress") },
             ] as const
           ).map((tab) => (
             <button
               key={tab.value}
               type="button"
               onClick={() => setStatusFilter(tab.value)}
-              className={`min-h-[34px] rounded-lg px-3 py-1 text-xs font-semibold transition cursor-pointer ${
+              className={`min-h-[38px] sm:min-h-[34px] rounded-lg px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
                 statusFilter === tab.value
                   ? "bg-navy text-white"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -106,11 +110,13 @@ export function StudentResultsList({ items }: StudentResultsListProps) {
                 key={item.attempt_id}
                 className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 flex flex-col gap-3.5 sm:flex-row sm:items-center sm:justify-between"
               >
-                <div className="space-y-1">
+                <div className="space-y-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-base font-bold text-slate-900">{item.exam_name}</h2>
-                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium capitalize text-slate-700">
-                      {item.status.replace("_", " ")}
+                    <h2 className="text-base font-bold text-slate-900 break-words">
+                      {item.exam_name}
+                    </h2>
+                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
+                      {formatAttemptStatus(item.status, lang)}
                     </span>
                   </div>
                   <p className="text-xs text-slate-500">

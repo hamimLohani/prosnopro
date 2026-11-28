@@ -17,7 +17,7 @@ export function BrandMark({ href = "/", inverted = false, size = "md" }: BrandMa
   const src = inverted ? "/logo-2.png" : "/logo-1.png";
 
   const content = (
-    <span className="inline-flex items-center gap-2 sm:gap-2.5 select-none">
+    <span className="inline-flex min-w-0 items-center gap-2 sm:gap-2.5 select-none">
       <Image
         src={src}
         alt="ProsnoPro logo"
@@ -30,7 +30,7 @@ export function BrandMark({ href = "/", inverted = false, size = "md" }: BrandMa
         }
         priority
       />
-      <span className="flex flex-col leading-none">
+      <span className="flex min-w-0 flex-col leading-none">
         <span
           className={`font-bold tracking-tight ${
             size === "sm" ? "text-base" : "text-base sm:text-lg"
@@ -39,7 +39,7 @@ export function BrandMark({ href = "/", inverted = false, size = "md" }: BrandMa
           Prosno<span className="text-amber">Pro</span>
         </span>
         <span
-          className={`text-[9px] sm:text-[10px] font-medium ${
+          className={`hidden min-[360px]:block truncate text-[9px] sm:text-[10px] font-medium ${
             inverted ? "text-slate-300" : "text-slate-500"
           }`}
         >

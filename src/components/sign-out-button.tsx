@@ -8,11 +8,21 @@ import { useLang } from "@/components/language-provider";
 import { pickText } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 
-interface SignOutButtonProps {
-  className?: string;
+export async function performSignOut(router: ReturnType<typeof useRouter>) {
+  const supabase = createClient();
+  if (!supabase) return false;
+  await supabase.auth.signOut();
+  router.push("/login");
+  router.refresh();
+  return true;
 }
 
-export function SignOutButton({ className = "" }: SignOutButtonProps) {
+interface SignOutButtonProps {
+  className?: string;
+  variant?: "default" | "inverted" | "menu";
+}
+
+export function SignOutButton({ className = "", variant = "default" }: SignOutButtonProps) {
   const router = useRouter();
   const { lang } = useLang();
   const t = (bn: string, en: string) => pickText(lang, bn, en);
@@ -20,16 +30,22 @@ export function SignOutButton({ className = "" }: SignOutButtonProps) {
   const [loading, setLoading] = useState(false);
 
   async function handleSignOut() {
-    const supabase = createClient();
-    if (!supabase) return;
     setLoading(true);
-    await supabase.auth.signOut();
+    const ok = await performSignOut(router);
+    if (!ok) {
+      setLoading(false);
+      return;
+    }
     setConfirmOpen(false);
-    router.push("/login");
-    router.refresh();
   }
 
   const defaultDisplay = /\bhidden\b/.test(className) ? "" : "inline-flex ";
+  const variantClasses =
+    variant === "inverted"
+      ? "border border-white/25 bg-white/10 text-white hover:bg-white/20"
+      : variant === "menu"
+        ? "w-full justify-start border-0 bg-transparent text-rose-700 hover:bg-rose-50 px-3"
+        : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50";
 
   return (
     <>
@@ -37,10 +53,14 @@ export function SignOutButton({ className = "" }: SignOutButtonProps) {
         type="button"
         onClick={() => setConfirmOpen(true)}
         disabled={loading}
-        className={`${defaultDisplay}min-h-[38px] items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 cursor-pointer whitespace-nowrap ${className}`}
+        className={`${defaultDisplay}min-h-[38px] items-center gap-1.5 rounded-lg px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium disabled:opacity-60 cursor-pointer whitespace-nowrap ${
+          variant === "menu" ? "" : "justify-center "
+        }${variantClasses} ${className}`}
       >
         <LogOut className="h-4 w-4 shrink-0" />
-        <span>{loading ? t("বের হচ্ছে...", "Signing out...") : "Sign out"}</span>
+        <span>
+          {loading ? t("বের হচ্ছে...", "Signing out...") : t("সাইন আউট", "Sign out")}
+        </span>
       </button>
 
       <ConfirmModal

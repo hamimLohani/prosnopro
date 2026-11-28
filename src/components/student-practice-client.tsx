@@ -7,7 +7,9 @@ import { ClassSelect } from "@/components/class-select";
 import { useLang } from "@/components/language-provider";
 import { MathText } from "@/components/math-text";
 import { SearchableSubjectSelect } from "@/components/searchable-subject-select";
+import { InlineAlert } from "@/components/ui/primitives";
 import { pickText } from "@/lib/i18n";
+import { optionLabel } from "@/lib/mcq";
 import type { ExamMedium } from "@/lib/types";
 
 export interface PracticeQuestionItem {
@@ -27,12 +29,7 @@ interface StudentPracticeClientProps {
   blockedByExamId: string | null;
 }
 
-function optionLabel(index: number, medium: ExamMedium): string {
-  if (medium === "bn") {
-    return ["ক", "খ", "গ", "ঘ", "ঙ", "চ"][index] ?? String(index + 1);
-  }
-  return String.fromCharCode(65 + index);
-}
+const PRACTICE_PAGE_SIZE = 30;
 
 export function StudentPracticeClient({
   initialItems,
@@ -42,22 +39,27 @@ export function StudentPracticeClient({
   const t = (bn: string, en: string) => pickText(lang, bn, en);
   const [items, setItems] = useState<PracticeQuestionItem[]>(initialItems);
   const [activeExamId, setActiveExamId] = useState<string | null>(blockedByExamId);
+  const [hasMore, setHasMore] = useState(initialItems.length >= PRACTICE_PAGE_SIZE);
 
   const [keyword, setKeyword] = useState("");
   const [subject, setSubject] = useState("");
   const [classLevel, setClassLevel] = useState("");
   const [medium, setMedium] = useState<"all" | ExamMedium>("all");
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Per-card interactive selection & answer reveal state
   const [selectedByQid, setSelectedByQid] = useState<Record<string, number>>({});
   const [revealedByQid, setRevealedByQid] = useState<Record<string, boolean>>({});
 
-  async function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
+  async function fetchPracticePage(offset: number, append: boolean) {
     setError(null);
-    setLoading(true);
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
 
     try {
       const qs = new URLSearchParams({
@@ -65,6 +67,7 @@ export function StudentPracticeClient({
         subject: subject.trim(),
         class: classLevel.trim(),
         medium,
+        offset: String(offset),
       });
       const res = await fetch(`/api/student/practice?${qs.toString()}`);
       const data = (await res.json()) as {
@@ -78,7 +81,7 @@ export function StudentPracticeClient({
       if (res.status === 409 && data.code === "ATTEMPT_IN_PROGRESS") {
         setActiveExamId(data.active_exam_id ?? null);
         setItems([]);
-        setLoading(false);
+        setHasMore(false);
         return;
       }
 
@@ -87,12 +90,13 @@ export function StudentPracticeClient({
           data.message ??
             t("Practice প্রশ্ন খোঁজা যায়নি।", "Could not search practice questions."),
         );
-        setLoading(false);
         return;
       }
 
+      const nextBatch = data.items ?? [];
       setActiveExamId(null);
-      setItems(data.items ?? []);
+      setHasMore(nextBatch.length >= PRACTICE_PAGE_SIZE);
+      setItems((prev) => (append ? [...prev, ...nextBatch] : nextBatch));
     } catch {
       setError(
         t(
@@ -102,7 +106,13 @@ export function StudentPracticeClient({
       );
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
+  }
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    void fetchPracticePage(0, false);
   }
 
   if (activeExamId) {
@@ -127,7 +137,7 @@ export function StudentPracticeClient({
         </div>
         <Link
           href={`/student/exams/${activeExamId}/take`}
-          className="inline-flex items-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong"
         >
           <span>{t("চলমান Exam-এ ফিরে যান", "Return to Active Exam")}</span>
           <ArrowRight className="h-4 w-4" />
@@ -149,7 +159,7 @@ export function StudentPracticeClient({
             enterKeyHint="search"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Search keyword..."
+            placeholder={t("কীওয়ার্ড দিয়ে খুঁজুন...", "Search keyword...")}
             className="h-11 w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-base sm:text-sm"
           />
         </div>
@@ -173,8 +183,8 @@ export function StudentPracticeClient({
             onChange={(e) => setMedium(e.target.value as "all" | ExamMedium)}
             className="h-11 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-base sm:text-sm"
           >
-            <option value="all">All Media</option>
-            <option value="bn">Bangla</option>
+            <option value="all">{t("সব মাধ্যম", "All Media")}</option>
+            <option value="bn">{t("বাংলা", "Bangla")}</option>
             <option value="en">English</option>
           </select>
           <button
@@ -183,16 +193,12 @@ export function StudentPracticeClient({
             className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            <span>Search</span>
+            <span>{t("খুঁজুন", "Search")}</span>
           </button>
         </div>
       </form>
 
-      {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-          {error}
-        </div>
-      )}
+      {error && <InlineAlert tone="error">{error}</InlineAlert>}
 
       {items.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
@@ -238,7 +244,7 @@ export function StudentPracticeClient({
                     onClick={() =>
                       setRevealedByQid((prev) => ({ ...prev, [item.id]: !prev[item.id] }))
                     }
-                    className="inline-flex min-h-[36px] items-center gap-1 rounded-lg px-2 py-1 font-semibold text-navy hover:bg-slate-100 cursor-pointer"
+                    className="inline-flex min-h-[40px] sm:min-h-[36px] items-center gap-1 rounded-lg px-2.5 py-1 font-semibold text-navy hover:bg-slate-100 cursor-pointer"
                   >
                     {revealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                     <span>
@@ -247,7 +253,7 @@ export function StudentPracticeClient({
                   </button>
                 </div>
 
-                <p className="text-[15px] font-semibold leading-relaxed text-slate-900 sm:text-base">
+                <p className="text-[15px] font-semibold leading-relaxed text-slate-900 sm:text-base break-words">
                   {idx + 1}. <MathText text={item.text} />
                 </p>
 
@@ -272,7 +278,7 @@ export function StudentPracticeClient({
                         }
                         className={`flex min-h-[44px] items-center justify-between gap-2 rounded-xl border px-3.5 py-2.5 text-left transition active:scale-[0.99] cursor-pointer ${cardClass}`}
                       >
-                        <span>
+                        <span className="min-w-0 break-words">
                           <span className="mr-1.5 font-semibold">
                             {optionLabel(optIdx, item.medium)})
                           </span>
@@ -291,13 +297,27 @@ export function StudentPracticeClient({
 
                 {showFeedback && item.explanation && (
                   <div className="rounded-lg bg-slate-50 px-3.5 py-2.5 text-xs text-slate-700">
-                    <span className="font-semibold text-navy">Explanation:</span>{" "}
+                    <span className="font-semibold text-navy">{t("ব্যাখ্যা:", "Explanation:")}</span>{" "}
                     <MathText text={item.explanation} />
                   </div>
                 )}
               </article>
             );
           })}
+
+          {hasMore && (
+            <div className="flex justify-center pt-1">
+              <button
+                type="button"
+                disabled={loadingMore}
+                onClick={() => void fetchPracticePage(items.length, true)}
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2 text-xs sm:text-sm font-semibold text-navy hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
+              >
+                {loadingMore && <Loader2 className="h-4 w-4 animate-spin" />}
+                <span>{t("আরও প্রশ্ন লোড করুন", "Load More Questions")}</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

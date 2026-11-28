@@ -46,12 +46,12 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
           },
           {
             href: "/teacher/bank",
-            label: "Bank",
+            label: pickText(lang, "ব্যাংক", "Bank"),
             icon: <BookOpen className="h-4 w-4 shrink-0" />,
           },
           {
             href: "/teacher/settings",
-            label: "Settings",
+            label: pickText(lang, "সেটিংস", "Settings"),
             icon: <Settings className="h-4 w-4 shrink-0" />,
           },
         ]
@@ -64,12 +64,12 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
           },
           {
             href: "/student/results",
-            label: "Result",
+            label: pickText(lang, "রেজাল্ট", "Results"),
             icon: <ClipboardList className="h-4 w-4 shrink-0" />,
           },
           {
             href: "/student/practice",
-            label: "Practice",
+            label: pickText(lang, "প্র্যাকটিস", "Practice"),
             icon: <Search className="h-4 w-4 shrink-0" />,
           },
         ];

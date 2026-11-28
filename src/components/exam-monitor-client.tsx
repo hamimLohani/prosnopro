@@ -4,7 +4,9 @@ import { AlertTriangle, RefreshCw, ShieldAlert, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useLang } from "@/components/language-provider";
+import { AttemptStatusBadge, SurfaceCard } from "@/components/ui/primitives";
 import { pickText } from "@/lib/i18n";
+import { formatEntryEventType } from "@/lib/mcq";
 import type { AttemptDetail, EntryEvent } from "@/lib/types";
 
 interface ExamMonitorClientProps {
@@ -96,7 +98,7 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
             className="inline-flex min-h-[38px] items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`} />
-            <span>Refresh</span>
+            <span>{refreshing ? t("রিফ্রেশ হচ্ছে...", "Refreshing...") : t("রিফ্রেশ", "Refresh")}</span>
           </button>
         </div>
       </div>
@@ -137,15 +139,7 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
                           {t("জয়েন:", "Joined:")} {new Date(a.started_at).toLocaleTimeString()}
                         </p>
                       </div>
-                      <span
-                        className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${
-                          a.status === "in_progress"
-                            ? "bg-emerald-100 text-emerald-800"
-                            : "bg-slate-100 text-slate-700"
-                        }`}
-                      >
-                        {a.status.replace("_", " ")}
-                      </span>
+                      <AttemptStatusBadge status={a.status} lang={lang} />
                     </div>
 
                     <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
@@ -159,17 +153,17 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
                       <div className="flex flex-wrap gap-1">
                         {hasSecondDevice && (
                           <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-800">
-                            Second device
+                            {t("দ্বিতীয় ডিভাইস", "Second device")}
                           </span>
                         )}
                         {hasNewTab && (
                           <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900">
-                            New tab
+                            {t("নতুন ট্যাব", "New tab")}
                           </span>
                         )}
                         {resumeCount > 0 && (
                           <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
-                            Resumed ({resumeCount})
+                            {t(`পুনরায় শুরু (${resumeCount})`, `Resumed (${resumeCount})`)}
                           </span>
                         )}
                         {!hasSecondDevice && !hasNewTab && resumeCount === 0 && (
@@ -189,12 +183,12 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-xs uppercase text-slate-500">
-                    <th className="py-2 pr-4">Student</th>
-                    <th className="py-2 pr-4">Roll / ID</th>
+                    <th className="py-2 pr-4">{t("শিক্ষার্থী", "Student")}</th>
+                    <th className="py-2 pr-4">{t("রোল / আইডি", "Roll / ID")}</th>
                     <th className="py-2 pr-4">{t("জয়েনের সময়", "Joined At")}</th>
-                    <th className="py-2 pr-4">Status</th>
+                    <th className="py-2 pr-4">{t("অবস্থা", "Status")}</th>
                     <th className="py-2 pr-4">{t("Switch / বাইরে", "Switches / Away")}</th>
-                    <th className="py-2 pr-4">Alerts</th>
+                    <th className="py-2 pr-4">{t("সতর্কতা", "Alerts")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -218,35 +212,30 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
                           {new Date(a.started_at).toLocaleTimeString()}
                         </td>
                         <td className="py-3 pr-4">
-                          <span
-                            className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${
-                              a.status === "in_progress"
-                                ? "bg-emerald-100 text-emerald-800"
-                                : "bg-slate-100 text-slate-700"
-                            }`}
-                          >
-                            {a.status.replace("_", " ")}
-                          </span>
+                          <AttemptStatusBadge status={a.status} lang={lang} />
                         </td>
                         <td className="py-3 pr-4 text-xs text-slate-600">
-                          {v.tab_switches ?? 0} switches • {v.away_seconds ?? 0}s away
+                          {t(
+                            `${v.tab_switches ?? 0} switch • ${v.away_seconds ?? 0}s বাইরে`,
+                            `${v.tab_switches ?? 0} switches • ${v.away_seconds ?? 0}s away`,
+                          )}
                           {(v.copy_attempts ?? 0) > 0 && ` • ${v.copy_attempts} copy`}
                         </td>
                         <td className="py-3 pr-4">
                           <div className="flex flex-wrap gap-1.5">
                             {hasSecondDevice && (
                               <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-800">
-                                Second device
+                                {t("দ্বিতীয় ডিভাইস", "Second device")}
                               </span>
                             )}
                             {hasNewTab && (
                               <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900">
-                                New tab
+                                {t("নতুন ট্যাব", "New tab")}
                               </span>
                             )}
                             {resumeCount > 0 && (
                               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
-                                Resumed ({resumeCount})
+                                {t(`পুনরায় শুরু (${resumeCount})`, `Resumed (${resumeCount})`)}
                               </span>
                             )}
                             {!hasSecondDevice && !hasNewTab && resumeCount === 0 && (
@@ -277,10 +266,14 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
       </section>
 
       {/* Entry Event Timeline */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-3">
-        <h2 className="text-base font-bold text-navy">Entry &amp; Re-entry Timeline</h2>
+      <SurfaceCard className="space-y-3">
+        <h2 className="text-base font-bold text-navy">
+          {t("প্রবেশ ও পুনরায় যোগদানের টাইমলাইন", "Entry & Re-entry Timeline")}
+        </h2>
         {events.length === 0 ? (
-          <p className="text-sm text-slate-500">No entry events logged yet.</p>
+          <p className="text-sm text-slate-500">
+            {t("এখনো কোনো Entry রেকর্ড হয়নি।", "No entry events logged yet.")}
+          </p>
         ) : (
           <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 text-xs">
             {events.map((ev) => {
@@ -289,7 +282,7 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
                 <div key={ev.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`rounded px-2 py-0.5 font-semibold uppercase ${
+                      className={`rounded px-2 py-0.5 font-semibold ${
                         ev.event_type === "second_device"
                           ? "bg-rose-100 text-rose-800"
                           : ev.event_type === "new_tab"
@@ -297,7 +290,7 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
                             : "bg-slate-100 text-slate-700"
                       }`}
                     >
-                      {ev.event_type.replace("_", " ")}
+                      {formatEntryEventType(ev.event_type, lang)}
                     </span>
                     <span className="font-semibold text-slate-900">
                       {info?.name ?? ev.student_id.slice(0, 8)}
@@ -312,7 +305,7 @@ export function ExamMonitorClient({ attempts, events }: ExamMonitorClientProps) 
             })}
           </div>
         )}
-      </section>
+      </SurfaceCard>
     </div>
   );
 }

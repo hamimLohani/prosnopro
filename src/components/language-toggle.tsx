@@ -22,7 +22,7 @@ export function LanguageToggle() {
       <button
         type="button"
         onClick={() => switchTo("bn")}
-        className={`rounded-md px-2 py-1 transition cursor-pointer ${
+        className={`min-h-[32px] rounded-md px-2.5 py-1 transition cursor-pointer ${
           lang === "bn" ? "bg-navy text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
         }`}
       >
@@ -31,7 +31,7 @@ export function LanguageToggle() {
       <button
         type="button"
         onClick={() => switchTo("en")}
-        className={`rounded-md px-2 py-1 transition cursor-pointer ${
+        className={`min-h-[32px] rounded-md px-2.5 py-1 transition cursor-pointer ${
           lang === "en" ? "bg-navy text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
         }`}
       >

@@ -58,7 +58,7 @@ export default async function ExamMonitorPage({ params }: MonitorPageProps) {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Live Monitor • {exam.code}
+              {t(`লাইভ মনিটর • ${exam.code}`, `Live Monitor • ${exam.code}`)}
             </p>
             <h1 className="text-xl sm:text-2xl font-bold text-navy break-words">{exam.name}</h1>
           </div>

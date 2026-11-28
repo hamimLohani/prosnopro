@@ -3,10 +3,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { SetupBanner } from "@/components/setup-banner";
-import { SignOutButton } from "@/components/sign-out-button";
 import { StudentJoinForm } from "@/components/student-join-form";
 import { pickText } from "@/lib/i18n";
 import { getServerLang } from "@/lib/i18n-server";
+import { formatAttemptStatus } from "@/lib/mcq";
 import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
 import type { AttemptStatus } from "@/lib/types";
 
@@ -72,17 +72,22 @@ export default async function StudentDashboardPage({ searchParams }: StudentDash
       <Navbar ctx={ctx} />
 
       <main className="mx-auto w-full max-w-4xl flex-1 space-y-4 sm:space-y-6 px-3 py-4 sm:px-4 sm:py-8">
-        <section className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-navy px-4 py-3.5 text-white shadow-sm sm:p-6">
+        <section className="flex flex-wrap items-center justify-between gap-2.5 rounded-2xl bg-navy px-4 py-3.5 text-white shadow-sm sm:p-6">
           <div className="min-w-0">
             <h1 className="truncate text-lg font-bold sm:text-2xl">
               {t(`স্বাগতম, ${ctx.profile.name}`, `Welcome, ${ctx.profile.name}`)}
             </h1>
             <p className="text-xs text-slate-300">
-              {ctx.profile.roll ? `Roll/ID: ${ctx.profile.roll}` : "Student Portal"}
+              {ctx.profile.roll ? `Roll/ID: ${ctx.profile.roll}` : t("Student পোর্টাল", "Student Portal")}
               {ctx.profile.institution ? ` • ${ctx.profile.institution}` : ""}
             </p>
           </div>
-          <SignOutButton className="sm:hidden border-white/25 bg-white/10 text-white hover:bg-white/20" />
+          <Link
+            href="/student/settings"
+            className="inline-flex min-h-[38px] items-center rounded-lg border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20 shrink-0"
+          >
+            {t("প্রোফাইল Edit", "Edit Profile")}
+          </Link>
         </section>
 
         <StudentJoinForm initialTeacherCode={sp.t ?? ""} initialExamCode={sp.e ?? ""} />
@@ -116,15 +121,15 @@ export default async function StudentDashboardPage({ searchParams }: StudentDash
               {attemptList.map((a) => (
                 <div
                   key={a.id}
-                  className="flex items-center justify-between gap-3 py-3 text-sm"
+                  className="flex flex-wrap items-center justify-between gap-2.5 py-3 text-sm"
                 >
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold text-slate-900">
-                      {a.exams?.name ?? "Online Exam"}
+                  <div className="min-w-0 flex-1 basis-48">
+                    <p className="font-semibold text-slate-900 break-words">
+                      {a.exams?.name ?? t("অনলাইন Exam", "Online Exam")}
                     </p>
                     <p className="text-xs text-slate-500">
                       {a.exams?.subject ? `${a.exams.subject} • ` : ""}
-                      <span className="capitalize">{a.status.replace("_", " ")}</span> •{" "}
+                      <span>{formatAttemptStatus(a.status, lang)}</span> •{" "}
                       {new Date(a.started_at).toLocaleString()}
                     </p>
                   </div>

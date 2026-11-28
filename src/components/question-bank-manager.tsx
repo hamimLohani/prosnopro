@@ -1,22 +1,20 @@
 "use client";
 
-import {
-  CheckCircle2,
-  Globe,
-  Loader2,
-  Lock,
-  Pencil,
-  Plus,
-  Search,
-  Trash2,
-} from "lucide-react";
+import { ClipboardPaste, FileUp, Globe, Lock, Plus, Search, Sparkles, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ClassSelect } from "@/components/class-select";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { useLang } from "@/components/language-provider";
+import { QuestionBankCard } from "@/components/question-bank/question-bank-card";
+import { QuestionBankForm } from "@/components/question-bank/question-bank-form";
+import { AiGeneratorTab, PdfImportTab } from "@/components/question-editor/ai-pdf-tabs";
+import { BulkPasteTab } from "@/components/question-editor/bulk-paste-tab";
+import { DraftReviewQueue } from "@/components/question-editor/draft-review-queue";
 import { SearchableSubjectSelect } from "@/components/searchable-subject-select";
-import { MathText } from "@/components/math-text";
+import { StatusToast } from "@/components/status-toast";
+import { generateAiDraftBatches, importPdfDraftsFromFile } from "@/lib/ai/client-drafts";
+import type { DraftMcqQuestion } from "@/lib/ai/schema";
 import { pickText } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 import type { ExamMedium, QuestionBankItem } from "@/lib/types";
@@ -24,11 +22,21 @@ import type { ExamMedium, QuestionBankItem } from "@/lib/types";
 interface QuestionBankManagerProps {
   teacherId: string;
   initialItems: QuestionBankItem[];
+  hasAiKey?: boolean;
+  aiProvider?: string | null;
 }
 
-const BANK_PAGE_SIZE = 30;
+type BankSourceTab = "manual" | "paste" | "ai" | "pdf";
 
-export function QuestionBankManager({ teacherId, initialItems }: QuestionBankManagerProps) {
+const BANK_PAGE_SIZE = 30;
+const FIXED_OPTIONS_COUNT = 4;
+
+export function QuestionBankManager({
+  teacherId,
+  initialItems,
+  hasAiKey = false,
+  aiProvider = null,
+}: QuestionBankManagerProps) {
   const router = useRouter();
   const { lang } = useLang();
   const t = (bn: string, en: string) => pickText(lang, bn, en);
@@ -42,8 +50,9 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
   const [classFilter, setClassFilter] = useState("");
   const [keyword, setKeyword] = useState("");
 
-  // Create / Edit form
+  // Composer state (Manual, Bulk Paste, With AI, PDF Import) - strictly 4 options
   const [showForm, setShowForm] = useState(false);
+  const [activeTab, setActiveTab] = useState<BankSourceTab>("manual");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [text, setText] = useState("");
   const [options, setOptions] = useState<string[]>(["", "", "", ""]);
@@ -54,6 +63,20 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
   const [tagsInput, setTagsInput] = useState("");
   const [medium, setMedium] = useState<ExamMedium>("bn");
   const [visibility, setVisibility] = useState<"private" | "shared">("private");
+
+  // AI & PDF generation state
+  const [aiCount, setAiCount] = useState("5");
+  const [aiNotes, setAiNotes] = useState("");
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiProgress, setAiProgress] = useState<string | null>(null);
+  const [pdfImporting, setPdfImporting] = useState(false);
+  const [pdfProgress, setPdfProgress] = useState<string | null>(null);
+
+  // Draft Review Queue (Bulk Paste, With AI, PDF Import)
+  const [drafts, setDrafts] = useState<DraftMcqQuestion[]>([]);
+  const [draftSource, setDraftSource] = useState<"manual" | "ai" | "pdf">("manual");
+  const [editingDraftIdx, setEditingDraftIdx] = useState<number | null>(null);
+  const [savingDrafts, setSavingDrafts] = useState(false);
 
   const [busy, setBusy] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -79,10 +102,11 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
   function startEdit(item: QuestionBankItem) {
     setError(null);
     setMessage(null);
+    setActiveTab("manual");
     setEditingId(item.id);
     setText(item.text);
-    setOptions(item.options);
-    setCorrectIndex(item.correct_index);
+    setOptions(Array.from({ length: FIXED_OPTIONS_COUNT }, (_, i) => item.options[i] ?? ""));
+    setCorrectIndex(Math.min(item.correct_index, FIXED_OPTIONS_COUNT - 1));
     setExplanation(item.explanation ?? "");
     setSubject(item.subject);
     setClassLevel(item.class);
@@ -102,12 +126,12 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
     if (!supabase) return;
 
     const cleanText = text.trim();
-    const cleanOptions = options.map((o) => o.trim()).filter(Boolean);
-    if (!cleanText || cleanOptions.length < 2) {
+    const cleanOptions = options.slice(0, FIXED_OPTIONS_COUNT).map((o) => o.trim());
+    if (!cleanText || cleanOptions.length !== FIXED_OPTIONS_COUNT || cleanOptions.some((o) => !o)) {
       setError(
         t(
-          "প্রশ্নের লেখা এবং কমপক্ষে ২টি Option আবশ্যক।",
-          "Question text and at least 2 options are required.",
+          "প্রশ্নের লেখা এবং ৪টি Option-ই পূরণ করা আবশ্যক।",
+          "Question text and all 4 options are required.",
         ),
       );
       return;
@@ -121,7 +145,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
     const payload = {
       text: cleanText,
       options: cleanOptions,
-      correct_index: Math.min(correctIndex, cleanOptions.length - 1),
+      correct_index: Math.min(correctIndex, FIXED_OPTIONS_COUNT - 1),
       explanation: explanation.trim() || null,
       subject: subject.trim(),
       class: classLevel.trim(),
@@ -175,6 +199,129 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
     router.refresh();
   }
 
+  async function handleGenerateWithAi(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setMessage(null);
+    setAiGenerating(true);
+
+    const result = await generateAiDraftBatches({
+      medium,
+      classLevel,
+      subject,
+      requestedCount: Number(aiCount) || 5,
+      notes: aiNotes,
+      aiProvider,
+      lang,
+      onProgress: setAiProgress,
+      onBatchDrafts: (batch) => {
+        setDraftSource("ai");
+        setDrafts((prev) => [...prev, ...batch]);
+      },
+    });
+
+    setAiGenerating(false);
+    if (result.ok) {
+      setMessage(result.message);
+    } else {
+      setError(result.error);
+    }
+  }
+
+  async function handlePdfImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+
+    setError(null);
+    setMessage(null);
+    setPdfImporting(true);
+
+    const result = await importPdfDraftsFromFile({
+      file,
+      medium,
+      lang,
+      onProgress: setPdfProgress,
+    });
+
+    setPdfImporting(false);
+    if (result.ok) {
+      setDraftSource("pdf");
+      setDrafts((prev) => [...prev, ...result.drafts]);
+      setMessage(result.message);
+    } else {
+      setError(result.error);
+    }
+  }
+
+  async function handleSaveAllDrafts() {
+    if (drafts.length === 0) return;
+    setError(null);
+    setMessage(null);
+
+    for (let i = 0; i < drafts.length; i += 1) {
+      const d = drafts[i];
+      if (!d.text.trim() || d.options.length !== FIXED_OPTIONS_COUNT || d.options.some((o) => !o.trim())) {
+        setError(
+          t(
+            `Draft #${i + 1}-এ প্রশ্ন বা ৪টি Option সঠিকভাবে পূরণ করা নেই।`,
+            `Draft #${i + 1} must have non-empty question text and 4 options.`,
+          ),
+        );
+        return;
+      }
+    }
+
+    const supabase = createClient();
+    if (!supabase) return;
+
+    const tags = tagsInput
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+
+    setSavingDrafts(true);
+    const { data: inserted, error: insertErr } = await supabase
+      .from("question_bank")
+      .insert(
+        drafts.map((d) => ({
+          teacher_id: teacherId,
+          text: d.text.trim(),
+          options: d.options.slice(0, FIXED_OPTIONS_COUNT).map((o) => o.trim()),
+          correct_index: Math.min(d.correct_index, FIXED_OPTIONS_COUNT - 1),
+          explanation: d.explanation?.trim() || null,
+          subject: subject.trim(),
+          class: classLevel.trim(),
+          tags,
+          medium,
+          source: draftSource,
+          visibility,
+        })),
+      )
+      .select("*")
+      .returns<QuestionBankItem[]>();
+
+    setSavingDrafts(false);
+    if (insertErr || !inserted) {
+      setError(
+        insertErr?.message ??
+          t("Draft প্রশ্নগুলো Question Bank-এ Save করা যায়নি।", "Failed to save drafts to Question Bank."),
+      );
+      return;
+    }
+
+    setItems((prev) => [...inserted, ...prev]);
+    setDrafts([]);
+    setEditingDraftIdx(null);
+    setMessage(
+      t(
+        `${inserted.length}টি প্রশ্ন Question Bank-এ Save হয়েছে।`,
+        `Saved ${inserted.length} question(s) to Question Bank.`,
+      ),
+    );
+    router.refresh();
+  }
+
   async function handleToggleVisibility(item: QuestionBankItem) {
     if (item.teacher_id !== teacherId) return;
     const supabase = createClient();
@@ -189,6 +336,11 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
 
     if (updated) {
       setItems((prev) => prev.map((it) => (it.id === updated.id ? updated : it)));
+      setMessage(
+        updated.visibility === "shared"
+          ? t("প্রশ্নটি সবার জন্য Shared করা হয়েছে।", "Question marked as Shared.")
+          : t("প্রশ্নটি Private করা হয়েছে।", "Question marked as Private."),
+      );
     }
   }
 
@@ -210,6 +362,9 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
     if (!err) {
       setItems((prev) => prev.filter((it) => it.id !== item.id));
       setSelectedIds((prev) => prev.filter((id) => id !== item.id));
+      setMessage(t("প্রশ্নটি Question Bank থেকে মুছে ফেলা হয়েছে।", "Question deleted from Question Bank."));
+    } else {
+      setError(err.message);
     }
   }
 
@@ -316,6 +471,67 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
     [items, teacherId],
   );
 
+  const tabs: Array<{ id: BankSourceTab; label: string; icon?: React.ReactNode }> = [
+    { id: "manual", label: t("Manual", "Manual") },
+    {
+      id: "paste",
+      label: t("Bulk Paste", "Bulk Paste"),
+      icon: <ClipboardPaste className="h-3.5 w-3.5 text-navy shrink-0" />,
+    },
+    {
+      id: "ai",
+      label: t("AI দিয়ে", "With AI"),
+      icon: <Sparkles className="h-3.5 w-3.5 text-amber shrink-0" />,
+    },
+    {
+      id: "pdf",
+      label: t("PDF Import", "PDF Import"),
+      icon: <FileUp className="h-3.5 w-3.5 text-navy shrink-0" />,
+    },
+  ];
+
+  const batchMetadataBar = (includeClassSubject: boolean) => (
+    <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-3 sm:grid-cols-2 lg:grid-cols-4">
+      {includeClassSubject && (
+        <>
+          <SearchableSubjectSelect
+            value={subject}
+            onChange={setSubject}
+            placeholder={t("Subject (বিষয়)", "Subject")}
+          />
+          <ClassSelect
+            value={classLevel}
+            onChange={setClassLevel}
+            placeholder="Class / Level"
+          />
+        </>
+      )}
+      <select
+        value={medium}
+        onChange={(e) => setMedium(e.target.value as ExamMedium)}
+        className="h-11 sm:h-[42px] rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm"
+      >
+        <option value="bn">{t("বাংলা", "Bangla")}</option>
+        <option value="en">English</option>
+      </select>
+      <select
+        value={visibility}
+        onChange={(e) => setVisibility(e.target.value as "private" | "shared")}
+        className="h-11 sm:h-[42px] rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm"
+      >
+        <option value="private">{t("Private (শুধু আমি)", "Private (Only me)")}</option>
+        <option value="shared">{t("Shared (সবার জন্য)", "Shared (Everyone)")}</option>
+      </select>
+      <input
+        type="text"
+        value={tagsInput}
+        onChange={(e) => setTagsInput(e.target.value)}
+        placeholder={t("Tags (কমা দিয়ে, ঐচ্ছিক)", "Tags (comma separated, optional)")}
+        className={`${includeClassSubject ? "sm:col-span-2 lg:col-span-4 " : ""}h-11 sm:h-[42px] rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm`}
+      />
+    </div>
+  );
+
   return (
     <div className="space-y-5 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -345,141 +561,166 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
         </button>
       </div>
 
-      {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-          {error}
-        </div>
-      )}
-      {message && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          {message}
-        </div>
-      )}
-
       {showForm && (
-        <form
-          onSubmit={handleSave}
-          className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm space-y-4"
-        >
-          <h2 className="text-base font-bold text-navy">
-            {editingId
-              ? t("Bank-এর প্রশ্ন Edit করুন", "Edit Question Bank Item")
-              : t("Question Bank-এ নতুন প্রশ্ন", "New Question Bank Item")}
-          </h2>
+        <section className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          {!editingId && (
+            <div className="border-b border-slate-200 bg-slate-50 p-2 sm:px-4 sm:pt-3 sm:pb-0 space-y-2 sm:space-y-0">
+              <div className="flex items-center justify-between px-1 sm:hidden">
+                <span className="text-xs font-semibold text-slate-500">
+                  {t("প্রশ্ন যোগ করুন", "Add Question")}
+                </span>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="min-h-[34px] px-1 text-xs font-semibold text-navy hover:underline cursor-pointer"
+                >
+                  {t("Form লুকান", "Hide Form")}
+                </button>
+              </div>
+              <div className="flex items-center gap-1.5 sm:gap-1 overflow-x-auto no-scrollbar pb-0.5 sm:pb-0">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`inline-flex min-h-[40px] sm:min-h-[42px] shrink-0 items-center justify-center gap-1.5 rounded-lg sm:rounded-b-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap cursor-pointer ${
+                      activeTab === tab.id
+                        ? "border border-slate-200 sm:border-b-white bg-white text-navy shadow-xs sm:shadow-none sm:-mb-px"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    {tab.icon}
+                    <span>{tab.label}</span>
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="hidden sm:inline-flex ml-auto shrink-0 px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 cursor-pointer"
+                >
+                  {t("Form লুকান", "Hide Form")}
+                </button>
+              </div>
+            </div>
+          )}
 
-          <textarea
-            rows={2}
-            required
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={t(
-              "প্রশ্নের লেখা (বাংলা বা English, $...$ দিয়ে গণিতের সূত্র লেখা যাবে)",
-              "Question text (Bangla or English; use $...$ for math formulas)",
+          <div className="p-4 sm:p-6 space-y-4">
+            {(activeTab === "manual" || editingId) && (
+              <QuestionBankForm
+                embedded
+                editingId={editingId}
+                text={text}
+                options={options}
+                correctIndex={correctIndex}
+                explanation={explanation}
+                subject={subject}
+                classLevel={classLevel}
+                tagsInput={tagsInput}
+                medium={medium}
+                visibility={visibility}
+                busy={busy}
+                onTextChange={setText}
+                onOptionsChange={setOptions}
+                onCorrectIndexChange={setCorrectIndex}
+                onExplanationChange={setExplanation}
+                onSubjectChange={setSubject}
+                onClassChange={setClassLevel}
+                onTagsChange={setTagsInput}
+                onMediumChange={setMedium}
+                onVisibilityChange={setVisibility}
+                onCancel={resetForm}
+                onSubmit={handleSave}
+              />
             )}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base sm:text-sm"
-          />
 
-          <div className="grid gap-2.5 sm:grid-cols-2">
-            {options.map((opt, idx) => (
-              <div
-                key={idx}
-                className={`flex min-h-[44px] items-center gap-2.5 rounded-lg border px-2.5 py-2 ${
-                  correctIndex === idx ? "border-emerald-400 bg-emerald-50/60" : "border-slate-300"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="bank-correct"
-                  checked={correctIndex === idx}
-                  onChange={() => setCorrectIndex(idx)}
-                  className="h-5 w-5 sm:h-4 sm:w-4 shrink-0 text-emerald-600 cursor-pointer"
-                />
-                <input
-                  type="text"
-                  required
-                  value={opt}
-                  onChange={(e) => {
-                    const next = [...options];
-                    next[idx] = e.target.value;
-                    setOptions(next);
+            {activeTab === "paste" && !editingId && (
+              <div className="space-y-4">
+                {batchMetadataBar(true)}
+                <BulkPasteTab
+                  medium={medium}
+                  optionCount={FIXED_OPTIONS_COUNT}
+                  defaultMarks={1}
+                  subject={subject}
+                  classLevel={classLevel}
+                  onError={(msg) => {
+                    setMessage(null);
+                    setError(msg);
                   }}
-                  placeholder={t(`অপশন ${idx + 1}`, `Option ${idx + 1}`)}
-                  className="w-full bg-transparent text-base sm:text-sm focus:outline-none"
+                  onDraftsAdded={(parsed) => {
+                    setError(null);
+                    setDraftSource("manual");
+                    setDrafts((prev) => [...prev, ...parsed]);
+                    setMessage(
+                      t(
+                        `${parsed.length}টি Draft তৈরি হয়েছে — নিচে যাচাই করে Bank-এ Save করুন।`,
+                        `Created ${parsed.length} draft(s) — review and save to Bank below.`,
+                      ),
+                    );
+                  }}
                 />
               </div>
-            ))}
-          </div>
+            )}
 
-          <div className="grid gap-3 sm:grid-cols-4">
-            <SearchableSubjectSelect
-              value={subject}
-              onChange={setSubject}
-              placeholder={t("Subject (বিষয়)", "Subject")}
-            />
-            <ClassSelect
-              value={classLevel}
-              onChange={setClassLevel}
-              placeholder="Class / Level"
-            />
-            <select
-              value={medium}
-              onChange={(e) => setMedium(e.target.value as ExamMedium)}
-              className="h-11 sm:h-[42px] rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm"
-            >
-              <option value="bn">{t("বাংলা", "Bangla")}</option>
-              <option value="en">English</option>
-            </select>
-            <select
-              value={visibility}
-              onChange={(e) => setVisibility(e.target.value as "private" | "shared")}
-              className="h-11 sm:h-[42px] rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm"
-            >
-              <option value="private">{t("Private (শুধু আমি)", "Private (Only me)")}</option>
-              <option value="shared">{t("Shared (সবার জন্য)", "Shared (Everyone)")}</option>
-            </select>
-          </div>
+            {activeTab === "ai" && !editingId && (
+              <div className="space-y-4">
+                {hasAiKey && batchMetadataBar(false)}
+                <AiGeneratorTab
+                  returnToPath="/teacher/bank"
+                  medium={medium}
+                  optionCount={FIXED_OPTIONS_COUNT}
+                  defaultMarks={1}
+                  hasAiKey={hasAiKey}
+                  aiProvider={aiProvider}
+                  aiClassLevel={classLevel}
+                  aiSubject={subject}
+                  aiCount={aiCount}
+                  aiNotes={aiNotes}
+                  aiGenerating={aiGenerating}
+                  aiProgress={aiProgress}
+                  onClassChange={setClassLevel}
+                  onSubjectChange={setSubject}
+                  onCountChange={setAiCount}
+                  onNotesChange={setAiNotes}
+                  onGenerate={handleGenerateWithAi}
+                />
+              </div>
+            )}
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <input
-              type="text"
-              value={tagsInput}
-              onChange={(e) => setTagsInput(e.target.value)}
-              placeholder={t(
-                "Tag (কমা দিয়ে, যেমন: mechanics, chapter-4)",
-                "Tags (comma separated, e.g. mechanics, chapter-4)",
-              )}
-              className="h-11 sm:h-[42px] rounded-lg border border-slate-300 px-3 text-base sm:text-sm"
-            />
-            <input
-              type="text"
-              value={explanation}
-              onChange={(e) => setExplanation(e.target.value)}
-              placeholder={t("ব্যাখ্যা / Explanation (ঐচ্ছিক)", "Explanation (optional)")}
-              className="h-11 sm:h-[42px] rounded-lg border border-slate-300 px-3 text-base sm:text-sm"
-            />
+            {activeTab === "pdf" && !editingId && (
+              <div className="space-y-4">
+                {hasAiKey && batchMetadataBar(true)}
+                <PdfImportTab
+                  returnToPath="/teacher/bank"
+                  hasAiKey={hasAiKey}
+                  aiProvider={aiProvider}
+                  pdfImporting={pdfImporting}
+                  pdfProgress={pdfProgress}
+                  onPdfSelect={handlePdfImport}
+                />
+              </div>
+            )}
           </div>
-
-          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
-            <button
-              type="button"
-              onClick={resetForm}
-              className="min-h-[44px] w-full sm:w-auto rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 cursor-pointer"
-            >
-              {t("বাতিল", "Cancel")}
-            </button>
-            <button
-              type="submit"
-              disabled={busy}
-              className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-strong cursor-pointer"
-            >
-              {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-              <span>
-                {editingId ? t("Update করুন", "Update Question") : t("প্রশ্ন Save করুন", "Save Question")}
-              </span>
-            </button>
-          </div>
-        </form>
+        </section>
       )}
+
+      <DraftReviewQueue
+        drafts={drafts}
+        medium={medium}
+        editingDraftIdx={editingDraftIdx}
+        showSaveToBankToggle={false}
+        confirmLabel={t(
+          `নিশ্চিত করে ${drafts.length}টি প্রশ্ন Bank-এ Save করুন`,
+          `Confirm & Save ${drafts.length} Draft(s) to Bank`,
+        )}
+        savingDrafts={savingDrafts}
+        onSetDrafts={setDrafts}
+        onSetEditingDraftIdx={setEditingDraftIdx}
+        onSaveAllDrafts={() => void handleSaveAllDrafts()}
+        onDiscardAll={() => {
+          setDrafts([]);
+          setEditingDraftIdx(null);
+        }}
+      />
 
       {/* Search & Filter Bar */}
       <section className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 grid gap-2.5 sm:gap-3 sm:grid-cols-5">
@@ -489,7 +730,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Search keyword..."
+            placeholder={t("কীওয়ার্ড দিয়ে খুঁজুন...", "Search keyword...")}
             className="h-11 w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-base sm:text-sm"
           />
         </div>
@@ -511,20 +752,20 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
           <select
             value={mediumFilter}
             onChange={(e) => setMediumFilter(e.target.value as "all" | ExamMedium)}
-            className="h-11 rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm sm:text-xs"
+            className="h-11 rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-base sm:text-sm"
           >
-            <option value="all">All Media</option>
-            <option value="bn">Bangla</option>
+            <option value="all">{t("সব মাধ্যম", "All Media")}</option>
+            <option value="bn">{t("বাংলা", "Bangla")}</option>
             <option value="en">English</option>
           </select>
           <select
             value={scope}
             onChange={(e) => setScope(e.target.value as "all" | "mine" | "shared")}
-            className="h-11 rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm sm:text-xs"
+            className="h-11 rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-base sm:text-sm"
           >
-            <option value="all">All</option>
-            <option value="mine">Mine</option>
-            <option value="shared">Shared</option>
+            <option value="all">{t("সব প্রশ্ন", "All")}</option>
+            <option value="mine">{t("আমার", "Mine")}</option>
+            <option value="shared">{t("শেয়ার্ড", "Shared")}</option>
           </select>
         </div>
       </section>
@@ -599,120 +840,23 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
             )}
           </div>
         ) : (
-          filtered.slice(0, visibleCount).map((item) => {
-            const isOwner = item.teacher_id === teacherId;
-            return (
-              <div
-                key={item.id}
-                className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 space-y-2.5"
-              >
-                <div className="space-y-2">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-                      {isOwner && (
-                        <input
-                          type="checkbox"
-                          aria-label={t("প্রশ্ন নির্বাচন করুন", "Select question")}
-                          checked={selectedIds.includes(item.id)}
-                          onChange={(e) => {
-                            setSelectedIds((prev) =>
-                              e.target.checked
-                                ? [...prev, item.id]
-                                : prev.filter((id) => id !== item.id),
-                            );
-                          }}
-                          className="mr-1 h-4 w-4 rounded border-slate-300 text-navy cursor-pointer"
-                        />
-                      )}
-                      <span className="rounded bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">
-                        {item.medium === "bn" ? t("বাংলা", "Bangla") : "English"}
-                      </span>
-                      {item.subject && (
-                        <span className="rounded bg-navy/10 px-2 py-0.5 font-medium text-navy">
-                          {item.subject}
-                        </span>
-                      )}
-                      {item.class && (
-                        <span className="rounded bg-slate-100 px-2 py-0.5 text-slate-600">
-                          {item.class}
-                        </span>
-                      )}
-                      <span
-                        className={`inline-flex items-center gap-1 rounded px-2 py-0.5 font-semibold ${
-                          item.visibility === "shared"
-                            ? "bg-emerald-100 text-emerald-800"
-                            : "bg-slate-100 text-slate-600"
-                        }`}
-                      >
-                        {item.visibility === "shared" ? (
-                          <Globe className="h-3 w-3" />
-                        ) : (
-                          <Lock className="h-3 w-3" />
-                        )}
-                        {item.visibility === "shared" ? "Shared" : "Private"}
-                      </span>
-                    </div>
-
-                    {isOwner && (
-                      <div className="ml-auto flex items-center gap-1 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => handleToggleVisibility(item)}
-                          title={t("Private / Shared পরিবর্তন করুন", "Toggle Private / Shared")}
-                          className="min-h-[34px] rounded-lg px-2.5 py-1 text-xs font-medium text-navy hover:bg-slate-100 cursor-pointer"
-                        >
-                          {item.visibility === "shared"
-                            ? t("Private করুন", "Make Private")
-                            : t("Share করুন", "Share")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => startEdit(item)}
-                          title="Edit"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 cursor-pointer"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          disabled={busy}
-                          onClick={() => setPendingDeleteItem(item)}
-                          title="Delete"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-rose-600 hover:bg-rose-50 disabled:opacity-50 cursor-pointer"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  <p className="text-[15px] sm:text-sm font-semibold leading-relaxed text-slate-900 break-words">
-                    <MathText text={item.text} />
-                  </p>
-                </div>
-
-                <div className="grid gap-1.5 sm:grid-cols-2 text-[13px] sm:text-xs">
-                  {item.options.map((opt, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 ${
-                        idx === item.correct_index
-                          ? "border-emerald-300 bg-emerald-50 font-semibold text-emerald-900"
-                          : "border-slate-200 bg-slate-50 text-slate-700"
-                      }`}
-                    >
-                      {idx === item.correct_index && (
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                      )}
-                      <span className="min-w-0 break-words">
-                        <MathText text={opt} />
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })
+          filtered.slice(0, visibleCount).map((item) => (
+            <QuestionBankCard
+              key={item.id}
+              item={item}
+              isOwner={item.teacher_id === teacherId}
+              selected={selectedIds.includes(item.id)}
+              busy={busy}
+              onSelectChange={(checked) => {
+                setSelectedIds((prev) =>
+                  checked ? [...prev, item.id] : prev.filter((id) => id !== item.id),
+                );
+              }}
+              onToggleVisibility={() => void handleToggleVisibility(item)}
+              onEdit={() => startEdit(item)}
+              onRequestDelete={() => setPendingDeleteItem(item)}
+            />
+          ))
         )}
         {filtered.length > visibleCount && (
           <div className="flex justify-center pt-1">
@@ -756,6 +900,52 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
         busy={busy}
         onCancel={() => setConfirmBulkDeleteOpen(false)}
         onConfirm={() => void handleBulkDelete()}
+      />
+
+      {selectedIds.length > 0 && (
+        <div className="no-print fixed inset-x-3 bottom-[calc(4.1rem+env(safe-area-inset-bottom))] z-30 flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white/95 px-3 py-2 shadow-xl backdrop-blur sm:hidden text-xs">
+          <span className="font-semibold text-navy shrink-0">
+            {t(`${selectedIds.length}টি নির্বাচিত`, `${selectedIds.length} selected`)}
+          </span>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void handleBulkVisibility("shared")}
+              className="inline-flex min-h-[38px] items-center gap-1 rounded-xl border border-emerald-300 bg-emerald-50 px-2.5 py-1.5 font-semibold text-emerald-800 cursor-pointer"
+            >
+              <Globe className="h-3.5 w-3.5" />
+              <span>{t("Share", "Share")}</span>
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void handleBulkVisibility("private")}
+              className="inline-flex min-h-[38px] items-center gap-1 rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 font-semibold text-slate-700 cursor-pointer"
+            >
+              <Lock className="h-3.5 w-3.5" />
+              <span>{t("Private", "Private")}</span>
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setConfirmBulkDeleteOpen(true)}
+              aria-label={t("নির্বাচিত মুছুন", "Delete selected")}
+              className="inline-flex min-h-[38px] min-w-[38px] items-center justify-center rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-1.5 font-semibold text-rose-700 cursor-pointer"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      <StatusToast
+        message={error ?? message}
+        tone={error ? "error" : "success"}
+        onDismiss={() => {
+          setError(null);
+          setMessage(null);
+        }}
       />
     </div>
   );
