@@ -626,7 +626,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
                     </div>
 
                     {isOwner && (
-                      <div className="flex items-center gap-1 shrink-0">
+                      <div className="ml-auto flex items-center gap-1 shrink-0">
                         <button
                           type="button"
                           onClick={() => handleToggleVisibility(item)}
