@@ -8,7 +8,7 @@ export default async function PrivacyPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar ctx={ctx} />
-      <main className="mx-auto w-full max-w-3xl flex-1 space-y-6 px-4 py-10">
+      <main className="mx-auto w-full max-w-4xl flex-1 space-y-6 px-4 py-10">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-navy">Privacy &amp; Data Retention Notice</h1>
           <p className="text-sm text-slate-600">

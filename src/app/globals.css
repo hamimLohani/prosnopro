@@ -53,6 +53,11 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  :focus-visible {
+    outline: 2px solid var(--navy);
+    outline-offset: 2px;
+  }
+
   select {
     appearance: none;
     -webkit-appearance: none;

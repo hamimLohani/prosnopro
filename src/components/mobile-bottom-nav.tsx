@@ -82,8 +82,12 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
         }`}
       >
         {items.map((item) => {
+          const isTeacherExamDetail =
+            item.href === "/teacher" &&
+            pathname.startsWith("/teacher/exams/") &&
+            !pathname.startsWith("/teacher/exams/new");
           const active = item.exact
-            ? pathname === item.href
+            ? pathname === item.href || isTeacherExamDetail
             : pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
             <Link

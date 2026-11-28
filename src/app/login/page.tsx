@@ -20,7 +20,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center gap-5 px-4 py-10">
+      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center gap-5 px-4 py-10">
         {!configured && (
           <div className="w-full max-w-md">
             <SetupBanner />

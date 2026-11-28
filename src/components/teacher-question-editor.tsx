@@ -23,6 +23,7 @@ import { useMemo, useState } from "react";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { MathText } from "@/components/math-text";
 import { SearchableSubjectSelect } from "@/components/searchable-subject-select";
+import { StatusToast } from "@/components/status-toast";
 import { CLASS_OPTIONS } from "@/lib/academic-options";
 import type { DraftMcqQuestion } from "@/lib/ai/schema";
 import { parseBulkMcqText } from "@/lib/bulk-mcq";
@@ -1813,6 +1814,15 @@ export function TeacherQuestionEditor({
         onCancel={() => setPendingDeleteQuestion(null)}
         onConfirm={() => {
           if (pendingDeleteQuestion) void handleDelete(pendingDeleteQuestion);
+        }}
+      />
+
+      <StatusToast
+        message={error ?? message}
+        tone={error ? "error" : "success"}
+        onDismiss={() => {
+          setError(null);
+          setMessage(null);
         }}
       />
     </div>

@@ -1,0 +1,49 @@
+"use client";
+
+import { AlertTriangle, RotateCcw } from "lucide-react";
+import Link from "next/link";
+import { useEffect } from "react";
+
+export default function GlobalError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
+      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 text-center shadow-sm space-y-4">
+        <div className="mx-auto inline-flex rounded-2xl bg-rose-100 p-3 text-rose-600">
+          <AlertTriangle className="h-7 w-7" />
+        </div>
+        <div className="space-y-1.5">
+          <h1 className="text-xl font-bold text-slate-900">কিছু একটা সমস্যা হয়েছে</h1>
+          <p className="text-sm text-slate-600">
+            পেজটি লোড করার সময় অপ্রত্যাশিত একটি ত্রুটি ঘটেছে। দয়া করে আবার চেষ্টা করুন।
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
+          <button
+            type="button"
+            onClick={reset}
+            className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong cursor-pointer"
+          >
+            <RotateCcw className="h-4 w-4" />
+            <span>আবার চেষ্টা করুন</span>
+          </button>
+          <Link
+            href="/"
+            className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Home-এ যান
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

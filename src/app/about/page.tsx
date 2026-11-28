@@ -9,7 +9,7 @@ export default async function AboutPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar ctx={ctx} />
-      <main className="mx-auto w-full max-w-3xl flex-1 space-y-6 px-3 py-6 sm:px-4 sm:py-10">
+      <main className="mx-auto w-full max-w-4xl flex-1 space-y-6 px-3 py-6 sm:px-4 sm:py-10">
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">
             About ProsnoPro

@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { StatusToast } from "@/components/status-toast";
 import { TeacherCodeInput } from "@/components/teacher-code-input";
 import { PROVIDER_CATALOG, type AiProviderId } from "@/lib/ai/providers";
 import { createClient } from "@/lib/supabase/client";
@@ -588,6 +589,17 @@ export function TeacherSettingsForm({
           } else if (confirmAiAction === "save") {
             void executeSaveAiKey();
           }
+        }}
+      />
+
+      <StatusToast
+        message={error ?? aiError ?? status ?? aiStatus}
+        tone={error || aiError ? "error" : "success"}
+        onDismiss={() => {
+          setError(null);
+          setAiError(null);
+          setStatus(null);
+          setAiStatus(null);
         }}
       />
     </div>

@@ -21,7 +21,7 @@ export default async function TeacherSettingsPage({ searchParams }: TeacherSetti
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="mx-auto w-full max-w-3xl px-4 py-10">
+        <main className="mx-auto w-full max-w-4xl px-4 py-10">
           <SetupBanner />
         </main>
       </div>
@@ -40,7 +40,7 @@ export default async function TeacherSettingsPage({ searchParams }: TeacherSetti
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar ctx={ctx} />
-      <main className="mx-auto w-full max-w-3xl flex-1 space-y-5 sm:space-y-6 px-3 py-5 sm:px-4 sm:py-8">
+      <main className="mx-auto w-full max-w-4xl flex-1 space-y-5 sm:space-y-6 px-3 py-5 sm:px-4 sm:py-8">
         <div className="flex flex-wrap items-center justify-between gap-2.5">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-navy">Settings</h1>

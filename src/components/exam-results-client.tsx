@@ -13,6 +13,7 @@ import {
 import { useRouter } from "next/navigation";
 import { Fragment, useState } from "react";
 import { MathText } from "@/components/math-text";
+import { StatusToast } from "@/components/status-toast";
 import { formatTimeTaken, type ExamAnalyticsSummary } from "@/lib/analytics";
 import { createClient } from "@/lib/supabase/client";
 import type { AttemptDetail, Exam, Question } from "@/lib/types";
@@ -497,6 +498,12 @@ export function ExamResultsClient({
           </div>
         )}
       </section>
+
+      <StatusToast
+        message={statusMessage}
+        tone="success"
+        onDismiss={() => setStatusMessage(null)}
+      />
     </div>
   );
 }
