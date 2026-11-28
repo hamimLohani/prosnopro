@@ -69,6 +69,7 @@ export function TeacherQuestionEditor({
   // Question Bank import state
   const [bankKeyword, setBankKeyword] = useState("");
   const [bankSubject, setBankSubject] = useState("");
+  const [bankClass, setBankClass] = useState("");
   const [selectedBankIds, setSelectedBankIds] = useState<string[]>([]);
   const [importingBank, setImportingBank] = useState(false);
   const [savingToBankKey, setSavingToBankKey] = useState<string | null>(null);
@@ -692,17 +693,19 @@ export function TeacherQuestionEditor({
   const filteredBank = useMemo(() => {
     const kw = bankKeyword.trim().toLowerCase();
     const subj = bankSubject.trim().toLowerCase();
+    const cls = bankClass.trim().toLowerCase();
     return initialBankItems.filter((item) => {
       if (item.medium !== exam.medium) return false;
       if (item.options.length !== optionCount) return false;
       if (subj && !item.subject.toLowerCase().includes(subj)) return false;
+      if (cls && !item.class.toLowerCase().includes(cls)) return false;
       if (kw) {
         const hay = `${item.text} ${item.subject} ${item.class} ${item.tags.join(" ")}`.toLowerCase();
         if (!hay.includes(kw)) return false;
       }
       return true;
     });
-  }, [bankKeyword, bankSubject, exam.medium, initialBankItems, optionCount]);
+  }, [bankClass, bankKeyword, bankSubject, exam.medium, initialBankItems, optionCount]);
 
   async function handleImportFromBank() {
     if (selectedBankIds.length === 0) return;
@@ -1021,7 +1024,7 @@ export function TeacherQuestionEditor({
                   </Link>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-3">
                   <div className="relative">
                     <Search className="pointer-events-none absolute left-3 top-3.5 sm:top-3 h-4 w-4 text-slate-400" />
                     <input
@@ -1032,13 +1035,24 @@ export function TeacherQuestionEditor({
                       className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-base sm:text-sm"
                     />
                   </div>
-                  <input
-                    type="text"
+                  <SearchableSubjectSelect
                     value={bankSubject}
-                    onChange={(e) => setBankSubject(e.target.value)}
-                    placeholder="Filter by subject..."
-                    className="h-11 sm:h-[42px] rounded-lg border border-slate-300 px-3 py-2 text-base sm:text-sm"
+                    onChange={setBankSubject}
+                    placeholder="All Subjects"
+                    searchPlaceholder="Search subject..."
                   />
+                  <select
+                    value={bankClass}
+                    onChange={(e) => setBankClass(e.target.value)}
+                    className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base sm:text-sm"
+                  >
+                    <option value="">All Classes</option>
+                    {CLASS_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 {filteredBank.length === 0 ? (
