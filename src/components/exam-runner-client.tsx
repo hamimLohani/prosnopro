@@ -103,6 +103,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
   const serverOffsetMsRef = useRef<number>(0);
   const submittingRef = useRef<boolean>(false);
   const takenOverRef = useRef<boolean>(false);
+  const headerRef = useRef<HTMLElement | null>(null);
 
   const persistLocalDraft = useCallback((attId: string, nextAnswers: Record<string, number>, seq: number) => {
     try {
@@ -530,9 +531,18 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
 
   function jumpToQuestion(questionId: string) {
     setShowNavDrawer(false);
-    document.getElementById(`question-${questionId}`)?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
+    // Wait for the mobile nav drawer to collapse and relayout before measuring scroll offset.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const el = document.getElementById(`question-${questionId}`);
+        if (!el) return;
+        const headerHeight = headerRef.current?.getBoundingClientRect().height ?? 72;
+        const targetTop = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+        window.scrollTo({
+          top: Math.max(0, targetTop),
+          behavior: "smooth",
+        });
+      });
     });
   }
 
@@ -624,7 +634,7 @@ export function ExamRunnerClient({ examId }: ExamRunnerClientProps) {
         </ConfirmModal>
 
         {/* Sticky Top Exam Bar */}
-        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <header ref={headerRef} className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-2.5 px-3 py-2.5 sm:px-4 sm:py-3">
             <div className="min-w-0">
               <h1 className="truncate text-sm font-bold text-navy sm:text-base">
