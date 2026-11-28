@@ -183,7 +183,7 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
               className="inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
             >
               <Printer className="h-3.5 w-3.5 shrink-0 text-slate-600" />
-              <span>Print Paper</span>
+              <span>Print ও Export</span>
             </Link>
           </div>
 

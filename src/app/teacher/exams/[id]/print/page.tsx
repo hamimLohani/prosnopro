@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { MathText } from "@/components/math-text";
-import { PrintTriggerButton } from "@/components/print-trigger-button";
+import { PrintExportActions } from "@/components/print-export-actions";
 import { computeExamAnalytics, formatTimeTaken } from "@/lib/analytics";
 import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
 import type { AttemptDetail, Exam, Question } from "@/lib/types";
@@ -47,16 +47,14 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
       .eq("exam_id", exam.id)
       .order("position", { ascending: true })
       .returns<Question[]>(),
-    mode === "results"
-      ? supabase
-          .from("attempts")
-          .select(
-            "id, exam_id, student_id, student_name, student_roll, started_at, deadline_at, submitted_at, status, answers, draft_answers, score, total_marks, violation_counts",
-          )
-          .eq("exam_id", exam.id)
-          .order("score", { ascending: false, nullsFirst: false })
-          .returns<AttemptDetail[]>()
-      : Promise.resolve({ data: [] as AttemptDetail[] }),
+    supabase
+      .from("attempts")
+      .select(
+        "id, exam_id, student_id, student_name, student_roll, started_at, deadline_at, submitted_at, status, answers, draft_answers, score, total_marks, violation_counts",
+      )
+      .eq("exam_id", exam.id)
+      .order("score", { ascending: false, nullsFirst: false })
+      .returns<AttemptDetail[]>(),
   ]);
 
   const qList = questions ?? [];
@@ -66,41 +64,45 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
 
   return (
     <div className="min-h-screen bg-slate-100 py-4 px-3 sm:py-8 sm:px-4 print:bg-white print:p-0">
-      <div className="no-print mx-auto mb-4 sm:mb-6 flex max-w-4xl flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <Link
-            href={`/teacher/exams/${exam.id}/print?mode=paper`}
-            className={`inline-flex min-h-[34px] items-center rounded-lg px-3 py-1.5 font-semibold ${
-              mode === "paper" ? "bg-navy text-white" : "bg-slate-100 text-slate-700"
-            }`}
-          >
-            Question Paper
-          </Link>
-          <Link
-            href={`/teacher/exams/${exam.id}/print?mode=key`}
-            className={`inline-flex min-h-[34px] items-center rounded-lg px-3 py-1.5 font-semibold ${
-              mode === "key" ? "bg-navy text-white" : "bg-slate-100 text-slate-700"
-            }`}
-          >
-            Answer Key
-          </Link>
-          <Link
-            href={`/teacher/exams/${exam.id}/print?mode=results`}
-            className={`inline-flex min-h-[34px] items-center rounded-lg px-3 py-1.5 font-semibold ${
-              mode === "results" ? "bg-navy text-white" : "bg-slate-100 text-slate-700"
-            }`}
-          >
-            Results Sheet
-          </Link>
+      <div className="no-print mx-auto mb-4 sm:mb-6 flex max-w-4xl flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={`/teacher/exams/${exam.id}/print?mode=paper`}
+              className={`inline-flex min-h-[34px] items-center rounded-lg px-3 py-1.5 font-semibold ${
+                mode === "paper" ? "bg-navy text-white" : "bg-slate-100 text-slate-700"
+              }`}
+            >
+              Question Paper
+            </Link>
+            <Link
+              href={`/teacher/exams/${exam.id}/print?mode=key`}
+              className={`inline-flex min-h-[34px] items-center rounded-lg px-3 py-1.5 font-semibold ${
+                mode === "key" ? "bg-navy text-white" : "bg-slate-100 text-slate-700"
+              }`}
+            >
+              Answer Key
+            </Link>
+            <Link
+              href={`/teacher/exams/${exam.id}/print?mode=results`}
+              className={`inline-flex min-h-[34px] items-center rounded-lg px-3 py-1.5 font-semibold ${
+                mode === "results" ? "bg-navy text-white" : "bg-slate-100 text-slate-700"
+              }`}
+            >
+              Results Sheet
+            </Link>
+          </div>
           <Link
             href={`/teacher/exams/${exam.id}/results`}
-            className="inline-flex min-h-[34px] items-center ml-1 font-semibold text-navy hover:underline"
+            className="inline-flex min-h-[34px] items-center font-semibold text-navy hover:underline"
           >
             ← Result-এ ফিরে যান
           </Link>
         </div>
 
-        <PrintTriggerButton />
+        <div className="border-t border-slate-100 pt-3">
+          <PrintExportActions exam={exam} questions={qList} attempts={attemptList} />
+        </div>
       </div>
 
       <article className="print-only-sheet mx-auto max-w-4xl rounded-2xl border border-slate-200 bg-white p-4 sm:p-8 shadow-sm">

@@ -6,20 +6,14 @@ import {
   ChevronDown,
   ChevronUp,
   Copy,
-  Download,
-  FileSpreadsheet,
-  FileText,
   Loader2,
-  Printer,
   RefreshCw,
   Send,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Fragment, useState } from "react";
 import { MathText } from "@/components/math-text";
 import { formatTimeTaken, type ExamAnalyticsSummary } from "@/lib/analytics";
-import { exportQuestionsDocx, exportResultsCsv, exportResultsExcel } from "@/lib/exports";
 import { createClient } from "@/lib/supabase/client";
 import type { AttemptDetail, Exam, Question } from "@/lib/types";
 
@@ -45,7 +39,6 @@ export function ExamResultsClient({
 }: ExamResultsClientProps) {
   const router = useRouter();
   const [expandedAttemptId, setExpandedAttemptId] = useState<string | null>(null);
-  const [exportBusy, setExportBusy] = useState<string | null>(null);
   const [releasing, setReleasing] = useState(false);
   const [regrading, setRegrading] = useState(false);
   const [meritCopied, setMeritCopied] = useState(false);
@@ -94,24 +87,6 @@ export function ExamResultsClient({
     if (!error) {
       setStatusMessage(`${Number(data ?? 0)}টি Submit করা Attempt পুনরায় মূল্যায়ন (Re-grade) করা হয়েছে।`);
       router.refresh();
-    }
-  }
-
-  async function handleExcelExport() {
-    setExportBusy("xlsx");
-    try {
-      await exportResultsExcel(exam, attempts);
-    } finally {
-      setExportBusy(null);
-    }
-  }
-
-  async function handleDocxExport(includeAnswers: boolean) {
-    setExportBusy(includeAnswers ? "docx-key" : "docx-paper");
-    try {
-      await exportQuestionsDocx(exam, questions, includeAnswers);
-    } finally {
-      setExportBusy(null);
     }
   }
 
@@ -186,97 +161,6 @@ export function ExamResultsClient({
           <p className="mt-1 text-2xl font-bold text-rose-700">
             {analytics.lowestScore !== null ? analytics.lowestScore : "—"}
           </p>
-        </div>
-      </section>
-
-      {/* Client-Side Exports */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 space-y-4">
-        <h2 className="text-base font-bold text-navy">Result ও প্রশ্নপত্র Export করুন</h2>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Result Export
-            </p>
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => exportResultsCsv(exam, attempts)}
-                className="inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-              >
-                <Download className="h-3.5 w-3.5 shrink-0" />
-                <span>CSV (Excel)</span>
-              </button>
-              <button
-                type="button"
-                disabled={exportBusy !== null}
-                onClick={handleExcelExport}
-                className="inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
-              >
-                {exportBusy === "xlsx" ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
-                ) : (
-                  <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
-                )}
-                <span>Excel (.xlsx)</span>
-              </button>
-              <Link
-                href={`/teacher/exams/${exam.id}/print?mode=results`}
-                className="col-span-2 sm:col-span-1 inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                <Printer className="h-3.5 w-3.5 text-navy shrink-0" />
-                <span>PDF (Print)</span>
-              </Link>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              প্রশ্নপত্র ও Answer Key
-            </p>
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
-              <Link
-                href={`/teacher/exams/${exam.id}/print?mode=paper`}
-                className="inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                <Printer className="h-3.5 w-3.5 text-navy shrink-0" />
-                <span>Paper PDF</span>
-              </Link>
-              <Link
-                href={`/teacher/exams/${exam.id}/print?mode=key`}
-                className="inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                <Printer className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
-                <span>Key PDF</span>
-              </Link>
-              <button
-                type="button"
-                disabled={exportBusy !== null}
-                onClick={() => handleDocxExport(false)}
-                className="inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
-              >
-                {exportBusy === "docx-paper" ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
-                ) : (
-                  <FileText className="h-3.5 w-3.5 text-navy shrink-0" />
-                )}
-                <span>Paper (.docx)</span>
-              </button>
-              <button
-                type="button"
-                disabled={exportBusy !== null}
-                onClick={() => handleDocxExport(true)}
-                className="inline-flex min-h-[40px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
-              >
-                {exportBusy === "docx-key" ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
-                ) : (
-                  <FileText className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
-                )}
-                <span>Key (.docx)</span>
-              </button>
-            </div>
-          </div>
         </div>
       </section>
 
