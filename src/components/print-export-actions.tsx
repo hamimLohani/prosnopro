@@ -6,12 +6,13 @@ import { exportQuestionsDocx, exportResultsCsv, exportResultsExcel } from "@/lib
 import type { AttemptDetail, Exam, Question } from "@/lib/types";
 
 interface PrintExportActionsProps {
+  mode: "paper" | "key" | "results";
   exam: Exam;
   questions: Question[];
   attempts: AttemptDetail[];
 }
 
-export function PrintExportActions({ exam, questions, attempts }: PrintExportActionsProps) {
+export function PrintExportActions({ mode, exam, questions, attempts }: PrintExportActionsProps) {
   const [busy, setBusy] = useState<string | null>(null);
 
   async function handleExcel() {
@@ -34,28 +35,32 @@ export function PrintExportActions({ exam, questions, attempts }: PrintExportAct
 
   return (
     <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
-      <button
-        type="button"
-        onClick={() => exportResultsCsv(exam, attempts)}
-        className="inline-flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-      >
-        <Download className="h-3.5 w-3.5 shrink-0" />
-        <span>CSV (Excel)</span>
-      </button>
+      {mode === "results" && (
+        <>
+          <button
+            type="button"
+            onClick={() => exportResultsCsv(exam, attempts)}
+            className="inline-flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+          >
+            <Download className="h-3.5 w-3.5 shrink-0" />
+            <span>CSV (Excel)</span>
+          </button>
 
-      <button
-        type="button"
-        disabled={busy !== null}
-        onClick={handleExcel}
-        className="inline-flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
-      >
-        {busy === "xlsx" ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
-        ) : (
-          <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
-        )}
-        <span>Excel (.xlsx)</span>
-      </button>
+          <button
+            type="button"
+            disabled={busy !== null}
+            onClick={handleExcel}
+            className="inline-flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
+          >
+            {busy === "xlsx" ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
+            ) : (
+              <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
+            )}
+            <span>Excel (.xlsx)</span>
+          </button>
+        </>
+      )}
 
       <button
         type="button"

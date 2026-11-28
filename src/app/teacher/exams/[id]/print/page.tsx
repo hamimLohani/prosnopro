@@ -101,7 +101,7 @@ export default async function ExamPrintPage({ params, searchParams }: PrintPageP
         </div>
 
         <div className="border-t border-slate-100 pt-3">
-          <PrintExportActions exam={exam} questions={qList} attempts={attemptList} />
+          <PrintExportActions mode={mode} exam={exam} questions={qList} attempts={attemptList} />
         </div>
       </div>
 
