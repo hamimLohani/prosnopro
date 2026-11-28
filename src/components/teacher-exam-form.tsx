@@ -1,20 +1,18 @@
 "use client";
 
-import { BookOpen, ChevronDown, ChevronUp, Loader2, Lock, RefreshCw, Search } from "lucide-react";
-import Link from "next/link";
+import { ChevronDown, ChevronUp, Loader2, Lock, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { SearchableSubjectSelect } from "@/components/searchable-subject-select";
 import { CLASS_OPTIONS } from "@/lib/academic-options";
 import { createClient } from "@/lib/supabase/client";
-import type { Exam, ExamMedium, QuestionBankItem, ResultReleaseMode } from "@/lib/types";
+import type { Exam, ExamMedium, ResultReleaseMode } from "@/lib/types";
 import { generateExamCode, isValidExamCode, normalizeExamCode } from "@/lib/validation";
 
 interface TeacherExamFormProps {
   mode: "create" | "edit";
   exam?: Exam;
   hasAttempts?: boolean;
-  bankItems?: QuestionBankItem[];
 }
 
 function toLocalDateTimeInput(iso: string | null | undefined): string {
@@ -25,12 +23,7 @@ function toLocalDateTimeInput(iso: string | null | undefined): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-export function TeacherExamForm({
-  mode,
-  exam,
-  hasAttempts = false,
-  bankItems = [],
-}: TeacherExamFormProps) {
+export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExamFormProps) {
   const router = useRouter();
   const isEdit = mode === "edit" && Boolean(exam);
 
@@ -59,33 +52,9 @@ export function TeacherExamForm({
   const [showAnswers, setShowAnswers] = useState(exam?.show_answers ?? true);
   const [practiceSharing, setPracticeSharing] = useState(exam?.practice_sharing ?? false);
   const [showAdvanced, setShowAdvanced] = useState(isEdit);
-  const [showBankPicker, setShowBankPicker] = useState(false);
-  const [bankKeyword, setBankKeyword] = useState("");
-  const [selectedBankIds, setSelectedBankIds] = useState<string[]>([]);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const compatibleBank = useMemo(() => {
-    const parsedOpt = Number(optionsPerQuestion);
-    return bankItems.filter(
-      (item) => item.medium === medium && item.options.length === parsedOpt,
-    );
-  }, [bankItems, medium, optionsPerQuestion]);
-
-  const filteredBank = useMemo(() => {
-    const kw = bankKeyword.trim().toLowerCase();
-    if (!kw) return compatibleBank;
-    return compatibleBank.filter((item) => {
-      const hay = `${item.text} ${item.subject} ${item.class} ${item.tags.join(" ")}`.toLowerCase();
-      return hay.includes(kw);
-    });
-  }, [bankKeyword, compatibleBank]);
-
-  const selectedCompatibleIds = useMemo(() => {
-    const validSet = new Set(compatibleBank.map((b) => b.id));
-    return selectedBankIds.filter((id) => validSet.has(id));
-  }, [compatibleBank, selectedBankIds]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -210,8 +179,8 @@ export function TeacherExamForm({
       .select("id")
       .single<{ id: string }>();
 
+    setSaving(false);
     if (insertErr || !created) {
-      setSaving(false);
       setError(
         insertErr?.code === "23505"
           ? "You already have another exam with this Exam Code."
@@ -220,28 +189,6 @@ export function TeacherExamForm({
       return;
     }
 
-    const chosenBank = compatibleBank.filter((b) => selectedCompatibleIds.includes(b.id));
-    if (chosenBank.length > 0) {
-      const { error: qErr } = await supabase.from("questions").insert(
-        chosenBank.map((b, idx) => ({
-          exam_id: created.id,
-          position: idx,
-          text: b.text,
-          options: b.options,
-          correct_index: b.correct_index,
-          explanation: b.explanation,
-          marks: parsedMarks,
-          bank_id: b.id,
-        })),
-      );
-      if (qErr) {
-        setSaving(false);
-        setError(`Exam তৈরি হয়েছে, তবে Question Bank থেকে প্রশ্ন যোগ করতে সমস্যা হয়েছে: ${qErr.message}`);
-        return;
-      }
-    }
-
-    setSaving(false);
     router.push(`/teacher/exams/${created.id}/questions`);
     router.refresh();
   }
@@ -595,153 +542,6 @@ export function TeacherExamForm({
         </>
       )}
 
-      {!isEdit && (
-        <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setShowBankPicker((v) => !v)}
-            className="flex w-full items-center justify-between gap-3 p-4 sm:p-5 text-left hover:bg-slate-50 cursor-pointer"
-          >
-            <div className="flex items-start gap-3">
-              <div className="rounded-xl bg-navy/10 p-2 text-navy shrink-0">
-                <BookOpen className="h-4 w-4" />
-              </div>
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm sm:text-base font-bold text-navy">
-                    Question Bank থেকে প্রশ্ন যোগ করুন (ঐচ্ছিক)
-                  </span>
-                  {selectedCompatibleIds.length > 0 && (
-                    <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
-                      {selectedCompatibleIds.length}টি নির্বাচিত
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-slate-500">
-                  আপনার সংরক্ষিত প্রশ্ন ({compatibleBank.length}টি ম্যাচিং প্রশ্ন) থেকে সরাসরি বাছাই করুন।
-                </p>
-              </div>
-            </div>
-            {showBankPicker ? (
-              <ChevronUp className="h-4 w-4 text-slate-500 shrink-0" />
-            ) : (
-              <ChevronDown className="h-4 w-4 text-slate-500 shrink-0" />
-            )}
-          </button>
-
-          {showBankPicker && (
-            <div className="border-t border-slate-200 p-4 sm:p-5 space-y-3">
-              {bankItems.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center space-y-2">
-                  <p className="text-sm font-medium text-slate-700">
-                    আপনার Question Bank-এ এখনো কোনো প্রশ্ন নেই।
-                  </p>
-                  <Link
-                    href="/teacher/bank"
-                    className="inline-flex text-xs font-semibold text-navy hover:underline"
-                  >
-                    Question Bank-এ গিয়ে প্রশ্ন সংরক্ষণ করুন →
-                  </Link>
-                </div>
-              ) : compatibleBank.length === 0 ? (
-                <p className="rounded-xl bg-amber-50 border border-amber-200 px-3.5 py-2.5 text-xs text-amber-900">
-                  বর্তমান Medium ({medium === "bn" ? "বাংলা" : "English"}) ও {optionsPerQuestion} Option-এর সাথে মিলে এমন কোনো প্রশ্ন Question Bank-এ পাওয়া যায়নি।
-                </p>
-              ) : (
-                <>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                    <div className="relative flex-1">
-                      <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                      <input
-                        type="text"
-                        value={bankKeyword}
-                        onChange={(e) => setBankKeyword(e.target.value)}
-                        placeholder="Search question bank by text, subject, or class..."
-                        className="h-9 w-full rounded-lg border border-slate-300 pl-9 pr-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const allIds = filteredBank.map((b) => b.id);
-                          setSelectedBankIds((prev) => Array.from(new Set([...prev, ...allIds])));
-                        }}
-                        className="min-h-[36px] rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-                      >
-                        সবগুলো নির্বাচন ({filteredBank.length})
-                      </button>
-                      {selectedCompatibleIds.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => setSelectedBankIds([])}
-                          className="min-h-[36px] rounded-lg px-2.5 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-50 cursor-pointer"
-                        >
-                          মুছুন
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {filteredBank.length === 0 ? (
-                    <p className="py-4 text-center text-xs text-slate-500">
-                      সার্চ অনুযায়ী কোনো প্রশ্ন পাওয়া যায়নি।
-                    </p>
-                  ) : (
-                    <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
-                      {filteredBank.map((item) => {
-                        const checked = selectedCompatibleIds.includes(item.id);
-                        return (
-                          <label
-                            key={item.id}
-                            className={`flex items-start gap-3 rounded-xl border p-3 text-sm transition cursor-pointer ${
-                              checked
-                                ? "border-navy bg-navy/5"
-                                : "border-slate-200 bg-white hover:bg-slate-50"
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={(e) => {
-                                setSelectedBankIds((prev) =>
-                                  e.target.checked
-                                    ? [...prev, item.id]
-                                    : prev.filter((id) => id !== item.id),
-                                );
-                              }}
-                              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-navy"
-                            />
-                            <div className="min-w-0 flex-1 space-y-1">
-                              <p className="font-medium text-slate-900 line-clamp-2 break-words">
-                                {item.text}
-                              </p>
-                              <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500">
-                                {item.subject && (
-                                  <span className="rounded bg-slate-100 px-1.5 py-0.5 font-medium text-slate-700">
-                                    {item.subject}
-                                  </span>
-                                )}
-                                {item.class && (
-                                  <span className="rounded bg-slate-100 px-1.5 py-0.5 font-medium text-slate-700">
-                                    {item.class}
-                                  </span>
-                                )}
-                                <span>{item.options.length} Options</span>
-                              </div>
-                            </div>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          )}
-        </section>
-      )}
-
       <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3">
         <button
           type="button"
@@ -756,13 +556,7 @@ export function TeacherExamForm({
           className="inline-flex min-h-[44px] w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-navy px-5 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong disabled:opacity-60 cursor-pointer"
         >
           {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-          <span>
-            {isEdit
-              ? "Settings Save করুন"
-              : selectedCompatibleIds.length > 0
-                ? `Exam তৈরি ও ${selectedCompatibleIds.length}টি প্রশ্ন যোগ করুন`
-                : "Save করে প্রশ্ন যোগ করুন"}
-          </span>
+          <span>{isEdit ? "Settings Save করুন" : "Save করে প্রশ্ন যোগ করুন"}</span>
         </button>
       </div>
     </form>
