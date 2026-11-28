@@ -206,9 +206,10 @@ export function TeacherQuestionEditor({
             correct_index: correctIndex,
             explanation: explanation.trim() || null,
             subject: exam.subject,
+            class: exam.class ?? "",
             medium: exam.medium,
             source: "manual",
-            visibility: "private",
+            visibility: exam.practice_sharing ? "shared" : "private",
           })
           .select("id")
           .single<{ id: string }>();
@@ -494,7 +495,7 @@ export function TeacherQuestionEditor({
             class: aiClassLevel.trim(),
             medium: exam.medium,
             source: activeTab === "pdf" ? "pdf" : "ai",
-            visibility: "private",
+            visibility: exam.practice_sharing ? "shared" : "private",
           })),
         )
         .select("id")
@@ -655,7 +656,7 @@ export function TeacherQuestionEditor({
           class: exam.class ?? "",
           medium: exam.medium,
           source: "manual",
-          visibility: "private",
+          visibility: exam.practice_sharing ? "shared" : "private",
         })),
       )
       .select("id")

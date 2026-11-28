@@ -52,7 +52,9 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
   const [visibility, setVisibility] = useState<"private" | "shared">("private");
 
   const [busy, setBusy] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [pendingDeleteItem, setPendingDeleteItem] = useState<QuestionBankItem | null>(null);
+  const [confirmBulkDeleteOpen, setConfirmBulkDeleteOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -198,7 +200,73 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
     setPendingDeleteItem(null);
     if (!err) {
       setItems((prev) => prev.filter((it) => it.id !== item.id));
+      setSelectedIds((prev) => prev.filter((id) => id !== item.id));
     }
+  }
+
+  async function handleBulkVisibility(nextVisibility: "shared" | "private") {
+    if (selectedIds.length === 0) return;
+    const supabase = createClient();
+    if (!supabase) return;
+
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+    const { error: err } = await supabase
+      .from("question_bank")
+      .update({ visibility: nextVisibility })
+      .in("id", selectedIds)
+      .eq("teacher_id", teacherId);
+
+    setBusy(false);
+    if (err) {
+      setError(err.message);
+      return;
+    }
+
+    const idSet = new Set(selectedIds);
+    setItems((prev) =>
+      prev.map((it) => (idSet.has(it.id) ? { ...it, visibility: nextVisibility } : it)),
+    );
+    setMessage(
+      `${selectedIds.length}টি প্রশ্ন ${nextVisibility === "shared" ? "Shared" : "Private"} করা হয়েছে।`,
+    );
+    setSelectedIds([]);
+    router.refresh();
+  }
+
+  async function handleBulkDelete() {
+    if (selectedIds.length === 0) {
+      setConfirmBulkDeleteOpen(false);
+      return;
+    }
+    const supabase = createClient();
+    if (!supabase) {
+      setConfirmBulkDeleteOpen(false);
+      return;
+    }
+
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+    const { error: err } = await supabase
+      .from("question_bank")
+      .delete()
+      .in("id", selectedIds)
+      .eq("teacher_id", teacherId);
+
+    setBusy(false);
+    setConfirmBulkDeleteOpen(false);
+    if (err) {
+      setError(err.message);
+      return;
+    }
+
+    const idSet = new Set(selectedIds);
+    setItems((prev) => prev.filter((it) => !idSet.has(it.id)));
+    setMessage(`${selectedIds.length}টি প্রশ্ন Question Bank থেকে মুছে ফেলা হয়েছে।`);
+    setSelectedIds([]);
+    router.refresh();
   }
 
   const filtered = useMemo(() => {
@@ -219,6 +287,11 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
       return true;
     });
   }, [classFilter, items, keyword, mediumFilter, scope, subjectFilter, teacherId]);
+
+  const ownFilteredIds = useMemo(
+    () => filtered.filter((item) => item.teacher_id === teacherId).map((item) => item.id),
+    [filtered, teacherId],
+  );
 
   return (
     <div className="space-y-5 sm:space-y-6">
@@ -431,6 +504,64 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
         </div>
       </section>
 
+      {/* Bulk Selection Actions */}
+      {ownFilteredIds.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setSelectedIds(ownFilteredIds)}
+              className="min-h-[34px] rounded-lg border border-slate-300 bg-white px-3 py-1 font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+            >
+              সবগুলো নির্বাচন ({ownFilteredIds.length})
+            </button>
+            {selectedIds.length > 0 && (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => setSelectedIds([])}
+                className="min-h-[34px] rounded-lg px-2.5 py-1 font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer"
+              >
+                নির্বাচন মুছুন
+              </button>
+            )}
+          </div>
+
+          {selectedIds.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void handleBulkVisibility("shared")}
+                className="inline-flex min-h-[34px] items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1 font-semibold text-emerald-800 hover:bg-emerald-100 disabled:opacity-50 cursor-pointer"
+              >
+                <Globe className="h-3.5 w-3.5" />
+                <span>Shared করুন ({selectedIds.length})</span>
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void handleBulkVisibility("private")}
+                className="inline-flex min-h-[34px] items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1 font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
+              >
+                <Lock className="h-3.5 w-3.5" />
+                <span>Private করুন</span>
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => setConfirmBulkDeleteOpen(true)}
+                className="inline-flex min-h-[34px] items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1 font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-50 cursor-pointer"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>মুছুন ({selectedIds.length})</span>
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Results List */}
       <div className="space-y-3">
         {filtered.length === 0 ? (
@@ -448,6 +579,21 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                      {isOwner && (
+                        <input
+                          type="checkbox"
+                          aria-label="প্রশ্ন নির্বাচন করুন"
+                          checked={selectedIds.includes(item.id)}
+                          onChange={(e) => {
+                            setSelectedIds((prev) =>
+                              e.target.checked
+                                ? [...prev, item.id]
+                                : prev.filter((id) => id !== item.id),
+                            );
+                          }}
+                          className="mr-1 h-4 w-4 rounded border-slate-300 text-navy cursor-pointer"
+                        />
+                      )}
                       <span className="rounded bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">
                         {item.medium === "bn" ? "বাংলা" : "English"}
                       </span>
@@ -559,6 +705,16 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
         onConfirm={() => {
           if (pendingDeleteItem) void handleDelete(pendingDeleteItem);
         }}
+      />
+
+      <ConfirmModal
+        open={confirmBulkDeleteOpen}
+        title="নির্বাচিত প্রশ্নগুলো মুছে ফেলবেন?"
+        message={`আপনার Question Bank থেকে নির্বাচিত ${selectedIds.length}টি প্রশ্ন স্থায়ীভাবে মুছে ফেলতে চান?`}
+        confirmLabel="সবগুলো মুছুন"
+        busy={busy}
+        onCancel={() => setConfirmBulkDeleteOpen(false)}
+        onConfirm={() => void handleBulkDelete()}
       />
     </div>
   );
