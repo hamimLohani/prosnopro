@@ -5,8 +5,10 @@ import {
   ArrowDown,
   ArrowUp,
   BookOpen,
+  Check,
   CheckCircle2,
   ClipboardPaste,
+  Copy,
   FileUp,
   KeyRound,
   Loader2,
@@ -71,6 +73,7 @@ export function TeacherQuestionEditor({
 
   // Bulk Paste state (no AI key needed)
   const [bulkText, setBulkText] = useState("");
+  const [bulkPromptCopied, setBulkPromptCopied] = useState(false);
 
   // Question Bank import state
   const [bankKeyword, setBankKeyword] = useState("");
@@ -112,6 +115,62 @@ export function TeacherQuestionEditor({
   const [regrading, setRegrading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  function buildBulkFormatPrompt(): string {
+    const contextParts = [exam.subject, exam.class].filter(Boolean).join(" • ");
+    const targetLangBn = exam.medium === "bn" ? "বাংলায় (UTF-8)" : "English-এ";
+    const targetLangEn = exam.medium === "bn" ? "Bangla (UTF-8 Bengali script)" : "English";
+
+    if (lang === "bn") {
+      const sampleOptions = Array.from(
+        { length: optionCount },
+        (_, i) => `${optionLabel(i, exam.medium)}) বিকল্প ${i + 1}`,
+      ).join("\n");
+      const sampleAns = optionLabel(Math.min(1, optionCount - 1), exam.medium);
+
+      return [
+        `[বিষয়/Topic লিখুন] বিষয়ের উপর ${targetLangBn} ১০টি মানসম্মত MCQ প্রশ্ন তৈরি করুন${contextParts ? ` (${contextParts})` : ""}।`,
+        `প্রতিটি প্রশ্নে ঠিক ${optionCount}টি Option থাকতে হবে। Markdown বা Code block (***, \`\`\`) ছাড়া হুবহু নিচের ফরম্যাটে লিখুন এবং প্রতিটি প্রশ্নের মাঝে একটি ফাঁকা লাইন দিন (গণিতের সূত্রের জন্য $...$ ব্যবহার করুন):`,
+        "",
+        `1. এখানে প্রথম প্রশ্ন লিখুন?`,
+        sampleOptions,
+        `Ans: ${sampleAns}`,
+        `Ex: সংক্ষিপ্ত ব্যাখ্যা (ঐচ্ছিক)।`,
+      ].join("\n");
+    }
+
+    const sampleOptionsEn = Array.from(
+      { length: optionCount },
+      (_, i) => `${String.fromCharCode(65 + i)}) Option ${i + 1}`,
+    ).join("\n");
+    const sampleAnsEn = String.fromCharCode(65 + Math.min(1, optionCount - 1));
+
+    return [
+      `Create 10 high-quality MCQ questions in ${targetLangEn} on [TOPIC / CHAPTERS]${contextParts ? ` (${contextParts})` : ""}.`,
+      `Each question MUST have exactly ${optionCount} options. Return plain text in this EXACT format with no markdown bolding or code blocks, leaving one blank line between questions (use $...$ for math formulas):`,
+      "",
+      `1. Question text here?`,
+      sampleOptionsEn,
+      `Ans: ${sampleAnsEn}`,
+      `Ex: Brief explanation (optional).`,
+    ].join("\n");
+  }
+
+  async function handleCopyBulkPrompt() {
+    setError(null);
+    try {
+      await navigator.clipboard.writeText(buildBulkFormatPrompt());
+      setBulkPromptCopied(true);
+      setTimeout(() => setBulkPromptCopied(false), 2000);
+    } catch {
+      setError(
+        t(
+          "Clipboard-এ Copy করা যায়নি। অনুগ্রহ করে Browser permission চেক করুন।",
+          "Could not copy to clipboard. Please check browser permissions.",
+        ),
+      );
+    }
+  }
 
   function resetForm() {
     setEditingId(null);
@@ -969,21 +1028,40 @@ export function TeacherQuestionEditor({
             {/* TAB: Bulk Paste (No AI Key Needed) */}
             {activeTab === "paste" && !editingId && (
               <div className="space-y-4">
-                <div>
-                  <h2 className="text-base font-bold text-navy">
-                    {t(
-                      "Bulk Paste (কোনো AI Key ছাড়াই একসাথে প্রশ্ন যোগ করুন)",
-                      "Bulk Paste (Add multiple questions without an AI key)",
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2.5">
+                  <div>
+                    <h2 className="text-base font-bold text-navy">
+                      {t(
+                        "Bulk Paste (কোনো AI Key ছাড়াই একসাথে প্রশ্ন যোগ করুন)",
+                        "Bulk Paste (Add multiple questions without an AI key)",
+                      )}
+                    </h2>
+                    <p className="text-xs text-slate-500">
+                      {t(
+                        `Word, Notepad বা WhatsApp থেকে ${optionCount}-option MCQ কপি-পেস্ট করুন। প্রতিটি প্রশ্নের মাঝে একটি ফাঁকা লাইন দিন (ব্যাখ্যার জন্য ঐচ্ছিক`,
+                        `Copy and paste ${optionCount}-option MCQs from Word, Notepad, or WhatsApp. Leave a blank line between questions (optional`,
+                      )}{" "}
+                      <span className="font-mono font-semibold text-slate-700">Ex: ...</span>
+                      {t(" লিখুন)।", " for explanations).")}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => void handleCopyBulkPrompt()}
+                    className="inline-flex min-h-[38px] w-full sm:w-auto shrink-0 items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50 active:scale-[0.99] cursor-pointer"
+                  >
+                    {bulkPromptCopied ? (
+                      <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5 shrink-0" />
                     )}
-                  </h2>
-                  <p className="text-xs text-slate-500">
-                    {t(
-                      `Word, Notepad বা WhatsApp থেকে ${optionCount}-option MCQ কপি-পেস্ট করুন। প্রতিটি প্রশ্নের মাঝে একটি ফাঁকা লাইন দিন (ব্যাখ্যার জন্য ঐচ্ছিক`,
-                      `Copy and paste ${optionCount}-option MCQs from Word, Notepad, or WhatsApp. Leave a blank line between questions (optional`,
-                    )}{" "}
-                    <span className="font-mono font-semibold text-slate-700">Ex: ...</span>
-                    {t(" লিখুন)।", " for explanations).")}
-                  </p>
+                    <span>
+                      {bulkPromptCopied
+                        ? t("ফরম্যাট Prompt কপি হয়েছে", "Format Prompt Copied")
+                        : t("ফরম্যাট Prompt কপি করুন", "Copy Format Prompt")}
+                    </span>
+                  </button>
                 </div>
 
                 <textarea
