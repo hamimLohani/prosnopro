@@ -100,6 +100,33 @@ export default async function HomePage() {
               </ol>
             </div>
           </div>
+
+          {!ctx.userId && (
+            <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 space-y-3">
+              <h2 className="text-base font-bold text-navy">ProsnoPro সম্পর্কে (About)</h2>
+              <p className="text-sm leading-relaxed text-slate-600">
+                ProsnoPro (প্রশ্নপ্রো) বাংলাদেশি শিক্ষক ও শিক্ষার্থীদের জন্য তৈরি একটি মোবাইল-বান্ধব বাংলা ও
+                English অনলাইন MCQ পরীক্ষা প্ল্যাটফর্ম। দুর্বল 3G/4G নেটওয়ার্কেও উত্তর ফোনে Save থাকে,
+                গণিত ও বিজ্ঞানের সূত্র (KaTeX) সুন্দরভাবে দেখায় এবং শিক্ষকরা নিজস্ব AI Key দিয়েও দ্রুত
+                প্রশ্ন তৈরি করতে পারেন।
+              </p>
+              <div className="flex flex-wrap items-center gap-2.5 pt-1">
+                <Link
+                  href="/privacy"
+                  className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  <ShieldCheck className="h-4 w-4 text-emerald-700" />
+                  <span>Privacy Notice</span>
+                </Link>
+                <Link
+                  href="/about"
+                  className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  <span>বিস্তারিত জানুন (About)</span>
+                </Link>
+              </div>
+            </div>
+          )}
         </section>
       </main>
 

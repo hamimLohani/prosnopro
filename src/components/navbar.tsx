@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
-import { MobileSidebar } from "@/components/mobile-sidebar";
 import { NavLink } from "@/components/nav-link";
 import { SignOutButton } from "@/components/sign-out-button";
 import type { CurrentUserContext } from "@/lib/types";
@@ -71,14 +70,6 @@ export function Navbar({ ctx }: NavbarProps) {
               </Link>
             </>
           )}
-
-          <MobileSidebar
-            userId={ctx?.userId ?? null}
-            name={ctx?.profile?.name ?? null}
-            email={ctx?.email ?? null}
-            role={role}
-            teacherCode={ctx?.teacherProfile?.teacher_code ?? null}
-          />
         </nav>
         </div>
       </header>

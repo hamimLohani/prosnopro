@@ -1,7 +1,9 @@
+import { Info, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { SetupBanner } from "@/components/setup-banner";
+import { SignOutButton } from "@/components/sign-out-button";
 import { TeacherSettingsForm } from "@/components/teacher-settings-form";
 import { isValidProvider } from "@/lib/ai/providers";
 import { isEncryptionConfigured } from "@/lib/crypto";
@@ -65,6 +67,33 @@ export default async function TeacherSettingsPage({ searchParams }: TeacherSetti
           serverEncryptionReady={isAdminClientConfigured() && isEncryptionConfigured()}
           returnTo={safeReturnTo}
         />
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-3">
+          <div className="space-y-1">
+            <h2 className="text-base font-bold text-navy">About ও Privacy Notice</h2>
+            <p className="text-xs sm:text-sm text-slate-600">
+              ProsnoPro (প্রশ্নপ্রো) — বাংলাদেশি শিক্ষক ও শিক্ষার্থীদের জন্য মোবাইল-বান্ধব বাংলা ও English
+              অনলাইন MCQ Exam প্ল্যাটফর্ম। আপনার BYOK AI Key AES-256-GCM এনক্রিপশনে সুরক্ষিত থাকে।
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Link
+              href="/about"
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              <Info className="h-4 w-4 text-navy" />
+              <span>About ProsnoPro</span>
+            </Link>
+            <Link
+              href="/privacy"
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              <ShieldCheck className="h-4 w-4 text-emerald-700" />
+              <span>Privacy Notice</span>
+            </Link>
+            <SignOutButton className="sm:hidden min-h-[40px]" />
+          </div>
+        </section>
       </main>
     </div>
   );

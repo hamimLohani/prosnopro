@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { SetupBanner } from "@/components/setup-banner";
+import { SignOutButton } from "@/components/sign-out-button";
 import { StudentJoinForm } from "@/components/student-join-form";
 import { createClient, getCurrentUserContext } from "@/lib/supabase/server";
 import type { AttemptStatus } from "@/lib/types";
@@ -69,6 +70,7 @@ export default async function StudentDashboardPage({ searchParams }: StudentDash
               {ctx.profile.institution ? ` • ${ctx.profile.institution}` : ""}
             </p>
           </div>
+          <SignOutButton className="sm:hidden border-white/25 bg-white/10 text-white hover:bg-white/20" />
         </section>
 
         <StudentJoinForm initialTeacherCode={sp.t ?? ""} initialExamCode={sp.e ?? ""} />
