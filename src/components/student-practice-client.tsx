@@ -3,10 +3,10 @@
 import { ArrowRight, CheckCircle2, Eye, EyeOff, Loader2, Search, ShieldAlert, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { ClassSelect } from "@/components/class-select";
 import { useLang } from "@/components/language-provider";
 import { MathText } from "@/components/math-text";
 import { SearchableSubjectSelect } from "@/components/searchable-subject-select";
-import { CLASS_OPTIONS, getAcademicOptionLabel } from "@/lib/academic-options";
 import { pickText } from "@/lib/i18n";
 import type { ExamMedium } from "@/lib/types";
 
@@ -160,18 +160,13 @@ export function StudentPracticeClient({
           placeholder="All Subjects"
           searchPlaceholder="Search subject..."
         />
-        <select
+        <ClassSelect
           value={classLevel}
-          onChange={(e) => setClassLevel(e.target.value)}
-          className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base sm:text-sm"
-        >
-          <option value="">All Classes</option>
-          {CLASS_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {getAcademicOptionLabel(opt, lang)}
-            </option>
-          ))}
-        </select>
+          onChange={setClassLevel}
+          allowCustom={false}
+          placeholder="All Classes"
+          searchPlaceholder="Search class..."
+        />
         <div className="flex gap-2">
           <select
             value={medium}

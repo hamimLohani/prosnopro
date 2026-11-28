@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { CLASS_OPTIONS, getAcademicOptionLabel } from "@/lib/academic-options";
 import { ClassSelect } from "@/components/class-select";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { useLang } from "@/components/language-provider";
@@ -501,18 +500,13 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
           placeholder="All Subjects"
           searchPlaceholder="Search subject..."
         />
-        <select
+        <ClassSelect
           value={classFilter}
-          onChange={(e) => setClassFilter(e.target.value)}
-          className="h-11 sm:h-[42px] rounded-lg border border-slate-300 bg-white px-3 py-2 text-base sm:text-sm"
-        >
-          <option value="">All Classes</option>
-          {CLASS_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {getAcademicOptionLabel(opt, lang)}
-            </option>
-          ))}
-        </select>
+          onChange={setClassFilter}
+          allowCustom={false}
+          placeholder="All Classes"
+          searchPlaceholder="Search class..."
+        />
         <div className="grid grid-cols-2 gap-2">
           <select
             value={mediumFilter}

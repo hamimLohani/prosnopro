@@ -28,7 +28,6 @@ import { useLang } from "@/components/language-provider";
 import { MathText } from "@/components/math-text";
 import { SearchableSubjectSelect } from "@/components/searchable-subject-select";
 import { StatusToast } from "@/components/status-toast";
-import { CLASS_OPTIONS, getAcademicOptionLabel } from "@/lib/academic-options";
 import type { DraftMcqQuestion } from "@/lib/ai/schema";
 import { parseBulkMcqText } from "@/lib/bulk-mcq";
 import { pickText } from "@/lib/i18n";
@@ -1165,18 +1164,13 @@ export function TeacherQuestionEditor({
                     placeholder="All Subjects"
                     searchPlaceholder="Search subject..."
                   />
-                  <select
+                  <ClassSelect
                     value={bankClass}
-                    onChange={(e) => setBankClass(e.target.value)}
-                    className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base sm:text-sm"
-                  >
-                    <option value="">All Classes</option>
-                    {CLASS_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {getAcademicOptionLabel(opt, lang)}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setBankClass}
+                    allowCustom={false}
+                    placeholder="All Classes"
+                    searchPlaceholder="Search class..."
+                  />
                 </div>
 
                 {filteredBank.length === 0 ? (

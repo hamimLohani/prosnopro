@@ -3,8 +3,8 @@
 import { Clock, HelpCircle, Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { ClassSelect } from "@/components/class-select";
 import { useLang } from "@/components/language-provider";
-import { CLASS_OPTIONS, getAcademicOptionLabel } from "@/lib/academic-options";
 import { pickText } from "@/lib/i18n";
 import type { Exam, ExamStatus } from "@/lib/types";
 
@@ -71,18 +71,14 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
               className="h-10 w-full rounded-lg border border-slate-300 pl-9 pr-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
           </div>
-          <select
+          <ClassSelect
             value={classFilter}
-            onChange={(e) => setClassFilter(e.target.value)}
-            className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-          >
-            <option value="">All Classes</option>
-            {CLASS_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {getAcademicOptionLabel(opt, lang)}
-              </option>
-            ))}
-          </select>
+            onChange={setClassFilter}
+            allowCustom={false}
+            placeholder="All Classes"
+            searchPlaceholder="Search class..."
+            buttonClassName="h-10"
+          />
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">
