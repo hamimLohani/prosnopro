@@ -62,7 +62,7 @@ export function TeacherSettingsForm({
   const [hasKey, setHasKey] = useState(initialHasKey);
   const [keyHint, setKeyHint] = useState<string | null>(initialKeyHint);
   const [aiBusy, setAiBusy] = useState<"save" | "test" | "remove" | null>(null);
-  const [confirmRemoveKeyOpen, setConfirmRemoveKeyOpen] = useState(false);
+  const [confirmAiAction, setConfirmAiAction] = useState<"save" | "test" | "remove" | null>(null);
   const [aiStatus, setAiStatus] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
 
@@ -146,7 +146,7 @@ export function TeacherSettingsForm({
     setAiError(null);
   }
 
-  async function handleSaveAiKey(e: React.FormEvent) {
+  function handleSaveAiKey(e: React.FormEvent) {
     e.preventDefault();
     setAiStatus(null);
     setAiError(null);
@@ -156,6 +156,10 @@ export function TeacherSettingsForm({
       return;
     }
 
+    setConfirmAiAction("save");
+  }
+
+  async function executeSaveAiKey() {
     setAiBusy("save");
     try {
       const res = await fetch("/api/teacher/ai-key", {
@@ -190,6 +194,7 @@ export function TeacherSettingsForm({
       setAiError("AI Key Save করার সময় Network সমস্যা হয়েছে।");
     } finally {
       setAiBusy(null);
+      setConfirmAiAction(null);
     }
   }
 
@@ -216,6 +221,7 @@ export function TeacherSettingsForm({
       setAiError("Key টেস্ট করার সময় Network সমস্যা হয়েছে।");
     } finally {
       setAiBusy(null);
+      setConfirmAiAction(null);
     }
   }
 
@@ -239,7 +245,7 @@ export function TeacherSettingsForm({
       setAiError("Key মুছে ফেলার সময় Network সমস্যা হয়েছে।");
     } finally {
       setAiBusy(null);
-      setConfirmRemoveKeyOpen(false);
+      setConfirmAiAction(null);
     }
   }
 
@@ -507,7 +513,7 @@ export function TeacherSettingsForm({
               <button
                 type="button"
                 disabled={!serverEncryptionReady || aiBusy !== null}
-                onClick={handleTestSavedKey}
+                onClick={() => setConfirmAiAction("test")}
                 className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
               >
                 {aiBusy === "test" && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -517,7 +523,7 @@ export function TeacherSettingsForm({
               <button
                 type="button"
                 disabled={!serverEncryptionReady || aiBusy !== null}
-                onClick={() => setConfirmRemoveKeyOpen(true)}
+                onClick={() => setConfirmAiAction("remove")}
                 className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-50 cursor-pointer"
               >
                 {aiBusy === "remove" ? (
@@ -547,13 +553,42 @@ export function TeacherSettingsForm({
       </form>
 
       <ConfirmModal
-        open={confirmRemoveKeyOpen}
-        title="AI API Key মুছে ফেলবেন?"
-        message="আপনার সংরক্ষিত AI API Key মুছে ফেলতে চান? Manual প্রশ্ন ও Question Bank আগের মতোই কাজ করবে।"
-        confirmLabel="Key মুছুন"
-        busy={aiBusy === "remove"}
-        onCancel={() => setConfirmRemoveKeyOpen(false)}
-        onConfirm={() => void handleRemoveKey()}
+        open={confirmAiAction !== null}
+        tone={confirmAiAction === "remove" ? "danger" : "primary"}
+        title={
+          confirmAiAction === "remove"
+            ? "AI API Key মুছে ফেলবেন?"
+            : confirmAiAction === "test"
+              ? "সংরক্ষিত AI Key টেস্ট করবেন?"
+              : hasKey && !apiKeyInput.trim()
+                ? "Provider / Model Update করবেন?"
+                : "API Key Save করবেন?"
+        }
+        message={
+          confirmAiAction === "remove"
+            ? "আপনার সংরক্ষিত AI API Key মুছে ফেলতে চান? Manual প্রশ্ন ও Question Bank আগের মতোই কাজ করবে।"
+            : confirmAiAction === "test"
+              ? `সংরক্ষিত ${providerMeta.label} Key ও ${aiModel.trim() || providerMeta.defaultTextModel} মডেল দিয়ে একটি পরীক্ষামূলক কানেকশন যাচাই করা হবে।`
+              : `${providerMeta.label} (${aiModel.trim() || providerMeta.defaultTextModel}) সেটিংস সেভ করতে চান?`
+        }
+        confirmLabel={
+          confirmAiAction === "remove"
+            ? "Key মুছুন"
+            : confirmAiAction === "test"
+              ? "হ্যাঁ, টেস্ট করুন"
+              : "নিশ্চিত করে Save করুন"
+        }
+        busy={aiBusy !== null}
+        onCancel={() => setConfirmAiAction(null)}
+        onConfirm={() => {
+          if (confirmAiAction === "remove") {
+            void handleRemoveKey();
+          } else if (confirmAiAction === "test") {
+            void handleTestSavedKey();
+          } else if (confirmAiAction === "save") {
+            void executeSaveAiKey();
+          }
+        }}
       />
     </div>
   );
