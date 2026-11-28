@@ -30,3 +30,20 @@ Explanation: Basic addition
   assert.equal(drafts[1].correct_index, 1);
   assert.equal(drafts[1].explanation, "Basic addition");
 });
+
+test("parseBulkMcqText supports optional Ex: prefix for explanations", () => {
+  const input = `
+1. Which gas is most abundant in Earth's atmosphere?
+A) Oxygen
+B) Nitrogen
+C) Carbon dioxide
+D) Argon
+Ans: B
+Ex: Nitrogen makes up about 78% of Earth's atmosphere.
+  `;
+
+  const drafts = parseBulkMcqText(input, 4, 1);
+  assert.equal(drafts.length, 1);
+  assert.equal(drafts[0].correct_index, 1);
+  assert.equal(drafts[0].explanation, "Nitrogen makes up about 78% of Earth's atmosphere.");
+});

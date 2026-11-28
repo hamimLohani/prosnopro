@@ -954,7 +954,7 @@ export function TeacherQuestionEditor({
                   </h2>
                   <p className="text-xs text-slate-500">
                     Word, Notepad বা WhatsApp থেকে {optionCount}-option MCQ কপি-পেস্ট করুন। প্রতিটি
-                    প্রশ্নের মাঝে একটি ফাঁকা লাইন দিন।
+                    প্রশ্নের মাঝে একটি ফাঁকা লাইন দিন (ব্যাখ্যার জন্য ঐচ্ছিক <span className="font-mono font-semibold text-slate-700">Ex: ...</span> লিখুন)।
                   </p>
                 </div>
 
@@ -962,7 +962,7 @@ export function TeacherQuestionEditor({
                   rows={8}
                   value={bulkText}
                   onChange={(e) => setBulkText(e.target.value)}
-                  placeholder={`1. বাংলাদেশের রাজধানী কোথায়?\nক) চট্টগ্রাম\nখ) ঢাকা\nগ) খুলনা\nঘ) রাজশাহী\nAns: খ`}
+                  placeholder={`1. বাংলাদেশের রাজধানী কোথায়?\nক) চট্টগ্রাম\nখ) ঢাকা\nগ) খুলনা\nঘ) রাজশাহী\nAns: খ\nEx: ঢাকা বাংলাদেশের রাজধানী ও বৃহত্তম শহর।`}
                   className="w-full rounded-lg border border-slate-300 px-3 py-2.5 font-mono text-xs sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
                 />
 
@@ -971,7 +971,7 @@ export function TeacherQuestionEditor({
                     type="button"
                     onClick={() =>
                       setBulkText(
-                        `1. বাংলাদেশের রাজধানী কোথায়?\nক) চট্টগ্রাম\nখ) ঢাকা\nগ) খুলনা\nঘ) রাজশাহী\nAns: খ\n\n2. নিউটনের গতির দ্বিতীয় সূত্র কোনটি?\nক) F = ma\nখ) E = mc²\nগ) V = IR\nঘ) PV = nRT\nAns: ক`,
+                        `1. বাংলাদেশের রাজধানী কোথায়?\nক) চট্টগ্রাম\nখ) ঢাকা\nগ) খুলনা\nঘ) রাজশাহী\nAns: খ\nEx: ঢাকা বাংলাদেশের রাজধানী।\n\n2. নিউটনের গতির দ্বিতীয় সূত্র কোনটি?\nক) F = ma\nখ) E = mc²\nগ) V = IR\nঘ) PV = nRT\nAns: ক`,
                       )
                     }
                     className="text-xs font-semibold text-navy hover:underline cursor-pointer"

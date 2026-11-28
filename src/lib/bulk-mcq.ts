@@ -2,6 +2,7 @@ import type { DraftMcqQuestion } from "@/lib/ai/schema";
 
 const OPTION_PREFIX_RE = /^(?:[ক-চ]|[A-Fa-f]|[1-6])[).:\-]\s*(.+)$/;
 const ANSWER_LINE_RE = /^(?:ans(?:wer)?|correct|উত্তর)\s*[:\-]\s*(.+)$/i;
+const EXPLANATION_LINE_RE = /^(?:explanation|exp|ex|ব্যাখ্যা)\s*[:\-]\s*(.*)$/i;
 const QUESTION_NUM_RE = /^(?:q?\d+[).:\-]|প্রশ্ন\s*\d*[).:\-])\s*(.+)$/i;
 
 const LETTER_MAP: Record<string, number> = {
@@ -76,8 +77,9 @@ export function parseBulkMcqText(
         continue;
       }
 
-      if (/^(?:explanation|ব্যাখ্যা)\s*[:\-]/i.test(line)) {
-        explanation = line.replace(/^(?:explanation|ব্যাখ্যা)\s*[:\-]\s*/i, "").trim() || null;
+      const expMatch = line.match(EXPLANATION_LINE_RE);
+      if (expMatch) {
+        explanation = expMatch[1].trim() || null;
         continue;
       }
 
