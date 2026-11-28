@@ -98,3 +98,20 @@ export function analyzeBanglaPdfText(rawText: string): BanglaPdfAnalysis {
       "Clean English/ASCII text detected. Safe to send extracted text directly to your AI provider.",
   };
 }
+
+const JOIN_ERROR_MAP: Record<string, string> = {
+  UNAUTHORIZED: "Exam-এ জয়েন করতে আগে Sign in করুন।",
+  FORBIDDEN: "শুধুমাত্র Student অ্যাকাউন্ট থেকে Exam-এ জয়েন করা যাবে।",
+  RATE_LIMITED: "অনেকবার ভুল Code দেওয়া হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।",
+  EXAM_NOT_FOUND: "Teacher Code বা Exam Code সঠিক নয়। আবার যাচাই করুন।",
+  EXAM_CLOSED: "এই Exam-টি ইতিমধ্যে বন্ধ (Closed) করা হয়েছে।",
+  NOT_OPEN_YET: "এই Exam-টি এখনো শুরু হয়নি।",
+  PAST_CLOSE_TIME: "এই Exam-এর নির্ধারিত সময় শেষ হয়ে গেছে।",
+};
+
+export function localizeJoinError(code?: string, fallbackMessage?: string): string {
+  if (code && JOIN_ERROR_MAP[code]) {
+    return JOIN_ERROR_MAP[code];
+  }
+  return fallbackMessage || "Exam-এ জয়েন করা যায়নি। Code যাচাই করে আবার চেষ্টা করুন।";
+}

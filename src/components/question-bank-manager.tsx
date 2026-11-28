@@ -24,9 +24,12 @@ interface QuestionBankManagerProps {
   initialItems: QuestionBankItem[];
 }
 
+const BANK_PAGE_SIZE = 30;
+
 export function QuestionBankManager({ teacherId, initialItems }: QuestionBankManagerProps) {
   const router = useRouter();
   const [items, setItems] = useState<QuestionBankItem[]>(initialItems);
+  const [visibleCount, setVisibleCount] = useState(BANK_PAGE_SIZE);
 
   // Filters
   const [scope, setScope] = useState<"all" | "mine" | "shared">("all");
@@ -435,7 +438,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
             Question Bank-এ মিলে যায় এমন কোনো প্রশ্ন পাওয়া যায়নি।
           </div>
         ) : (
-          filtered.map((item) => {
+          filtered.slice(0, visibleCount).map((item) => {
             const isOwner = item.teacher_id === teacherId;
             return (
               <div
@@ -532,6 +535,17 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
               </div>
             );
           })
+        )}
+        {filtered.length > visibleCount && (
+          <div className="flex justify-center pt-1">
+            <button
+              type="button"
+              onClick={() => setVisibleCount((c) => c + BANK_PAGE_SIZE)}
+              className="min-h-[40px] rounded-xl border border-slate-300 bg-white px-5 py-2 text-xs sm:text-sm font-semibold text-navy hover:bg-slate-50 cursor-pointer"
+            >
+              আরও দেখুন ({filtered.length - visibleCount}টি বাকি)
+            </button>
+          </div>
         )}
       </div>
 

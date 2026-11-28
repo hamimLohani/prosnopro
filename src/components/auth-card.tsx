@@ -13,9 +13,15 @@ interface AuthCardProps {
   mode: "login" | "signup-teacher" | "signup-student";
   configured: boolean;
   initialError?: string | null;
+  nextPath?: string | null;
 }
 
-export function AuthCard({ mode, configured, initialError = null }: AuthCardProps) {
+export function AuthCard({
+  mode,
+  configured,
+  initialError = null,
+  nextPath = null,
+}: AuthCardProps) {
   const router = useRouter();
   const isLogin = mode === "login";
   const role: UserRole | null =
@@ -44,8 +50,11 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
 
     setLoadingGoogle(true);
     const origin = window.location.origin;
-    const callbackUrl = role
-      ? `${origin}/auth/callback?role=${encodeURIComponent(role)}`
+    const cbParams = new URLSearchParams();
+    if (role) cbParams.set("role", role);
+    if (nextPath) cbParams.set("next", nextPath);
+    const callbackUrl = cbParams.toString()
+      ? `${origin}/auth/callback?${cbParams.toString()}`
       : `${origin}/auth/callback`;
 
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
@@ -93,7 +102,7 @@ export function AuthCard({ mode, configured, initialError = null }: AuthCardProp
       if (!profile) {
         router.push("/onboarding");
       } else {
-        router.push(profile.role === "teacher" ? "/teacher" : "/student");
+        router.push(nextPath || (profile.role === "teacher" ? "/teacher" : "/student"));
       }
       router.refresh();
       return;

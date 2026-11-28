@@ -6,12 +6,16 @@ import { getSupabaseEnv } from "@/lib/env";
 export const dynamic = "force-dynamic";
 
 interface LoginPageProps {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; next?: string }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const { configured } = getSupabaseEnv();
   const params = await searchParams;
+  const safeNext =
+    params.next && params.next.startsWith("/") && !params.next.startsWith("//")
+      ? params.next
+      : null;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -22,7 +26,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <SetupBanner />
           </div>
         )}
-        <AuthCard mode="login" configured={configured} initialError={params.error ?? null} />
+        <AuthCard
+          mode="login"
+          configured={configured}
+          initialError={params.error ?? null}
+          nextPath={safeNext}
+        />
       </main>
     </div>
   );

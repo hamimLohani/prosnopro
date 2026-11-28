@@ -3,16 +3,20 @@
 import { Clock, HelpCircle, Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { CLASS_OPTIONS } from "@/lib/academic-options";
 import type { Exam, ExamStatus } from "@/lib/types";
 
 interface TeacherExamListProps {
   exams: Exam[];
 }
 
+const EXAM_PAGE_SIZE = 20;
+
 export function TeacherExamList({ exams }: TeacherExamListProps) {
   const [keyword, setKeyword] = useState("");
   const [classFilter, setClassFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | ExamStatus>("all");
+  const [visibleCount, setVisibleCount] = useState(EXAM_PAGE_SIZE);
 
   const filtered = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
@@ -58,13 +62,18 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
               className="h-10 w-full rounded-lg border border-slate-300 pl-9 pr-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
             />
           </div>
-          <input
-            type="text"
+          <select
             value={classFilter}
             onChange={(e) => setClassFilter(e.target.value)}
-            placeholder="Filter by class (e.g. HSC)"
-            className="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-          />
+            className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
+          >
+            <option value="">All Classes</option>
+            {CLASS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">
@@ -97,12 +106,13 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
           আপনার সার্চ অনুযায়ী কোনো Exam পাওয়া যায়নি।
         </div>
       ) : (
-        <div className="grid gap-3">
-          {filtered.map((exam) => (
-            <div
-              key={exam.id}
-              className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-            >
+        <>
+          <div className="grid gap-3">
+            {filtered.slice(0, visibleCount).map((exam) => (
+              <div
+                key={exam.id}
+                className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+              >
               <div className="min-w-0 space-y-1.5">
                 <div className="flex flex-wrap items-center gap-2">
                   <Link
@@ -169,7 +179,19 @@ export function TeacherExamList({ exams }: TeacherExamListProps) {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+          {filtered.length > visibleCount && (
+            <div className="flex justify-center pt-1">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((c) => c + EXAM_PAGE_SIZE)}
+                className="min-h-[40px] rounded-xl border border-slate-300 bg-white px-5 py-2 text-xs sm:text-sm font-semibold text-navy hover:bg-slate-50 cursor-pointer"
+              >
+                আরও দেখুন ({filtered.length - visibleCount}টি বাকি)
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

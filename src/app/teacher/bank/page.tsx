@@ -30,7 +30,7 @@ export default async function TeacherBankPage() {
         .from("question_bank")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(200)
+        .limit(1000)
         .returns<QuestionBankItem[]>()
     : { data: [] };
 

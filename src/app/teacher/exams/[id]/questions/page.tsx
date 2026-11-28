@@ -45,7 +45,7 @@ export default async function ExamQuestionsPage({ params }: QuestionsPageProps) 
         .from("question_bank")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(150)
+        .limit(1000)
         .returns<QuestionBankItem[]>(),
     ]);
 

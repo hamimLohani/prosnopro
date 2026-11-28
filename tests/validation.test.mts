@@ -5,6 +5,7 @@ import {
   generateExamCode,
   isValidExamCode,
   isValidTeacherCode,
+  localizeJoinError,
   normalizeExamCode,
   normalizeTeacherCode,
 } from "../src/lib/validation.ts";
@@ -45,4 +46,10 @@ test("analyzeBanglaPdfText detects Unicode Bangla, English, Bijoy, and empty sca
 
   const scanned = analyzeBanglaPdfText("   ");
   assert.equal(scanned.classification, "empty-scanned");
+});
+
+test("localizeJoinError maps known RPC codes to Bangla messages", () => {
+  assert.match(localizeJoinError("EXAM_NOT_FOUND", "Exam not found"), /Teacher Code/);
+  assert.match(localizeJoinError("RATE_LIMITED", "Too many attempts"), /অপেক্ষা|কিছুক্ষণ/);
+  assert.equal(localizeJoinError("UNKNOWN", "Custom error"), "Custom error");
 });

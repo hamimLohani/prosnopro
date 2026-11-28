@@ -44,7 +44,7 @@ export default async function ExamMonitorPage({ params }: MonitorPageProps) {
       .select("*")
       .eq("exam_id", exam.id)
       .order("created_at", { ascending: false })
-      .limit(200)
+      .limit(1000)
       .returns<EntryEvent[]>(),
   ]);
 

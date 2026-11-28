@@ -35,11 +35,18 @@ export default async function StudentDashboardPage({ searchParams }: StudentDash
     );
   }
 
-  if (!ctx.userId) redirect("/login");
+  const sp = await searchParams;
+
+  if (!ctx.userId) {
+    const qs = new URLSearchParams();
+    if (sp.t) qs.set("t", sp.t);
+    if (sp.e) qs.set("e", sp.e);
+    const nextPath = qs.toString() ? `/student?${qs.toString()}` : "/student";
+    redirect(`/login?next=${encodeURIComponent(nextPath)}`);
+  }
   if (!ctx.profile) redirect("/onboarding");
   if (ctx.profile.role !== "student") redirect("/teacher");
 
-  const sp = await searchParams;
   const supabase = await createClient();
   if (supabase) {
     await supabase.rpc("finalize_expired_attempts");

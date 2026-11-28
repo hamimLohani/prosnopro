@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getClientIp } from "@/lib/request-ip";
 import { createClient } from "@/lib/supabase/server";
-import { normalizeExamCode, normalizeTeacherCode } from "@/lib/validation";
+import { localizeJoinError, normalizeExamCode, normalizeTeacherCode } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -46,7 +46,10 @@ export async function POST(request: NextRequest) {
           : result?.code === "RATE_LIMITED"
             ? 429
             : 400;
-    return NextResponse.json(result, { status });
+    return NextResponse.json(
+      { ...result, message: localizeJoinError(result?.code, result?.message) },
+      { status },
+    );
   }
 
   return NextResponse.json(result);
