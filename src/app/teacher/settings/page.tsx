@@ -76,22 +76,24 @@ export default async function TeacherSettingsPage({ searchParams }: TeacherSetti
               অনলাইন MCQ Exam প্ল্যাটফর্ম। আপনার BYOK AI Key AES-256-GCM এনক্রিপশনে সুরক্ষিত থাকে।
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5">
             <Link
               href="/about"
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 whitespace-nowrap"
             >
-              <Info className="h-4 w-4 text-navy" />
+              <Info className="h-4 w-4 shrink-0 text-navy" />
               <span>About ProsnoPro</span>
             </Link>
             <Link
               href="/privacy"
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 whitespace-nowrap"
             >
-              <ShieldCheck className="h-4 w-4 text-emerald-700" />
+              <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-700" />
               <span>Privacy Notice</span>
             </Link>
-            <SignOutButton className="sm:hidden min-h-[40px]" />
+            <div className="col-span-2 sm:hidden">
+              <SignOutButton className="w-full min-h-[42px] rounded-xl border-rose-200 text-rose-700 hover:bg-rose-50" />
+            </div>
           </div>
         </section>
       </main>
