@@ -10,6 +10,7 @@ interface SearchableSubjectSelectProps {
   onChange: (value: string) => void;
   placeholder?: string;
   searchPlaceholder?: string;
+  allowCustom?: boolean;
   className?: string;
 }
 
@@ -19,6 +20,7 @@ export function SearchableSubjectSelect({
   onChange,
   placeholder = "বিষয় নির্বাচন করুন",
   searchPlaceholder = "Search subject...",
+  allowCustom = true,
   className = "",
 }: SearchableSubjectSelectProps) {
   const [open, setOpen] = useState(false);
@@ -62,6 +64,15 @@ export function SearchableSubjectSelect({
   }, [query]);
 
   const hasLegacyValue = Boolean(value && !SUBJECT_OPTIONS.some((o) => o.value === value));
+  const trimmedQuery = query.trim();
+  const hasExactMatch = Boolean(
+    trimmedQuery &&
+      SUBJECT_OPTIONS.some(
+        (o) =>
+          o.value.toLowerCase() === trimmedQuery.toLowerCase() ||
+          o.label.toLowerCase() === trimmedQuery.toLowerCase(),
+      ),
+  );
 
   function handleSelect(nextValue: string) {
     onChange(nextValue);
@@ -136,8 +147,8 @@ export function SearchableSubjectSelect({
             )}
 
             {filtered.length === 0 ? (
-              <p className="px-3 py-3 text-center text-xs text-slate-500">
-                No matching subject found.
+              <p className="px-3 py-2 text-center text-xs text-slate-500">
+                No matching preset subject found.
               </p>
             ) : (
               filtered.map((opt) => {
@@ -160,6 +171,16 @@ export function SearchableSubjectSelect({
                   </button>
                 );
               })
+            )}
+
+            {allowCustom && trimmedQuery && !hasExactMatch && (
+              <button
+                type="button"
+                onClick={() => handleSelect(trimmedQuery)}
+                className="mt-1 flex w-full items-center justify-between rounded-lg border border-dashed border-navy/30 bg-navy/5 px-2.5 py-2 text-left text-xs font-semibold text-navy hover:bg-navy/10 cursor-pointer"
+              >
+                <span className="truncate">+ Custom: &ldquo;{trimmedQuery}&rdquo;</span>
+              </button>
             )}
           </div>
         </div>

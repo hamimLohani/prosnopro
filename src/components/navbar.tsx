@@ -1,15 +1,19 @@
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
+import { LanguageToggle } from "@/components/language-toggle";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { NavLink } from "@/components/nav-link";
 import { SignOutButton } from "@/components/sign-out-button";
+import { pickText } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n-server";
 import type { CurrentUserContext } from "@/lib/types";
 
 interface NavbarProps {
   ctx?: CurrentUserContext | null;
 }
 
-export function Navbar({ ctx }: NavbarProps) {
+export async function Navbar({ ctx }: NavbarProps) {
+  const lang = await getServerLang();
   const role = ctx?.profile?.role ?? null;
   const dashboardHref =
     role === "teacher" ? "/teacher" : role === "student" ? "/student" : "/onboarding";
@@ -28,7 +32,11 @@ export function Navbar({ ctx }: NavbarProps) {
                 exact
                 className={ctx.profile ? "hidden sm:inline-flex" : "inline-flex"}
               >
-                {ctx.profile ? (role === "teacher" ? "Teacher Home" : "Student Home") : "Setup সম্পন্ন করুন"}
+                {ctx.profile
+                  ? role === "teacher"
+                    ? "Teacher Home"
+                    : "Student Home"
+                  : pickText(lang, "Setup সম্পন্ন করুন", "Complete Setup")}
               </NavLink>
 
               {role === "teacher" && (
@@ -45,7 +53,7 @@ export function Navbar({ ctx }: NavbarProps) {
               {role === "student" && (
                 <>
                   <NavLink href="/student/results" className="hidden sm:inline-flex">
-                    আমার Result
+                    {pickText(lang, "আমার Result", "My Results")}
                   </NavLink>
                   <NavLink href="/student/practice" className="hidden sm:inline-flex">
                     Practice
@@ -55,6 +63,7 @@ export function Navbar({ ctx }: NavbarProps) {
               <NavLink href="/about" className="hidden sm:inline-flex">
                 About
               </NavLink>
+              <LanguageToggle />
               <SignOutButton className={ctx.profile ? "hidden sm:inline-flex" : ""} />
             </>
           ) : (
@@ -62,11 +71,12 @@ export function Navbar({ ctx }: NavbarProps) {
               <NavLink href="/about" className="hidden sm:inline-flex">
                 About
               </NavLink>
+              <LanguageToggle />
               <Link
                 href="/signup"
                 className="inline-flex min-h-[36px] sm:min-h-[38px] items-center rounded-lg bg-navy px-3 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-navy-strong whitespace-nowrap"
               >
-                শুরু করুন
+                {pickText(lang, "শুরু করুন", "Get Started")}
               </Link>
             </>
           )}

@@ -11,6 +11,8 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { useLang } from "@/components/language-provider";
+import { pickText } from "@/lib/i18n";
 import type { UserRole } from "@/lib/types";
 
 interface MobileBottomNavProps {
@@ -26,19 +28,20 @@ interface BottomNavItem {
 
 export function MobileBottomNav({ role }: MobileBottomNavProps) {
   const pathname = usePathname();
+  const { lang } = useLang();
 
   const items: BottomNavItem[] =
     role === "teacher"
       ? [
           {
             href: "/teacher",
-            label: "আমার Exam",
+            label: pickText(lang, "আমার Exam", "My Exams"),
             exact: true,
             icon: <LayoutDashboard className="h-4 w-4 shrink-0" />,
           },
           {
             href: "/teacher/exams/new",
-            label: "নতুন Exam",
+            label: pickText(lang, "নতুন Exam", "New Exam"),
             icon: <PlusCircle className="h-4 w-4 shrink-0" />,
           },
           {
@@ -55,7 +58,7 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
       : [
           {
             href: "/student",
-            label: "জয়েন",
+            label: pickText(lang, "জয়েন", "Join"),
             exact: true,
             icon: <LayoutDashboard className="h-4 w-4 shrink-0" />,
           },

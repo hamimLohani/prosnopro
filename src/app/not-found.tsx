@@ -1,8 +1,13 @@
 import { FileQuestion } from "lucide-react";
 import Link from "next/link";
 import { Navbar } from "@/components/navbar";
+import { pickText } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n-server";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const lang = await getServerLang();
+  const t = (bn: string, en: string) => pickText(lang, bn, en);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -13,16 +18,21 @@ export default function NotFound() {
           </div>
           <div className="space-y-1.5">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">404</p>
-            <h1 className="text-xl font-bold text-navy">পেজটি পাওয়া যায়নি</h1>
+            <h1 className="text-xl font-bold text-navy">
+              {t("পেজটি পাওয়া যায়নি", "Page not found")}
+            </h1>
             <p className="text-sm text-slate-600">
-              আপনি যে লিংকটি খুঁজছেন তা সরানো হয়েছে অথবা ঠিকানাটি সঠিক নয়।
+              {t(
+                "আপনি যে লিংকটি খুঁজছেন তা সরানো হয়েছে অথবা ঠিকানাটি সঠিক নয়।",
+                "The link you are looking for may have been moved or does not exist.",
+              )}
             </p>
           </div>
           <Link
             href="/"
             className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-navy px-5 py-2.5 text-sm font-semibold text-white hover:bg-navy-strong"
           >
-            Home-এ ফিরে যান
+            {t("Home-এ ফিরে যান", "Back to Home")}
           </Link>
         </div>
       </main>

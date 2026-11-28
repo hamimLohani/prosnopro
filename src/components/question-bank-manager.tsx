@@ -13,6 +13,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { CLASS_OPTIONS } from "@/lib/academic-options";
+import { ClassSelect } from "@/components/class-select";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { SearchableSubjectSelect } from "@/components/searchable-subject-select";
 import { MathText } from "@/components/math-text";
@@ -382,21 +383,11 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
               onChange={setSubject}
               placeholder="Subject (বিষয়)"
             />
-            <select
+            <ClassSelect
               value={classLevel}
-              onChange={(e) => setClassLevel(e.target.value)}
-              className="h-11 sm:h-[42px] rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm"
-            >
-              <option value="">Class / শ্রেণি</option>
-              {classLevel && !CLASS_OPTIONS.some((o) => o.value === classLevel) && (
-                <option value={classLevel}>{classLevel}</option>
-              )}
-              {CLASS_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              onChange={setClassLevel}
+              placeholder="Class / Level"
+            />
             <select
               value={medium}
               onChange={(e) => setMedium(e.target.value as ExamMedium)}
@@ -467,6 +458,7 @@ export function QuestionBankManager({ teacherId, initialItems }: QuestionBankMan
         <SearchableSubjectSelect
           value={subjectFilter}
           onChange={setSubjectFilter}
+          allowCustom={false}
           placeholder="All Subjects"
           searchPlaceholder="Search subject..."
         />

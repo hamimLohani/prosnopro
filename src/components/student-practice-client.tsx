@@ -138,6 +138,7 @@ export function StudentPracticeClient({
         <SearchableSubjectSelect
           value={subject}
           onChange={setSubject}
+          allowCustom={false}
           placeholder="All Subjects"
           searchPlaceholder="Search subject..."
         />

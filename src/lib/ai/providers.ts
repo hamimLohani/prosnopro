@@ -414,8 +414,15 @@ export async function generateMcqDrafts(params: {
   notes: string;
 }): Promise<DraftMcqQuestion[]> {
   const languageLabel = params.medium === "bn" ? "Bangla (UTF-8 Bengali script)" : "English";
+  const isUniversity = /university|undergraduate|masters|postgraduate|engineering|medical|mbbs|bba|mba|honours|diploma|semester|cse|eee|llb/i.test(
+    `${params.classLevel} ${params.subject}`,
+  );
+  const curriculumContext = isUniversity
+    ? "university / higher-education academic standards"
+    : "the Bangladesh NCTB curriculum (when applicable)";
+
   const systemPrompt = [
-    "You are an expert exam question setter aligned with the Bangladesh NCTB curriculum.",
+    `You are an expert exam question setter aligned with ${curriculumContext}.`,
     "Return ONLY valid JSON matching this exact shape:",
     `{"questions":[{"text":"...","options":["..."],"correct_index":0,"explanation":"...","marks":${params.defaultMarks}}]}`,
     `Every question MUST have exactly ${params.optionsPerQuestion} plausible, distinct options with only 1 unambiguously correct answer—avoid "All of the above" or "None of the above".`,

@@ -3,8 +3,8 @@
 import { ChevronDown, ChevronUp, Loader2, Lock, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ClassSelect } from "@/components/class-select";
 import { SearchableSubjectSelect } from "@/components/searchable-subject-select";
-import { CLASS_OPTIONS } from "@/lib/academic-options";
 import { createClient } from "@/lib/supabase/client";
 import type { Exam, ExamMedium, ResultReleaseMode } from "@/lib/types";
 import { generateExamCode, isValidExamCode, normalizeExamCode } from "@/lib/validation";
@@ -246,25 +246,14 @@ export function TeacherExamForm({ mode, exam, hasAttempts = false }: TeacherExam
 
           <div className="space-y-1.5">
             <label htmlFor="exam-class" className="block text-sm font-medium text-slate-700">
-              Class / শ্রেণি
+              Class / Level (শ্রেণি / লেভেল)
             </label>
-            <select
+            <ClassSelect
               id="exam-class"
               required
               value={classLevel}
-              onChange={(e) => setClassLevel(e.target.value)}
-              className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-            >
-              <option value="">Class নির্বাচন করুন</option>
-              {classLevel && !CLASS_OPTIONS.some((o) => o.value === classLevel) && (
-                <option value={classLevel}>{classLevel}</option>
-              )}
-              {CLASS_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              onChange={setClassLevel}
+            />
           </div>
 
           <div className="space-y-1.5">

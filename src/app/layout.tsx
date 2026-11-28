@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_Bengali, Plus_Jakarta_Sans } from "next/font/google";
+import { LanguageProvider } from "@/components/language-provider";
+import { getServerLang } from "@/lib/i18n-server";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -41,14 +43,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const lang = await getServerLang();
+
   return (
     <html
-      lang="bn"
+      lang={lang}
       className={`${jakarta.variable} ${notoBengali.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col overflow-x-clip bg-background text-foreground">
-        {children}
+        <LanguageProvider initialLang={lang}>{children}</LanguageProvider>
       </body>
     </html>
   );

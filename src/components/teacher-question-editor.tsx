@@ -20,6 +20,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { ClassSelect } from "@/components/class-select";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { MathText } from "@/components/math-text";
 import { SearchableSubjectSelect } from "@/components/searchable-subject-select";
@@ -1040,6 +1041,7 @@ export function TeacherQuestionEditor({
                   <SearchableSubjectSelect
                     value={bankSubject}
                     onChange={setBankSubject}
+                    allowCustom={false}
                     placeholder="All Subjects"
                     searchPlaceholder="Search subject..."
                   />
@@ -1314,24 +1316,13 @@ export function TeacherQuestionEditor({
                     <div className="grid gap-4 sm:grid-cols-3">
                       <div className="space-y-1.5">
                         <label htmlFor="ai-class" className="block text-sm font-medium text-slate-700">
-                          Class / শ্রেণি
+                          Class / Level (শ্রেণি / লেভেল)
                         </label>
-                        <select
+                        <ClassSelect
                           id="ai-class"
                           value={aiClassLevel}
-                          onChange={(e) => setAiClassLevel(e.target.value)}
-                          className="h-11 sm:h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 text-base sm:text-sm focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15"
-                        >
-                          <option value="">Class নির্বাচন করুন</option>
-                          {aiClassLevel && !CLASS_OPTIONS.some((o) => o.value === aiClassLevel) && (
-                            <option value={aiClassLevel}>{aiClassLevel}</option>
-                          )}
-                          {CLASS_OPTIONS.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
+                          onChange={setAiClassLevel}
+                        />
                       </div>
 
                       <div className="space-y-1.5">
