@@ -166,7 +166,7 @@ export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
               className="inline-flex min-h-[44px] items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               <BarChart3 className="h-4 w-4 shrink-0 text-navy" />
-              <span>Result ও Export</span>
+              <span>Result ও Analytics</span>
             </Link>
           </div>
 
